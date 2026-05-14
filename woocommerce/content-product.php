@@ -4,7 +4,7 @@
  * Overrides: woocommerce/templates/content-product.php
  */
 
-defined( 'ABSPATH' ) || exit;
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 global $product;
 
@@ -23,7 +23,10 @@ $has_image   = has_post_thumbnail( $product->get_id() );
 $badge_text  = '';
 $badge_class = '';
 if ( $is_on_sale ) {
-    $badge_text  = '−' . round( ( ( $product->get_regular_price() - $product->get_sale_price() ) / $product->get_regular_price() ) * 100 ) . '%';
+    $reg  = (float) $product->get_regular_price();
+    $sale = (float) $product->get_sale_price();
+    $pct  = $reg > 0 ? round( ( ( $reg - $sale ) / $reg ) * 100 ) : 0;
+    $badge_text  = '−' . $pct . '%';
     $badge_class = 'product-badge--sale';
 } elseif ( $is_featured ) {
     $badge_text  = 'Хіт';
@@ -34,64 +37,72 @@ if ( $is_on_sale ) {
 }
 
 // Category
-$cats = wc_get_product_term_ids( $product->get_id(), 'product_cat' );
+$cats     = wc_get_product_term_ids( $product->get_id(), 'product_cat' );
 $cat_name = '';
+$cat_slug = '';
 if ( $cats ) {
     $first_cat = get_term( $cats[0], 'product_cat' );
     if ( $first_cat && ! is_wp_error( $first_cat ) ) {
         $cat_name = $first_cat->name;
+        $cat_slug = $first_cat->slug;
     }
 }
 
-// Short description
-$short_desc = $product->get_short_description() ?: wp_trim_words( $product->get_description(), 18 );
-
-// Variations for size selector
-$variations_data = [];
-if ( $is_variable ) {
-    /** @var WC_Product_Variable $product */
-    $variations      = $product->get_available_variations();
-    foreach ( $variations as $var ) {
-        $attr = $var['attributes'];
-        // Look for a Size/Розмір attribute
-        $size_key = null;
-        foreach ( $attr as $key => $val ) {
-            if ( stripos( $key, 'size' ) !== false || stripos( $key, 'розмір' ) !== false || stripos( $key, 'pa_rozmir' ) !== false ) {
-                $size_key = $val;
-                break;
-            }
-        }
-        if ( $size_key ) {
-            $variations_data[ strtolower( $size_key ) ] = [
-                'price'       => $var['display_price'],
-                'weight'      => $var['weight'] ?: '',
-                'variation_id'=> $var['variation_id'],
-            ];
-        }
-    }
-}
+// Short description — strip all HTML tags
+$raw_desc  = $product->get_short_description() ?: $product->get_description();
+$short_desc = wp_strip_all_tags( $raw_desc );
+$short_desc = wp_trim_words( $short_desc, 20, '...' );
 
 // Rating
 $avg_rating   = $product->get_average_rating();
 $review_count = $product->get_review_count();
 
-// Data attributes for product card (for JS category filter)
+// --- Variations (for size selector) ------------------------------------
+$variation_options = array();
+if ( $is_variable ) {
+    /** @var WC_Product_Variable $product */
+    foreach ( $product->get_available_variations() as $var ) {
+        $attrs     = $var['attributes'];
+        $first_val = reset( $attrs ); // e.g. "Малий" or "Великий"
+        if ( $first_val ) {
+            $variation_options[] = array(
+                'label'        => $first_val,
+                'price'        => (float) $var['display_price'],
+                'weight'       => $var['weight'] ?: '',
+                'variation_id' => (int) $var['variation_id'],
+            );
+        }
+    }
+}
+
+$has_sizes    = $is_variable && count( $variation_options ) >= 2;
+$first_price  = $has_sizes ? $variation_options[0]['price'] : (float) $product->get_price();
+
+// data-category for JS filter
 $data_cats = implode( ' ', array_map( function( $id ) {
     $t = get_term( $id, 'product_cat' );
-    return $t ? $t->slug : '';
+    return ( $t && ! is_wp_error( $t ) ) ? $t->slug : '';
 }, $cats ) );
 ?>
 
-<div class="product-card" data-id="<?php echo esc_attr( $product->get_id() ); ?>" data-category="<?php echo esc_attr( $data_cats ); ?>">
+<div class="product-card"
+     data-id="<?php echo esc_attr( $product->get_id() ); ?>"
+     data-category="<?php echo esc_attr( $data_cats ); ?>"
+     data-type="<?php echo $is_variable ? 'variable' : 'simple'; ?>">
 
     <?php if ( $badge_text ) : ?>
         <span class="product-badge <?php echo esc_attr( $badge_class ); ?>"><?php echo esc_html( $badge_text ); ?></span>
     <?php endif; ?>
 
     <!-- Image -->
-    <a href="<?php echo esc_url( get_permalink( $product->get_id() ) ); ?>" class="product-image" tabindex="-1" aria-hidden="true">
+    <a href="<?php echo esc_url( get_permalink( $product->get_id() ) ); ?>"
+       class="product-image" tabindex="-1" aria-hidden="true">
         <?php if ( $has_image ) : ?>
-            <?php echo get_the_post_thumbnail( $product->get_id(), 'woocommerce_thumbnail', [ 'alt' => esc_attr( $product->get_name() ) ] ); ?>
+            <?php echo get_the_post_thumbnail(
+                $product->get_id(),
+                'woocommerce_thumbnail',
+                array( 'alt' => esc_attr( $product->get_name() ) )
+            ); ?>
         <?php else : ?>
             <span class="pie-visual <?php echo esc_attr( $pie_class ); ?>"></span>
         <?php endif; ?>
@@ -99,6 +110,7 @@ $data_cats = implode( ' ', array_map( function( $id ) {
 
     <!-- Body -->
     <div class="product-body">
+
         <?php if ( $cat_name ) : ?>
             <p class="product-category"><?php echo esc_html( $cat_name ); ?></p>
         <?php endif; ?>
@@ -113,40 +125,31 @@ $data_cats = implode( ' ', array_map( function( $id ) {
             <p class="product-description"><?php echo esc_html( $short_desc ); ?></p>
         <?php endif; ?>
 
-        <!-- Specs / rating -->
         <?php if ( $avg_rating > 0 ) : ?>
             <div class="product-specs">
                 <span class="product-rating">
                     ★ <?php echo number_format( $avg_rating, 1 ); ?>
                     <?php if ( $review_count > 0 ) : ?>
-                        <span style="font-weight:400;color:#999">(<?php echo esc_html( $review_count ); ?>)</span>
+                        <span style="font-weight:400;color:#bbb">(<?php echo esc_html( $review_count ); ?>)</span>
                     <?php endif; ?>
                 </span>
             </div>
         <?php endif; ?>
 
-        <?php if ( $is_variable && count( $variations_data ) >= 2 ) : ?>
-            <!-- Size selector for Small / Large variable products -->
-            <?php
-            $keys     = array_keys( $variations_data );
-            $is_small = in_array( 'малий', $keys, true )  || in_array( 'small', $keys, true );
-            $is_large = in_array( 'великий', $keys, true ) || in_array( 'large', $keys, true );
-            $first_var = reset( $variations_data );
-            $last_var  = end( $variations_data );
-            ?>
+        <?php if ( $has_sizes ) : ?>
+            <!-- Size selector -->
             <div class="size-selector"
-                 data-small-price="<?php echo esc_attr( $first_var['price'] ); ?>"
-                 data-large-price="<?php echo esc_attr( $last_var['price'] ); ?>">
-
-                <?php foreach ( $variations_data as $size_label => $vdata ) : ?>
-                    <?php $is_first = ( array_key_first( $variations_data ) === $size_label ); ?>
+                 data-small-price="<?php echo esc_attr( $variation_options[0]['price'] ); ?>"
+                 data-large-price="<?php echo esc_attr( $variation_options[1]['price'] ); ?>">
+                <?php foreach ( $variation_options as $i => $opt ) : ?>
                     <button
-                        class="size-option <?php echo $is_first ? 'active' : ''; ?>"
-                        data-size="<?php echo esc_attr( $size_label ); ?>"
-                        data-variation-id="<?php echo esc_attr( $vdata['variation_id'] ); ?>">
-                        <span class="size-option__label"><?php echo esc_html( ucfirst( $size_label ) ); ?></span>
-                        <?php if ( $vdata['weight'] ) : ?>
-                            <span class="size-option__weight"><?php echo esc_html( $vdata['weight'] ); ?> г</span>
+                        class="size-option <?php echo $i === 0 ? 'active' : ''; ?>"
+                        data-size="<?php echo $i === 0 ? 'small' : 'large'; ?>"
+                        data-variation-id="<?php echo esc_attr( $opt['variation_id'] ); ?>"
+                        data-price="<?php echo esc_attr( $opt['price'] ); ?>">
+                        <span class="size-option__label"><?php echo esc_html( $opt['label'] ); ?></span>
+                        <?php if ( $opt['weight'] ) : ?>
+                            <span class="size-option__weight"><?php echo esc_html( $opt['weight'] ); ?> г</span>
                         <?php endif; ?>
                     </button>
                 <?php endforeach; ?>
@@ -156,30 +159,23 @@ $data_cats = implode( ' ', array_map( function( $id ) {
         <!-- Price + Add to cart -->
         <div class="product-footer">
             <div class="product-price">
-                <?php if ( $is_variable ) : ?>
-                    <span class="price-value"><?php echo wc_price( $product->get_variation_price( 'min' ) ); ?></span>
-                <?php else : ?>
-                    <span class="price-value"><?php echo wc_price( $product->get_price() ); ?></span>
-                <?php endif; ?>
+                <span class="price-value"><?php echo number_format( $first_price, 0, '', '' ); ?></span>
+                <span class="product-price-unit">грн</span>
             </div>
 
             <?php if ( $product->is_purchasable() && $product->is_in_stock() ) : ?>
-                <?php if ( $is_variable ) : ?>
-                    <a href="<?php echo esc_url( get_permalink( $product->get_id() ) ); ?>" class="btn-add-cart">
-                        Обрати
-                    </a>
-                <?php else : ?>
-                    <a
-                        href="<?php echo esc_url( $product->add_to_cart_url() ); ?>"
-                        data-quantity="1"
-                        data-product_id="<?php echo esc_attr( $product->get_id() ); ?>"
-                        class="btn-add-cart add_to_cart_button ajax_add_to_cart">
-                        В кошик
-                    </a>
-                <?php endif; ?>
+                <button
+                    class="btn-add-cart"
+                    data-product-id="<?php echo esc_attr( $product->get_id() ); ?>"
+                    data-type="<?php echo $is_variable ? 'variable' : 'simple'; ?>"
+                    data-cart-url="<?php echo $is_variable ? '' : esc_url( $product->add_to_cart_url() ); ?>"
+                    aria-label="<?php echo esc_attr( 'В кошик: ' . $product->get_name() ); ?>">
+                    В кошик
+                </button>
             <?php else : ?>
-                <span class="btn-add-cart" style="opacity:.5;cursor:default">Немає</span>
+                <span class="btn-add-cart btn-add-cart--disabled">Немає</span>
             <?php endif; ?>
         </div>
-    </div>
-</div>
+
+    </div><!-- .product-body -->
+</div><!-- .product-card -->

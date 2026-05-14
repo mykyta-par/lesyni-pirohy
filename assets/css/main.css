@@ -2636,3 +2636,530 @@ ul.products { list-style: none; margin: 0; padding: 0; }
     .cart-coupon     { max-width: none; }
     .cart-summary__trust { grid-template-columns: 1fr; }
 }
+
+/* ==========================================================================
+   23. Checkout Page
+   ========================================================================== */
+
+/* Reuse .checkout-wrap same as .cart-wrap layout */
+.checkout-wrap {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 32px var(--px) 80px;
+}
+
+/* Steps: done state (green) */
+.cart-step--done .cart-step__num {
+    background: #7a9b6e;
+    color: #fff;
+}
+.cart-step--done { color: var(--color-text); }
+
+/* ── Layout ───────────────────────────────────────────────────── */
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 36px;
+    align-items: start;
+}
+
+/* ── Login callout ────────────────────────────────────────────── */
+.co-login-callout {
+    background: var(--color-bg);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 13px 16px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.co-login-link { color: var(--color-accent); font-weight: 600; text-decoration: none; }
+.co-login-link:hover { text-decoration: underline; }
+
+/* ── Section cards ────────────────────────────────────────────── */
+.co-section {
+    background: var(--color-surface);
+    border: 1px solid #f0e5d9;
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    margin-bottom: 18px;
+}
+.co-section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0e5d9;
+}
+.co-section-title {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+.co-section-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px; height: 26px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    margin-right: 10px;
+    flex-shrink: 0;
+    font-family: var(--font-sans);
+}
+.co-section-hint {
+    font-size: 12px;
+    color: var(--color-text-faint);
+}
+.co-req { color: var(--color-accent); }
+
+/* ── Form fields ──────────────────────────────────────────────── */
+.co-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+.co-row:last-child { margin-bottom: 0; }
+.co-row.co-row--single { grid-template-columns: 1fr; }
+
+.co-field {
+    display: flex;
+    flex-direction: column;
+}
+.co-label {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-bottom: 7px;
+}
+.co-input,
+.co-select,
+.co-textarea {
+    width: 100%;
+    padding: 13px 15px;
+    background: var(--color-bg);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--color-text);
+    outline: none;
+    transition: background .2s, border-color .2s;
+}
+.co-input::placeholder,
+.co-textarea::placeholder { color: var(--color-text-faint); }
+.co-input:focus,
+.co-select:focus,
+.co-textarea:focus {
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+}
+.co-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%23c4845a' d='M5 6L0 0h10z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 36px;
+    cursor: pointer;
+}
+.co-textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+.co-hint {
+    font-size: 11px;
+    color: var(--color-text-faint);
+    margin-top: 5px;
+}
+
+/* ── Option cards (delivery / payment) ───────────────────────── */
+.co-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+.co-opt-card {
+    background: var(--color-bg);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s, box-shadow .2s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    user-select: none;
+}
+.co-opt-card:hover { border-color: var(--color-border); }
+.co-opt-card--active {
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+    box-shadow: 0 4px 14px rgba(196,132,90,.1);
+}
+
+.co-opt-radio-input { display: none; }
+
+.co-opt-radio {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid #c4b5a3;
+    flex-shrink: 0;
+    position: relative;
+    transition: border-color .2s;
+}
+.co-opt-card--active .co-opt-radio { border-color: var(--color-accent); }
+.co-opt-card--active .co-opt-radio::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--color-accent);
+    border-radius: 50%;
+}
+
+.co-opt-icon {
+    width: 42px; height: 42px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    border: 1px solid #f0e5d9;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.co-opt-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.co-opt-name {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.co-opt-desc {
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+.co-opt-price {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.co-opt-price--free { color: #7a9b6e; }
+
+/* ── Address block ────────────────────────────────────────────── */
+.co-address-block {
+    margin-top: 6px;
+    transition: opacity .2s;
+}
+.co-address-block--hidden {
+    display: none;
+}
+
+/* ── Time slots ───────────────────────────────────────────────── */
+.co-time-block {
+    margin-top: 20px;
+}
+.co-time-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 9px;
+    margin-top: 10px;
+}
+.co-time-slot {
+    background: var(--color-bg);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 11px 6px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: border-color .2s, color .2s, box-shadow .2s;
+    text-align: center;
+}
+.co-time-slot:hover { border-color: var(--color-border); }
+.co-time-slot--active {
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    box-shadow: 0 3px 8px rgba(196,132,90,.12);
+}
+
+/* ── WooCommerce payment section override ─────────────────────── */
+.co-section--payment #payment { background: transparent; border: none; border-radius: 0; padding: 0; }
+
+/* Style WC payment methods as option cards */
+.co-section--payment #payment .payment_methods { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.co-section--payment #payment .payment_methods li {
+    background: var(--color-bg);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    transition: border-color .2s, background .2s;
+}
+.co-section--payment #payment .payment_methods li.payment_method_cod,
+.co-section--payment #payment .payment_methods li:first-child {
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+    box-shadow: 0 4px 14px rgba(196,132,90,.1);
+}
+.co-section--payment #payment .payment_methods input[type="radio"] { margin-right: 10px; accent-color: var(--color-accent); }
+.co-section--payment #payment .payment_methods label { font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; }
+.co-section--payment #payment .payment_box { margin-top: 12px; font-size: 13px; color: var(--color-text-muted); padding-left: 24px; }
+.co-section--payment #payment .payment_box p { margin: 0; }
+
+/* Hide WC's default place order button (we use our own CTA in the sidebar) */
+.co-section--payment #payment .place-order { display: none !important; }
+/* But keep it accessible for WooCommerce JS */
+.co-section--payment #payment #place_order {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+    visibility: hidden !important;
+}
+
+/* ── Checkboxes ───────────────────────────────────────────────── */
+.co-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px 0;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    border-bottom: 1px solid #f8f1ea;
+}
+.co-check:last-child { border-bottom: none; }
+.co-check input[type="checkbox"] { display: none; }
+.co-check-box {
+    width: 20px; height: 20px;
+    border: 1.5px solid #c4b5a3;
+    border-radius: 5px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: background .2s, border-color .2s;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+}
+.co-check input[type="checkbox"]:checked + .co-check-box {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+}
+.co-check input[type="checkbox"]:checked + .co-check-box::after { content: '✓'; }
+.co-check a { color: var(--color-accent); text-decoration: none; font-weight: 500; }
+.co-check a:hover { text-decoration: underline; }
+.co-check strong { color: var(--color-text); }
+
+/* ── Checkout summary panel ───────────────────────────────────── */
+.checkout-side { position: sticky; top: 90px; }
+
+.co-summary {
+    background: var(--color-surface);
+    border: 1px solid #f0e5d9;
+    border-radius: var(--radius-lg);
+    padding: 26px;
+}
+.co-summary__title {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f0e5d9;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+.co-summary__edit {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+.co-summary__edit:hover { text-decoration: underline; }
+
+/* Cart items list in summary */
+.co-sum-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #f0e5d9;
+}
+.co-sum-item {
+    display: grid;
+    grid-template-columns: 52px 1fr auto;
+    gap: 12px;
+    align-items: center;
+}
+.co-sum-item__img {
+    position: relative;
+    width: 52px; height: 52px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--color-bg);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.co-sum-item__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pie-visual--sm { width: 38px; height: 38px; border-radius: 50%; display: block; }
+.co-sum-item__qty {
+    position: absolute;
+    top: -5px; right: -5px;
+    background: var(--color-accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px; height: 18px;
+    padding: 0 4px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-sans);
+}
+.co-sum-item__info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.co-sum-item__name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.co-sum-item__meta { font-size: 11px; color: var(--color-text-faint); }
+.co-sum-item__price {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text);
+    white-space: nowrap;
+}
+
+/* Totals rows */
+.co-summary__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    padding: 6px 0;
+}
+.co-summary__row strong { color: var(--color-text); font-weight: 600; }
+.co-summary__row--discount strong { color: #7a9b6e; }
+
+.co-summary__total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f0e5d9;
+}
+.co-summary__total-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.co-summary__total-price {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+.co-summary__total-unit {
+    font-size: 13px;
+    color: var(--color-text-faint);
+    margin-left: 4px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+}
+
+.co-summary__cta {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+    padding: 18px;
+    background: var(--color-accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: background .3s, transform .3s, box-shadow .3s;
+    text-align: center;
+}
+.co-summary__cta:hover {
+    background: var(--color-accent-dk);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(196,132,90,.3);
+}
+.co-summary__cta:disabled {
+    background: #c4b5a3;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.co-secure-note {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--color-text-faint);
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .checkout-layout { grid-template-columns: 1fr; }
+    .checkout-side   { position: static; }
+    .co-time-grid    { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
+    .co-section  { padding: 20px 16px; }
+    .co-row      { grid-template-columns: 1fr; }
+    .co-time-grid { grid-template-columns: repeat(2, 1fr); }
+    .co-opt-card { padding: 14px; }
+    .co-opt-icon { display: none; }
+}

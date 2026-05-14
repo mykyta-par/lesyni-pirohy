@@ -115,6 +115,38 @@ remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wr
 remove_action( 'woocommerce_after_main_content',  'woocommerce_output_content_wrapper_end', 10 );
 
 /* -----------------------------------------------------------------------
+   WooCommerce: Checkout — save custom order fields
+----------------------------------------------------------------------- */
+add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {
+    $fields = [
+        'delivery_time'     => 'Час доставки',
+        'delivery_type'     => 'Тип доставки',
+        'lesyni_gift'       => 'Подарунок',
+        'lesyni_subscribe'  => 'Підписка на новини',
+    ];
+    foreach ( $fields as $key => $label ) {
+        if ( isset( $_POST[ $key ] ) && $_POST[ $key ] !== '' ) {
+            update_post_meta( $order_id, '_' . $key, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
+        }
+    }
+} );
+
+// Show custom fields in order admin
+add_action( 'woocommerce_admin_order_data_after_billing_address', function ( $order ) {
+    $fields = [
+        '_delivery_type' => 'Тип доставки',
+        '_delivery_time' => 'Час доставки',
+        '_lesyni_gift'   => 'Подарунок',
+    ];
+    foreach ( $fields as $key => $label ) {
+        $val = get_post_meta( $order->get_id(), $key, true );
+        if ( $val ) {
+            echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html( $val ) . '</p>';
+        }
+    }
+} );
+
+/* -----------------------------------------------------------------------
    WooCommerce: Nutritional Value — admin fields
 ----------------------------------------------------------------------- */
 add_filter( 'woocommerce_product_data_tabs', function ( $tabs ) {

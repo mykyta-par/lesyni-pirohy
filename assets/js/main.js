@@ -370,6 +370,83 @@
     }
 
     /* ------------------------------------------------------------------
+       Checkout: delivery option cards
+    ------------------------------------------------------------------ */
+    var coDeliveryOptions = document.getElementById('co-delivery-options');
+    var coAddressBlock    = document.getElementById('co-address-block');
+
+    if (coDeliveryOptions) {
+        coDeliveryOptions.querySelectorAll('.co-opt-card').forEach(function (card) {
+            card.addEventListener('click', function () {
+                coDeliveryOptions.querySelectorAll('.co-opt-card').forEach(function (c) {
+                    c.classList.remove('co-opt-card--active');
+                });
+                card.classList.add('co-opt-card--active');
+
+                var radioInput = card.querySelector('.co-opt-radio-input');
+                if (radioInput) radioInput.checked = true;
+
+                // Show/hide address block
+                if (coAddressBlock) {
+                    var hasAddr = card.getAttribute('data-has-address');
+                    if (hasAddr === '0') {
+                        coAddressBlock.classList.add('co-address-block--hidden');
+                    } else {
+                        coAddressBlock.classList.remove('co-address-block--hidden');
+                    }
+                }
+
+                // Update shipping cost label in summary
+                var priceEl = card.querySelector('.co-opt-price');
+                var label   = document.getElementById('co-shipping-label');
+                if (label && priceEl) {
+                    label.textContent = priceEl.textContent.trim();
+                    label.style.color = card.querySelector('.co-opt-price--free') ? '#7a9b6e' : '';
+                }
+            });
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       Checkout: time slot selector
+    ------------------------------------------------------------------ */
+    var coTimeSlots   = document.querySelectorAll('.co-time-slot');
+    var coTimeInput   = document.getElementById('delivery_time_input');
+
+    coTimeSlots.forEach(function (slot) {
+        slot.addEventListener('click', function () {
+            coTimeSlots.forEach(function (s) { s.classList.remove('co-time-slot--active'); });
+            slot.classList.add('co-time-slot--active');
+            if (coTimeInput) coTimeInput.value = slot.dataset.time || slot.textContent.trim();
+        });
+    });
+
+    /* ------------------------------------------------------------------
+       Checkout: CTA button → triggers WC #place_order
+    ------------------------------------------------------------------ */
+    var coCtaBtn    = document.getElementById('co-place-order-cta');
+    var coPlaceOrder = document.getElementById('place_order');
+
+    if (coCtaBtn) {
+        coCtaBtn.addEventListener('click', function () {
+            // If WC's own button exists, click it (triggers WC validation + AJAX)
+            if (coPlaceOrder) {
+                coPlaceOrder.click();
+            } else {
+                // Fallback: submit the form directly
+                var form = document.getElementById('checkout-form');
+                if (form) form.submit();
+            }
+        });
+
+        // Reflect WC's loading state on our button
+        document.addEventListener('checkout_error', function () {
+            coCtaBtn.textContent = 'Підтвердити замовлення';
+            coCtaBtn.disabled = false;
+        });
+    }
+
+    /* ------------------------------------------------------------------
        Smooth scroll for anchor links
     ------------------------------------------------------------------ */
     document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {

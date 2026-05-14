@@ -115,6 +115,81 @@ remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wr
 remove_action( 'woocommerce_after_main_content',  'woocommerce_output_content_wrapper_end', 10 );
 
 /* -----------------------------------------------------------------------
+   WooCommerce: Nutritional Value — admin fields
+----------------------------------------------------------------------- */
+add_filter( 'woocommerce_product_data_tabs', function ( $tabs ) {
+    $tabs['lesyni_nutrition'] = [
+        'label'  => 'Поживна цінність',
+        'target' => 'lesyni_nutrition_data',
+        'class'  => [],
+    ];
+    return $tabs;
+} );
+
+add_action( 'woocommerce_product_data_panels', function () {
+    echo '<div id="lesyni_nutrition_data" class="panel woocommerce_options_panel">';
+    woocommerce_wp_text_input( [ 'id' => '_nutrition_calories', 'label' => 'Калорійність (ккал / 100 г)', 'type' => 'number', 'placeholder' => 'напр. 248' ] );
+    woocommerce_wp_text_input( [ 'id' => '_nutrition_protein',  'label' => 'Білки (г / 100 г)',           'type' => 'number', 'placeholder' => 'напр. 12.4' ] );
+    woocommerce_wp_text_input( [ 'id' => '_nutrition_fat',      'label' => 'Жири (г / 100 г)',            'type' => 'number', 'placeholder' => 'напр. 14.2' ] );
+    woocommerce_wp_text_input( [ 'id' => '_nutrition_carbs',    'label' => 'Вуглеводи (г / 100 г)',       'type' => 'number', 'placeholder' => 'напр. 18.6' ] );
+    echo '</div>';
+} );
+
+add_action( 'woocommerce_process_product_meta', function ( $post_id ) {
+    foreach ( [ '_nutrition_calories', '_nutrition_protein', '_nutrition_fat', '_nutrition_carbs' ] as $key ) {
+        if ( isset( $_POST[ $key ] ) ) {
+            update_post_meta( $post_id, $key, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
+        }
+    }
+} );
+
+/* -----------------------------------------------------------------------
+   WooCommerce: Nutritional Value — frontend tab
+----------------------------------------------------------------------- */
+add_filter( 'woocommerce_product_tabs', function ( $tabs ) {
+    global $product;
+    if ( ! $product ) return $tabs;
+    if ( get_post_meta( $product->get_id(), '_nutrition_calories', true ) ) {
+        $tabs['lesyni_nutrition'] = [
+            'title'    => 'Поживна цінність',
+            'priority' => 25,
+            'callback' => 'lesyni_nutrition_tab_content',
+        ];
+    }
+    return $tabs;
+} );
+
+function lesyni_nutrition_tab_content() {
+    global $product;
+    $id       = $product->get_id();
+    $calories = get_post_meta( $id, '_nutrition_calories', true );
+    $protein  = get_post_meta( $id, '_nutrition_protein',  true );
+    $fat      = get_post_meta( $id, '_nutrition_fat',      true );
+    $carbs    = get_post_meta( $id, '_nutrition_carbs',    true );
+
+    $items = [
+        [ 'value' => $calories, 'unit' => 'ккал', 'label' => 'Калорійність' ],
+        [ 'value' => $protein,  'unit' => 'г',    'label' => 'Білки' ],
+        [ 'value' => $fat,      'unit' => 'г',    'label' => 'Жири' ],
+        [ 'value' => $carbs,    'unit' => 'г',    'label' => 'Вуглеводи' ],
+    ];
+    ?>
+    <p class="nutrition-per100">на 100 г продукту</p>
+    <div class="nutrition-grid">
+        <?php foreach ( $items as $item ) : ?>
+            <?php if ( $item['value'] !== '' ) : ?>
+                <div class="nutrition-card">
+                    <span class="nutrition-card__value"><?php echo esc_html( $item['value'] ); ?></span>
+                    <span class="nutrition-card__unit"><?php echo esc_html( $item['unit'] ); ?></span>
+                    <span class="nutrition-card__label"><?php echo esc_html( $item['label'] ); ?></span>
+                </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </div>
+    <?php
+}
+
+/* -----------------------------------------------------------------------
    Helper: map product category slug → pie visual CSS class
 ----------------------------------------------------------------------- */
 function lesyni_pie_visual_class( $product ) {

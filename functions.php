@@ -1,6 +1,6 @@
 <?php
 
-defined( 'ABSPATH' ) || exit;
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /* -----------------------------------------------------------------------
    Theme setup

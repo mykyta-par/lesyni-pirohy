@@ -157,6 +157,115 @@
     });
 
     /* ------------------------------------------------------------------
+       Single product: gallery thumbnail switcher
+    ------------------------------------------------------------------ */
+    var mainImage = document.getElementById('sp-main-image');
+    if (mainImage) {
+        document.querySelectorAll('.sp-gallery__thumb').forEach(function (thumb) {
+            thumb.addEventListener('click', function () {
+                document.querySelectorAll('.sp-gallery__thumb').forEach(function (t) {
+                    t.classList.remove('active');
+                });
+                thumb.classList.add('active');
+                mainImage.style.opacity = '0';
+                setTimeout(function () {
+                    mainImage.src = thumb.dataset.full;
+                    mainImage.style.opacity = '1';
+                }, 150);
+            });
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       Single product: transform variation <select> into pill buttons
+       (WooCommerce's variation JS still works via the hidden select)
+    ------------------------------------------------------------------ */
+    document.querySelectorAll('.sp-details .variations select').forEach(function (select) {
+        var label = select.closest('tr') ? select.closest('tr').querySelector('label') : null;
+        var labelText = label ? label.textContent.trim() : '';
+
+        var wrapper = document.createElement('div');
+        wrapper.className = 'size-selector';
+        if (labelText) {
+            var title = document.createElement('p');
+            title.className = 'size-selector__label';
+            title.textContent = labelText + ':';
+            wrapper.appendChild(title);
+        }
+
+        var btnGroup = document.createElement('div');
+        btnGroup.className = 'size-selector__btns';
+        btnGroup.style.cssText = 'display:flex;gap:4px;background:#faf5f0;border:1px solid #e8d5c4;border-radius:10px;padding:4px;';
+
+        Array.from(select.options).forEach(function (opt, i) {
+            if (!opt.value) return;
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'size-option' + (i === 1 ? ' active' : '');
+            btn.dataset.value = opt.value;
+            btn.innerHTML = '<span class="size-option__label">' + opt.text + '</span>';
+            btn.addEventListener('click', function () {
+                btnGroup.querySelectorAll('.size-option').forEach(function (b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                select.value = opt.value;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            btnGroup.appendChild(btn);
+        });
+
+        wrapper.appendChild(btnGroup);
+        select.parentNode.insertBefore(wrapper, select);
+
+        // Pre-select first real option
+        var firstOpt = Array.from(select.options).find(function (o) { return o.value; });
+        if (firstOpt) {
+            select.value = firstOpt.value;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            var firstBtn = btnGroup.querySelector('.size-option');
+            if (firstBtn) firstBtn.classList.add('active');
+        }
+    });
+
+    /* ------------------------------------------------------------------
+       Single product: quantity +/- stepper
+    ------------------------------------------------------------------ */
+    document.querySelectorAll('.sp-details .quantity').forEach(function (wrap) {
+        var input = wrap.querySelector('.qty');
+        if (!input) return;
+
+        var minus = document.createElement('button');
+        minus.type = 'button';
+        minus.className = 'qty-btn qty-btn--minus';
+        minus.setAttribute('aria-label', 'Зменшити');
+        minus.textContent = '−';
+
+        var plus = document.createElement('button');
+        plus.type = 'button';
+        plus.className = 'qty-btn qty-btn--plus';
+        plus.setAttribute('aria-label', 'Збільшити');
+        plus.textContent = '+';
+
+        wrap.insertBefore(minus, input);
+        wrap.appendChild(plus);
+
+        minus.addEventListener('click', function () {
+            var v = parseInt(input.value, 10) || 1;
+            if (v > (parseInt(input.min, 10) || 1)) {
+                input.value = v - 1;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+        plus.addEventListener('click', function () {
+            var v   = parseInt(input.value, 10) || 1;
+            var max = parseInt(input.max, 10);
+            if (!max || v < max) {
+                input.value = v + 1;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    });
+
+    /* ------------------------------------------------------------------
        Smooth scroll for anchor links
     ------------------------------------------------------------------ */
     document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {

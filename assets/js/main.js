@@ -316,6 +316,60 @@
     }
 
     /* ------------------------------------------------------------------
+       Cart page: qty stepper + row total update
+    ------------------------------------------------------------------ */
+    var cartForm     = document.getElementById('cart-form');
+    var cartRows     = document.querySelectorAll('.cart-row[data-key]');
+    var cartUpdateBtn = document.getElementById('cart-update-btn');
+
+    if (cartForm && cartRows.length) {
+        var cartUpdateTimer = null;
+
+        cartRows.forEach(function (row) {
+            var val     = row.querySelector('.ci-qty-val');
+            var input   = row.querySelector('.ci-qty-input');
+            var sumEl   = row.querySelector('.ci-row-sum');
+            var unit    = parseFloat(row.dataset.unit) || 0;
+            var minus   = row.querySelector('.ci-qty-btn--minus');
+            var plus    = row.querySelector('.ci-qty-btn--plus');
+
+            function syncRow() {
+                var q = parseInt(val.textContent, 10) || 1;
+                if (input)  input.value = q;
+                if (sumEl)  sumEl.textContent = Math.round(unit * q);
+            }
+
+            if (minus) {
+                minus.addEventListener('click', function () {
+                    var q = parseInt(val.textContent, 10) || 1;
+                    if (q > 1) {
+                        val.textContent = q - 1;
+                        syncRow();
+                        scheduleUpdate();
+                    }
+                });
+            }
+            if (plus) {
+                plus.addEventListener('click', function () {
+                    var q = parseInt(val.textContent, 10) || 1;
+                    if (q < 20) {
+                        val.textContent = q + 1;
+                        syncRow();
+                        scheduleUpdate();
+                    }
+                });
+            }
+        });
+
+        function scheduleUpdate() {
+            clearTimeout(cartUpdateTimer);
+            cartUpdateTimer = setTimeout(function () {
+                if (cartUpdateBtn) cartUpdateBtn.click();
+            }, 800);
+        }
+    }
+
+    /* ------------------------------------------------------------------
        Smooth scroll for anchor links
     ------------------------------------------------------------------ */
     document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {

@@ -72,10 +72,16 @@ if ( $is_variable ) {
             $term     = get_term_by( 'slug', urldecode( $slug ), $taxonomy );
             $label    = $term ? $term->name : urldecode( $slug );
 
+            $w            = (float) $var['weight'];
+            $weight_unit  = get_option( 'woocommerce_weight_unit', 'kg' );
+            $weight_g     = $w > 0
+                ? ( $weight_unit === 'kg' ? round( $w * 1000 ) : round( $w ) )
+                : '';
+
             $variation_options[] = array(
                 'label'        => $label,
                 'price'        => (float) $var['display_price'],
-                'weight'       => $var['weight'] ?: '',
+                'weight'       => $weight_g,
                 'variation_id' => (int) $var['variation_id'],
             );
         }

@@ -1647,7 +1647,7 @@ ul.products { list-style: none; margin: 0; padding: 0; }
 }
 .sp-qty-btn:hover { background: var(--color-bg); color: var(--color-accent); }
 .sp-qty-input {
-    width: 40px;
+    width: 24px;
     height: 56px;
     text-align: center;
     border: none;

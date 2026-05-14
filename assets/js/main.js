@@ -177,111 +177,143 @@
     }
 
     /* ------------------------------------------------------------------
-       Single product: transform variation <select> into pill buttons
-       Inserts pills BEFORE the hidden .variations table so they're visible.
-       WooCommerce's variation JS still works via the hidden <select>.
+       Single product: size card selection + total price
     ------------------------------------------------------------------ */
-    var variationsTable = document.querySelector('.sp-details table.variations');
-    if (variationsTable) {
-        var allPillsWrapper = document.createElement('div');
-        allPillsWrapper.className = 'sp-size-selectors';
+    var spSizeCards = document.querySelectorAll('.sp-size-card');
+    var spBtnCart   = document.querySelector('.sp-btn-cart');
+    var spTotalEl   = document.getElementById('sp-total');
+    var spQtyInput  = document.querySelector('.sp-qty-input');
 
-        variationsTable.querySelectorAll('tr').forEach(function (row) {
-            var label  = row.querySelector('label');
-            var select = row.querySelector('select');
-            if (!select) return;
+    var spSelectedVariationId = '';
+    var spSelectedPrice       = 0;
 
-            var labelText = label ? label.textContent.trim() : '';
+    function updateSpTotal() {
+        var qty = parseInt(spQtyInput ? spQtyInput.value : 1, 10) || 1;
+        if (spTotalEl) spTotalEl.textContent = Math.round(spSelectedPrice * qty);
+    }
 
-            var wrapper = document.createElement('div');
-            wrapper.className = 'size-selector';
+    if (spSizeCards.length) {
+        var firstCard = spSizeCards[0];
+        spSelectedVariationId = firstCard.dataset.variationId || '';
+        spSelectedPrice       = parseFloat(firstCard.dataset.price) || 0;
+        updateSpTotal();
 
-            if (labelText) {
-                var title = document.createElement('p');
-                title.className = 'size-selector__label';
-                title.style.cssText = 'font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:8px;';
-                title.textContent = labelText + ':';
-                wrapper.appendChild(title);
-            }
-
-            var btnGroup = document.createElement('div');
-            btnGroup.style.cssText = 'display:flex;gap:4px;background:#faf5f0;border:1px solid #e8d5c4;border-radius:10px;padding:4px;';
-
-            var firstBtn = null;
-            Array.from(select.options).forEach(function (opt) {
-                if (!opt.value) return;
-                var btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'size-option';
-                btn.dataset.value = opt.value;
-                btn.innerHTML = '<span class="size-option__label">' + opt.text + '</span>';
-                if (!firstBtn) firstBtn = btn;
-
-                btn.addEventListener('click', function () {
-                    btnGroup.querySelectorAll('.size-option').forEach(function (b) { b.classList.remove('active'); });
-                    btn.classList.add('active');
-                    select.value = opt.value;
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
-                });
-                btnGroup.appendChild(btn);
+        spSizeCards.forEach(function (card) {
+            card.addEventListener('click', function () {
+                spSizeCards.forEach(function (c) { c.classList.remove('active'); });
+                card.classList.add('active');
+                spSelectedVariationId = card.dataset.variationId || '';
+                spSelectedPrice       = parseFloat(card.dataset.price) || 0;
+                updateSpTotal();
             });
-
-            wrapper.appendChild(btnGroup);
-            allPillsWrapper.appendChild(wrapper);
-
-            // Pre-select first real option
-            if (firstBtn) {
-                firstBtn.classList.add('active');
-                var firstOpt = Array.from(select.options).find(function (o) { return o.value; });
-                if (firstOpt) {
-                    select.value = firstOpt.value;
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-            }
         });
-
-        // Insert pill UI BEFORE the hidden variations table — outside it, so it stays visible
-        variationsTable.parentNode.insertBefore(allPillsWrapper, variationsTable);
+    } else if (spBtnCart && spBtnCart.dataset.price) {
+        spSelectedPrice = parseFloat(spBtnCart.dataset.price) || 0;
+        updateSpTotal();
     }
 
     /* ------------------------------------------------------------------
-       Single product: quantity +/- stepper
+       Single product: qty stepper
     ------------------------------------------------------------------ */
-    document.querySelectorAll('.sp-details .quantity').forEach(function (wrap) {
-        var input = wrap.querySelector('.qty');
-        if (!input) return;
+    if (spQtyInput) {
+        var spMinusBtn = document.querySelector('.sp-qty-btn--minus');
+        var spPlusBtn  = document.querySelector('.sp-qty-btn--plus');
 
-        var minus = document.createElement('button');
-        minus.type = 'button';
-        minus.className = 'qty-btn qty-btn--minus';
-        minus.setAttribute('aria-label', 'Зменшити');
-        minus.textContent = '−';
+        if (spMinusBtn) {
+            spMinusBtn.addEventListener('click', function () {
+                var v = parseInt(spQtyInput.value, 10) || 1;
+                if (v > 1) { spQtyInput.value = v - 1; updateSpTotal(); }
+            });
+        }
+        if (spPlusBtn) {
+            spPlusBtn.addEventListener('click', function () {
+                var v   = parseInt(spQtyInput.value, 10) || 1;
+                var max = parseInt(spQtyInput.max, 10) || 20;
+                if (v < max) { spQtyInput.value = v + 1; updateSpTotal(); }
+            });
+        }
+    }
 
-        var plus = document.createElement('button');
-        plus.type = 'button';
-        plus.className = 'qty-btn qty-btn--plus';
-        plus.setAttribute('aria-label', 'Збільшити');
-        plus.textContent = '+';
+    /* ------------------------------------------------------------------
+       Single product: add to cart
+    ------------------------------------------------------------------ */
+    if (spBtnCart) {
+        spBtnCart.addEventListener('click', function () {
+            var productId   = spBtnCart.dataset.productId;
+            var productType = spBtnCart.dataset.type;
+            var qty         = parseInt(spQtyInput ? spQtyInput.value : 1, 10) || 1;
+            var body;
 
-        wrap.insertBefore(minus, input);
-        wrap.appendChild(plus);
+            if (productType === 'variable') {
+                if (!spSelectedVariationId) return;
+                body = new URLSearchParams({
+                    product_id:   productId,
+                    variation_id: spSelectedVariationId,
+                    quantity:     qty,
+                });
+            } else {
+                body = new URLSearchParams({
+                    product_id: productId,
+                    quantity:   qty,
+                });
+            }
 
-        minus.addEventListener('click', function () {
-            var v = parseInt(input.value, 10) || 1;
-            if (v > (parseInt(input.min, 10) || 1)) {
-                input.value = v - 1;
-                input.dispatchEvent(new Event('change', { bubbles: true }));
+            spBtnCart.disabled = true;
+            var labelEl = spBtnCart.querySelector('.sp-btn-cart__label');
+            if (labelEl) labelEl.textContent = '...';
+
+            fetch('/?wc-ajax=add_to_cart', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body:    body.toString(),
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data && !data.error) {
+                    if (labelEl) labelEl.textContent = '✓ Додано!';
+                    spBtnCart.classList.add('sp-btn-cart--added');
+
+                    if (data.fragments) {
+                        Object.keys(data.fragments).forEach(function (selector) {
+                            var el = document.querySelector(selector);
+                            if (el) {
+                                var tmp = document.createElement('div');
+                                tmp.innerHTML = data.fragments[selector];
+                                if (tmp.firstElementChild) el.replaceWith(tmp.firstElementChild);
+                            }
+                        });
+                    }
+
+                    setTimeout(function () {
+                        if (labelEl) labelEl.textContent = 'Додати в кошик';
+                        spBtnCart.classList.remove('sp-btn-cart--added');
+                        spBtnCart.disabled = false;
+                    }, 2000);
+                } else {
+                    if (labelEl) labelEl.textContent = 'Додати в кошик';
+                    spBtnCart.disabled = false;
+                }
+            })
+            .catch(function () {
+                if (labelEl) labelEl.textContent = 'Додати в кошик';
+                spBtnCart.disabled = false;
+            });
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       Single product: share button
+    ------------------------------------------------------------------ */
+    var spShareBtn = document.querySelector('.sp-share-btn');
+    if (spShareBtn) {
+        spShareBtn.addEventListener('click', function () {
+            if (navigator.share) {
+                navigator.share({ title: document.title, url: location.href });
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(location.href);
             }
         });
-        plus.addEventListener('click', function () {
-            var v   = parseInt(input.value, 10) || 1;
-            var max = parseInt(input.max, 10);
-            if (!max || v < max) {
-                input.value = v + 1;
-                input.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        });
-    });
+    }
 
     /* ------------------------------------------------------------------
        Smooth scroll for anchor links

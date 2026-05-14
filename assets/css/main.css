@@ -1648,6 +1648,7 @@ ul.products { list-style: none; margin: 0; padding: 0; }
 .sp-qty-btn:hover { background: var(--color-bg); color: var(--color-accent); }
 .sp-qty-input {
     width: 40px;
+    height: 56px;
     text-align: center;
     border: none;
     background: transparent;
@@ -1656,6 +1657,7 @@ ul.products { list-style: none; margin: 0; padding: 0; }
     font-weight: 700;
     color: var(--color-text);
     -moz-appearance: textfield;
+    padding: 0;
 }
 .sp-qty-input::-webkit-inner-spin-button,
 .sp-qty-input::-webkit-outer-spin-button { -webkit-appearance: none; }

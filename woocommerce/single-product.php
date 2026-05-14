@@ -220,7 +220,7 @@ while ( have_posts() ) :
 
                     <div class="sp-qty">
                         <button type="button" class="sp-qty-btn sp-qty-btn--minus" aria-label="Зменшити">−</button>
-                        <input class="sp-qty-input" type="number" value="1" min="1" max="20" readonly>
+                        <input class="sp-qty-input" type="text" inputmode="numeric" value="1" min="1" max="20" readonly>
                         <button type="button" class="sp-qty-btn sp-qty-btn--plus" aria-label="Збільшити">+</button>
                     </div>
 

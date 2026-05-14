@@ -178,53 +178,71 @@
 
     /* ------------------------------------------------------------------
        Single product: transform variation <select> into pill buttons
-       (WooCommerce's variation JS still works via the hidden select)
+       Inserts pills BEFORE the hidden .variations table so they're visible.
+       WooCommerce's variation JS still works via the hidden <select>.
     ------------------------------------------------------------------ */
-    document.querySelectorAll('.sp-details .variations select').forEach(function (select) {
-        var label = select.closest('tr') ? select.closest('tr').querySelector('label') : null;
-        var labelText = label ? label.textContent.trim() : '';
+    var variationsTable = document.querySelector('.sp-details table.variations');
+    if (variationsTable) {
+        var allPillsWrapper = document.createElement('div');
+        allPillsWrapper.className = 'sp-size-selectors';
 
-        var wrapper = document.createElement('div');
-        wrapper.className = 'size-selector';
-        if (labelText) {
-            var title = document.createElement('p');
-            title.className = 'size-selector__label';
-            title.textContent = labelText + ':';
-            wrapper.appendChild(title);
-        }
+        variationsTable.querySelectorAll('tr').forEach(function (row) {
+            var label  = row.querySelector('label');
+            var select = row.querySelector('select');
+            if (!select) return;
 
-        var btnGroup = document.createElement('div');
-        btnGroup.className = 'size-selector__btns';
-        btnGroup.style.cssText = 'display:flex;gap:4px;background:#faf5f0;border:1px solid #e8d5c4;border-radius:10px;padding:4px;';
+            var labelText = label ? label.textContent.trim() : '';
 
-        Array.from(select.options).forEach(function (opt, i) {
-            if (!opt.value) return;
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'size-option' + (i === 1 ? ' active' : '');
-            btn.dataset.value = opt.value;
-            btn.innerHTML = '<span class="size-option__label">' + opt.text + '</span>';
-            btn.addEventListener('click', function () {
-                btnGroup.querySelectorAll('.size-option').forEach(function (b) { b.classList.remove('active'); });
-                btn.classList.add('active');
-                select.value = opt.value;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
+            var wrapper = document.createElement('div');
+            wrapper.className = 'size-selector';
+
+            if (labelText) {
+                var title = document.createElement('p');
+                title.className = 'size-selector__label';
+                title.style.cssText = 'font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:8px;';
+                title.textContent = labelText + ':';
+                wrapper.appendChild(title);
+            }
+
+            var btnGroup = document.createElement('div');
+            btnGroup.style.cssText = 'display:flex;gap:4px;background:#faf5f0;border:1px solid #e8d5c4;border-radius:10px;padding:4px;';
+
+            var firstBtn = null;
+            Array.from(select.options).forEach(function (opt) {
+                if (!opt.value) return;
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'size-option';
+                btn.dataset.value = opt.value;
+                btn.innerHTML = '<span class="size-option__label">' + opt.text + '</span>';
+                if (!firstBtn) firstBtn = btn;
+
+                btn.addEventListener('click', function () {
+                    btnGroup.querySelectorAll('.size-option').forEach(function (b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    select.value = opt.value;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+                btnGroup.appendChild(btn);
             });
-            btnGroup.appendChild(btn);
+
+            wrapper.appendChild(btnGroup);
+            allPillsWrapper.appendChild(wrapper);
+
+            // Pre-select first real option
+            if (firstBtn) {
+                firstBtn.classList.add('active');
+                var firstOpt = Array.from(select.options).find(function (o) { return o.value; });
+                if (firstOpt) {
+                    select.value = firstOpt.value;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
         });
 
-        wrapper.appendChild(btnGroup);
-        select.parentNode.insertBefore(wrapper, select);
-
-        // Pre-select first real option
-        var firstOpt = Array.from(select.options).find(function (o) { return o.value; });
-        if (firstOpt) {
-            select.value = firstOpt.value;
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-            var firstBtn = btnGroup.querySelector('.size-option');
-            if (firstBtn) firstBtn.classList.add('active');
-        }
-    });
+        // Insert pill UI BEFORE the hidden variations table — outside it, so it stays visible
+        variationsTable.parentNode.insertBefore(allPillsWrapper, variationsTable);
+    }
 
     /* ------------------------------------------------------------------
        Single product: quantity +/- stepper

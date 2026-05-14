@@ -53,7 +53,7 @@ function lesyni_enqueue_assets() {
 		'lesyni-main',
 		get_template_directory_uri() . '/assets/css/main.css',
 		[ 'lesyni-fonts' ],
-		'1.0.0'
+		filemtime( get_template_directory() . '/assets/css/main.css' )
 	);
 
 	// Main script
@@ -61,7 +61,7 @@ function lesyni_enqueue_assets() {
 		'lesyni-main',
 		get_template_directory_uri() . '/assets/js/main.js',
 		[],
-		'1.0.0',
+		filemtime( get_template_directory() . '/assets/js/main.js' ),
 		true
 	);
 

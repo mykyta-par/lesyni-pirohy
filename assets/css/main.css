@@ -1200,6 +1200,10 @@ ul.products { list-style: none; margin: 0; padding: 0; }
 /* --------------------------------------------------------------------------
    19. WooCommerce Notices & Misc
    -------------------------------------------------------------------------- */
+.woocommerce-notices-wrapper:empty {
+    display: none;
+}
+
 .woocommerce-notices-wrapper,
 .woocommerce-message,
 .woocommerce-error,

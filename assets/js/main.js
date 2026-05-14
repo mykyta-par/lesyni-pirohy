@@ -122,20 +122,18 @@
                     btn.textContent = '✓ Додано';
                     btn.classList.add('btn-add-cart--added');
 
-                    // Update cart count in header
-                    var countEl = document.querySelector('.header-cart__count');
-                    if (data.cart_contents_count) {
-                        if (countEl) {
-                            countEl.textContent = data.cart_contents_count;
-                        } else {
-                            var cartLink = document.querySelector('.header-cart');
-                            if (cartLink) {
-                                var span = document.createElement('span');
-                                span.className = 'header-cart__count';
-                                span.textContent = data.cart_contents_count;
-                                cartLink.appendChild(span);
+                    // Update cart count via WooCommerce fragments
+                    if (data.fragments) {
+                        Object.keys(data.fragments).forEach(function (selector) {
+                            var el = document.querySelector(selector);
+                            if (el) {
+                                var tmp = document.createElement('div');
+                                tmp.innerHTML = data.fragments[selector];
+                                if (tmp.firstElementChild) {
+                                    el.replaceWith(tmp.firstElementChild);
+                                }
                             }
-                        }
+                        });
                     }
 
                     setTimeout(function () {

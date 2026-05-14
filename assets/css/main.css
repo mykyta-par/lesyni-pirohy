@@ -282,6 +282,7 @@ ul, ol   { list-style: none; }
     align-items: center;
     justify-content: center;
 }
+.header-cart__count--hidden { display: none; }
 
 /* Mobile toggle */
 .nav-toggle {

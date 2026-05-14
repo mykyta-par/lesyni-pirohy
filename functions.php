@@ -77,6 +77,15 @@ add_action( 'wp_enqueue_scripts', 'lesyni_enqueue_assets' );
 // Disable default WooCommerce stylesheet (we ship our own)
 add_filter( 'woocommerce_enqueue_styles', '__return_empty_array' );
 
+// Register cart count as a WooCommerce fragment so it updates after AJAX add-to-cart
+add_filter( 'woocommerce_add_to_cart_fragments', function ( $fragments ) {
+    $count = WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
+    $fragments['span.header-cart__count'] = '<span class="header-cart__count'
+        . ( $count > 0 ? '' : ' header-cart__count--hidden' ) . '">'
+        . esc_html( $count ) . '</span>';
+    return $fragments;
+} );
+
 /* -----------------------------------------------------------------------
    Content width
 ----------------------------------------------------------------------- */

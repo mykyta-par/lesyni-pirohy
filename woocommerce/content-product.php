@@ -62,11 +62,18 @@ $variation_options = array();
 if ( $is_variable ) {
     /** @var WC_Product_Variable $product */
     foreach ( $product->get_available_variations() as $var ) {
-        $attrs     = $var['attributes'];
-        $first_val = reset( $attrs ); // e.g. "Малий" or "Великий"
-        if ( $first_val ) {
+        $attrs    = $var['attributes'];
+        $attr_key = key( $attrs );
+        $slug     = reset( $attrs );
+
+        if ( $slug ) {
+            // Try to get proper display name from taxonomy term
+            $taxonomy = str_replace( 'attribute_', '', $attr_key );
+            $term     = get_term_by( 'slug', urldecode( $slug ), $taxonomy );
+            $label    = $term ? $term->name : urldecode( $slug );
+
             $variation_options[] = array(
-                'label'        => $first_val,
+                'label'        => $label,
                 'price'        => (float) $var['display_price'],
                 'weight'       => $var['weight'] ?: '',
                 'variation_id' => (int) $var['variation_id'],

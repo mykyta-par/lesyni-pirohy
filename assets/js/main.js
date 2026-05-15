@@ -799,67 +799,86 @@
         var mapEl = document.getElementById('oco-zone-map');
         if (!mapEl || typeof L === 'undefined') return;
 
-        ocoMap = L.map('oco-zone-map', {
-            zoomControl:       true,
-            scrollWheelZoom:   false,
-            attributionControl: true,
-        });
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
-            maxZoom: 18,
-        }).addTo(ocoMap);
-
-        var greenPoly  = cfg.greenPolygon  || [];
-        var yellowData = cfg.yellowPolygon || [];
-        // Detect multi-polygon: first element must be an array whose first element is also an array
-        var isMulti = yellowData.length > 0 &&
-                      Array.isArray(yellowData[0]) &&
-                      yellowData[0].length > 0 &&
-                      Array.isArray(yellowData[0][0]);
-        var yellowPolyList = isMulti ? yellowData : (yellowData.length >= 3 ? [yellowData] : []);
-
-        var yellowStyle = {
-            color: '#b8940a', fillColor: '#f5d85a',
-            fillOpacity: 0.22, weight: 2, dashArray: '6 4',
-        };
-        var yellowTip     = '<b>🟡 Жовта зона</b><br>' + YELLOW_COST + ' грн (від ' + YELLOW_FREE_FROM + ' грн — безкоштовно)';
-        var yellowTipOpts = { sticky: true, className: 'oco-map-tooltip oco-map-tooltip--yellow' };
-
-        // Collect all added layers so we can fitBounds without creating duplicates
-        var boundsLayers = [];
-
-        if (yellowPolyList.length) {
-            yellowLayer = L.layerGroup().addTo(ocoMap);
-            yellowPolyList.forEach(function (poly) {
-                if (!poly || poly.length < 3) return;
-                var p = L.polygon(poly, yellowStyle).addTo(yellowLayer);
-                p.bindTooltip(yellowTip, yellowTipOpts);
-                boundsLayers.push(p);
+        try {
+            ocoMap = L.map('oco-zone-map', {
+                zoomControl:        true,
+                scrollWheelZoom:    false,
+                attributionControl: true,
             });
-        }
 
-        if (greenPoly.length >= 3) {
-            greenLayer = L.polygon(greenPoly, {
-                color: '#3a7230', fillColor: '#7ab86e',
-                fillOpacity: 0.28, weight: 2,
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+                maxZoom: 18,
             }).addTo(ocoMap);
-            greenLayer.bindTooltip(
-                '<b>🟢 Зелена зона</b><br>' + GREEN_COST + ' грн (від ' + GREEN_FREE_FROM + ' грн — безкоштовно)',
-                { sticky: true, className: 'oco-map-tooltip oco-map-tooltip--green' }
-            );
-            boundsLayers.push(greenLayer);
-        }
 
-        // fitBounds using the already-added layers (no duplicates)
-        if (boundsLayers.length) {
-            try {
-                ocoMap.fitBounds(L.featureGroup(boundsLayers).getBounds(), { padding: [24, 24] });
-            } catch (e) {
+            var greenPoly  = (cfg.greenPolygon  && cfg.greenPolygon.length)  ? cfg.greenPolygon  : [];
+            var yellowData = (cfg.yellowPolygon && cfg.yellowPolygon.length) ? cfg.yellowPolygon : [];
+
+            // Detect multi-polygon: yellowPolygon is [[poly1_pts...], [poly2_pts...], ...]
+            var isMulti = yellowData.length > 0 &&
+                          Array.isArray(yellowData[0]) &&
+                          yellowData[0].length > 0 &&
+                          Array.isArray(yellowData[0][0]);
+            var yellowPolyList = isMulti ? yellowData : (yellowData.length >= 3 ? [yellowData] : []);
+
+            var yellowStyle = {
+                color: '#b8940a', fillColor: '#f5d85a',
+                fillOpacity: 0.22, weight: 2, dashArray: '6 4',
+            };
+            var yellowTip     = '<b>Жовта зона</b><br>' + YELLOW_COST + ' грн (від ' + YELLOW_FREE_FROM + ' грн — безкоштовно)';
+            var yellowTipOpts = { sticky: true, className: 'oco-map-tooltip oco-map-tooltip--yellow' };
+
+            var boundsLayers = [];
+
+            if (yellowPolyList.length) {
+                yellowLayer = L.layerGroup().addTo(ocoMap);
+                yellowPolyList.forEach(function (poly) {
+                    if (!poly || poly.length < 3) return;
+                    try {
+                        var p = L.polygon(poly, yellowStyle).addTo(yellowLayer);
+                        p.bindTooltip(yellowTip, yellowTipOpts);
+                        boundsLayers.push(p);
+                    } catch (polyErr) {
+                        console.warn('Yellow polygon error:', polyErr);
+                    }
+                });
+            }
+
+            if (greenPoly.length >= 3) {
+                try {
+                    greenLayer = L.polygon(greenPoly, {
+                        color: '#3a7230', fillColor: '#7ab86e',
+                        fillOpacity: 0.28, weight: 2,
+                    }).addTo(ocoMap);
+                    greenLayer.bindTooltip(
+                        '<b>Зелена зона</b><br>' + GREEN_COST + ' грн (від ' + GREEN_FREE_FROM + ' грн — безкоштовно)',
+                        { sticky: true, className: 'oco-map-tooltip oco-map-tooltip--green' }
+                    );
+                    boundsLayers.push(greenLayer);
+                } catch (polyErr) {
+                    console.warn('Green polygon error:', polyErr);
+                }
+            }
+
+            if (boundsLayers.length) {
+                try {
+                    var group = L.featureGroup(boundsLayers);
+                    var bounds = group.getBounds();
+                    if (bounds && bounds.isValid()) {
+                        ocoMap.fitBounds(bounds, { padding: [24, 24] });
+                    } else {
+                        ocoMap.setView([48.4647, 35.0462], 11);
+                    }
+                } catch (boundsErr) {
+                    console.warn('fitBounds error:', boundsErr);
+                    ocoMap.setView([48.4647, 35.0462], 11);
+                }
+            } else {
                 ocoMap.setView([48.4647, 35.0462], 11);
             }
-        } else {
-            ocoMap.setView([48.4647, 35.0462], 11);
+        } catch (mapErr) {
+            console.error('Map init error:', mapErr);
+            ocoMap = null;
         }
     }
 
@@ -963,7 +982,6 @@
                 if (msg === 'geocode_failed') {
                     showZoneIndicator('unknown', '⚠️ Адресу не знайдено — перевірте написання вулиці');
                 } else if (msg === 'bad_nonce') {
-                    // Nonce expired (e.g. after session refresh) — reload to get fresh nonce
                     window.location.reload();
                 } else {
                     showZoneIndicator('unknown', '⚠️ Не вдалося визначити адресу');
@@ -973,9 +991,11 @@
                 return;
             }
             detectedZone = data.data.zone;
-            applyZoneUI(detectedZone, data.data.rates);
-            updateMapMarker(data.data.lat, data.data.lng, detectedZone);
+            // Update zone indicator and shipping display first (must not be blocked by map errors)
+            try { applyZoneUI(detectedZone, data.data.rates); } catch (e) { console.error('applyZoneUI:', e); }
             recalc();
+            // Update map marker separately so any Leaflet error stays isolated
+            try { updateMapMarker(data.data.lat, data.data.lng, detectedZone); } catch (e) { console.error('updateMapMarker:', e); }
         })
         .catch(function (err) {
             if (err && err.message === 'invalid_json') {

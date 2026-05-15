@@ -83,12 +83,12 @@ function lesyni_enqueue_assets() {
 		true
 	);
 
-	// Pass AJAX URL + zone config to JS
-	wp_localize_script( 'lesyni-main', 'lesyniData', [
-		'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
-		'shopUrl'      => get_permalink( wc_get_page_id( 'shop' ) ),
-		'homeUrl'      => home_url( '/' ),
-		'nonce'        => wp_create_nonce( 'lesyni_zone_nonce' ),
+	// Use wp_add_inline_script for reliable JSON encoding of nested polygon arrays
+	$lesyni_inline_data = 'var lesyniData = ' . wp_json_encode( [
+		'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+		'shopUrl'        => get_permalink( wc_get_page_id( 'shop' ) ),
+		'homeUrl'        => home_url( '/' ),
+		'nonce'          => wp_create_nonce( 'lesyni_zone_nonce' ),
 		'greenFreeFrom'  => (int) get_option( 'lesyni_green_free_from',  600 ),
 		'greenCost'      => (int) get_option( 'lesyni_green_cost',        100 ),
 		'yellowFreeFrom' => (int) get_option( 'lesyni_yellow_free_from', 800 ),
@@ -96,7 +96,8 @@ function lesyni_enqueue_assets() {
 		'outOfZoneLabel' => get_option( 'lesyni_out_of_zone_label', 'Уточнимо можливість доставки з менеджером' ),
 		'greenPolygon'   => get_option( 'lesyni_green_polygon',  Lesyni_Zone_Shipping::GREEN_POLYGON_DEFAULT ),
 		'yellowPolygon'  => get_option( 'lesyni_yellow_polygon', Lesyni_Zone_Shipping::YELLOW_POLYGON_DEFAULT ),
-	] );
+	], JSON_UNESCAPED_UNICODE ) . ';';
+	wp_add_inline_script( 'lesyni-main', $lesyni_inline_data, 'before' );
 }
 add_action( 'wp_enqueue_scripts', 'lesyni_enqueue_assets' );
 

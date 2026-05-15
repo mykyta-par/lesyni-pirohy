@@ -51,6 +51,65 @@ class Lesyni_Zone_Shipping extends WC_Shipping_Method {
         [48.4872423, 34.9970396],
     ];
 
+    // Yellow zone: з Google My Maps ("Безкоштовна Доставка від 800 грн") — один полігон
+    const YELLOW_POLYGON_DEFAULT = [
+        [48.4740142, 34.9041276],
+        [48.4556883, 34.9241691],
+        [48.4429359, 34.9463135],
+        [48.4402029, 34.9613339],
+        [48.4389502, 34.9737793],
+        [48.4415694, 34.9799592],
+        [48.4392702, 34.9926458],
+        [48.43837,   34.9978053],
+        [48.4374195, 35.001787 ],
+        [48.4268553, 34.9962292],
+        [48.4332049, 34.9811446],
+        [48.429688,  34.9771859],
+        [48.4260002, 34.9857154],
+        [48.4219276, 34.9908438],
+        [48.4101839, 34.9893785],
+        [48.4036315, 34.9629429],
+        [48.3974328, 34.960073 ],
+        [48.3963062, 34.9669104],
+        [48.3956496, 34.9731535],
+        [48.3917172, 34.9813074],
+        [48.3954217, 34.9888605],
+        [48.3946893, 34.9944068],
+        [48.3824385, 34.9961653],
+        [48.3818981, 35.0003812],
+        [48.3889384, 35.027964 ],
+        [48.3889384, 35.0565026],
+        [48.3878555, 35.0599359],
+        [48.3927001, 35.070493 ],
+        [48.4030718, 35.0789044],
+        [48.4075732, 35.0887749],
+        [48.4088267, 35.0898048],
+        [48.4247203, 35.0722097],
+        [48.439584,  35.0739262],
+        [48.4707511, 35.0880552],
+        [48.5004845, 35.1131741],
+        [48.5041048, 35.0957152],
+        [48.5116109, 35.0970026],
+        [48.5168418, 35.0930974],
+        [48.5382405, 35.1026247],
+        [48.5480451, 35.0922391],
+        [48.5485,    35.0832476],
+        [48.5382718, 35.075631 ],
+        [48.5388396, 35.0650307],
+        [48.5367368, 35.0502678],
+        [48.5288366, 35.0350758],
+        [48.537703,  35.0204846],
+        [48.5319059, 35.0058934],
+        [48.5276429, 35.0101849],
+        [48.5120658, 34.9834057],
+        [48.5101325, 34.9846074],
+        [48.506806,  34.9709174],
+        [48.4944096, 34.9499184],
+        [48.4879818, 34.9161869],
+        [48.4848529, 34.9039131],
+        [48.4816385, 34.9009948],
+        [48.4740142, 34.9041276],
+    ];
 
     public function __construct() {
         $this->id                 = 'lesyni_zone';
@@ -95,6 +154,18 @@ class Lesyni_Zone_Shipping extends WC_Shipping_Method {
                 'type'    => 'number',
                 'default' => 100,
             ],
+            'yellow_free_from' => [
+                'title'       => 'Жовта зона: безкоштовно від (грн)',
+                'type'        => 'number',
+                'default'     => 800,
+                'description' => 'Мінімальна сума кошика для безкоштовної доставки в жовтій зоні',
+                'desc_tip'    => true,
+            ],
+            'yellow_cost' => [
+                'title'   => 'Жовта зона: вартість доставки (грн)',
+                'type'    => 'number',
+                'default' => 150,
+            ],
             'out_of_zone_label' => [
                 'title'   => 'Текст поза зоною',
                 'type'    => 'text',
@@ -117,7 +188,7 @@ class Lesyni_Zone_Shipping extends WC_Shipping_Method {
             return;
         }
 
-        $zone     = $session_data['zone'];    // 'green' | 'outside'
+        $zone     = $session_data['zone'];    // 'green' | 'yellow' | 'outside'
         $subtotal = $package['cart_subtotal'] ?? (float) WC()->cart->get_subtotal();
 
         if ( $zone === 'green' ) {
@@ -126,9 +197,20 @@ class Lesyni_Zone_Shipping extends WC_Shipping_Method {
             $final_cost = $subtotal >= $free_from ? 0 : $cost;
             $this->add_rate( [
                 'id'    => $this->get_rate_id( 'green' ),
-                'label' => $this->title,
+                'label' => $this->title . ' (зелена зона)',
                 'cost'  => $final_cost,
                 'meta_data' => [ 'lesyni_zone' => 'green' ],
+            ] );
+
+        } elseif ( $zone === 'yellow' ) {
+            $free_from  = (float) $this->get_option( 'yellow_free_from', 800 );
+            $cost       = (float) $this->get_option( 'yellow_cost', 150 );
+            $final_cost = $subtotal >= $free_from ? 0 : $cost;
+            $this->add_rate( [
+                'id'    => $this->get_rate_id( 'yellow' ),
+                'label' => $this->title . ' (жовта зона)',
+                'cost'  => $final_cost,
+                'meta_data' => [ 'lesyni_zone' => 'yellow' ],
             ] );
 
         } else {
@@ -177,15 +259,18 @@ class Lesyni_Zone_Shipping extends WC_Shipping_Method {
 
     /**
      * Detect zone for given coordinates.
-     * Returns 'green' | 'outside'.
+     * Returns 'green' | 'yellow' | 'outside'.
      */
     public static function detect_zone( $lat, $lng ) {
-        $green_polygon = get_option( 'lesyni_green_polygon', self::GREEN_POLYGON_DEFAULT );
+        $green_polygon  = get_option( 'lesyni_green_polygon',  self::GREEN_POLYGON_DEFAULT );
+        $yellow_polygon = get_option( 'lesyni_yellow_polygon', self::YELLOW_POLYGON_DEFAULT );
 
         if ( self::point_in_polygon( $lat, $lng, $green_polygon ) ) {
             return 'green';
         }
-
+        if ( self::point_in_polygon( $lat, $lng, $yellow_polygon ) ) {
+            return 'yellow';
+        }
         return 'outside';
     }
 

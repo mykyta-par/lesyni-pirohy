@@ -92,10 +92,13 @@ add_action( 'wp_footer', function () {
 	$config = [
 		'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
 		'nonce'          => wp_create_nonce( 'lesyni_zone_nonce' ),
-		'greenFreeFrom'  => (int) get_option( 'lesyni_green_free_from', 600 ),
-		'greenCost'      => (int) get_option( 'lesyni_green_cost',      100 ),
+		'greenFreeFrom'  => (int) get_option( 'lesyni_green_free_from',  600 ),
+		'greenCost'      => (int) get_option( 'lesyni_green_cost',        100 ),
+		'yellowFreeFrom' => (int) get_option( 'lesyni_yellow_free_from', 800 ),
+		'yellowCost'     => (int) get_option( 'lesyni_yellow_cost',      150 ),
 		'outOfZoneLabel' => get_option( 'lesyni_out_of_zone_label', 'Уточнимо можливість доставки з менеджером' ),
-		'greenPolygon'   => get_option( 'lesyni_green_polygon', Lesyni_Zone_Shipping::GREEN_POLYGON_DEFAULT ),
+		'greenPolygon'   => get_option( 'lesyni_green_polygon',  Lesyni_Zone_Shipping::GREEN_POLYGON_DEFAULT ),
+		'yellowPolygon'  => get_option( 'lesyni_yellow_polygon', Lesyni_Zone_Shipping::YELLOW_POLYGON_DEFAULT ),
 	];
 	echo '<div id="lesyni-config" hidden data-cfg="' . esc_attr( wp_json_encode( $config, JSON_UNESCAPED_UNICODE ) ) . '"></div>' . "\n";
 }, 5 );
@@ -296,6 +299,10 @@ function lesyni_ajax_check_zone() {
             'free_from' => (int) get_option( 'lesyni_green_free_from',  600 ),
             'cost'      => (int) get_option( 'lesyni_green_cost',        100 ),
         ],
+        'yellow' => [
+            'free_from' => (int) get_option( 'lesyni_yellow_free_from', 800 ),
+            'cost'      => (int) get_option( 'lesyni_yellow_cost',      150 ),
+        ],
     ];
 
     wp_send_json_success( [
@@ -343,6 +350,20 @@ function lesyni_zone_settings_fields() {
             'type'    => 'number',
             'id'      => 'lesyni_green_cost',
             'default' => 100,
+            'desc'    => 'грн',
+        ],
+        [
+            'title'   => 'Жовта зона: безкоштовно від',
+            'type'    => 'number',
+            'id'      => 'lesyni_yellow_free_from',
+            'default' => 800,
+            'desc'    => 'грн',
+        ],
+        [
+            'title'   => 'Жовта зона: вартість доставки',
+            'type'    => 'number',
+            'id'      => 'lesyni_yellow_cost',
+            'default' => 150,
             'desc'    => 'грн',
         ],
         [

@@ -50,7 +50,6 @@
 html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
-    overflow-x: hidden;
 }
 
 body {
@@ -3170,7 +3169,11 @@ ul.products { list-style: none; margin: 0; padding: 0; }
     width: 100%;
     margin: 0 auto;
     padding: 32px var(--px) 80px;
+    overflow-x: hidden;
 }
+
+.oco-left,
+.oco-right { min-width: 0; }
 
 /* Breadcrumbs */
 .oco-breadcrumbs {
@@ -3923,6 +3926,7 @@ ul.products { list-style: none; margin: 0; padding: 0; }
     .oco-wrap { padding: 24px 16px 60px; }
     .oco-card { padding: 20px 16px; }
     .oco-card--flush .oco-section-head { padding: 18px 16px 14px; }
+    .oco-summary { padding: 20px 16px; }
     .oco-form-row, .oco-form-row--addr { grid-template-columns: 1fr; }
     .oco-time-grid { grid-template-columns: repeat(2, 1fr); }
     .oco-date-picker { grid-template-columns: repeat(4, 1fr); }

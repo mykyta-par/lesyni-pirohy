@@ -240,8 +240,6 @@ $cart_count   = $cart->get_cart_contents_count();
                 </div>
             <?php endforeach; ?>
 
-            <!-- Cross-sells -->
-            <?php do_action( 'woocommerce_cart_collaterals' ); ?>
 
         </div><!-- .cart-main -->
 

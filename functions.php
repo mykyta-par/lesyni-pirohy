@@ -48,6 +48,23 @@ function lesyni_enqueue_assets() {
 		null
 	);
 
+	// Leaflet map — тільки на сторінці кошика
+	if ( is_cart() ) {
+		wp_enqueue_style(
+			'leaflet',
+			'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+			[],
+			'1.9.4'
+		);
+		wp_enqueue_script(
+			'leaflet',
+			'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+			[],
+			'1.9.4',
+			true
+		);
+	}
+
 	// Main stylesheet
 	wp_enqueue_style(
 		'lesyni-main',
@@ -56,11 +73,12 @@ function lesyni_enqueue_assets() {
 		filemtime( get_template_directory() . '/assets/css/main.css' )
 	);
 
-	// Main script
+	// Main script (depends on Leaflet when on cart page)
+	$script_deps = is_cart() ? [ 'leaflet' ] : [];
 	wp_enqueue_script(
 		'lesyni-main',
 		get_template_directory_uri() . '/assets/js/main.js',
-		[],
+		$script_deps,
 		filemtime( get_template_directory() . '/assets/js/main.js' ),
 		true
 	);
@@ -76,6 +94,8 @@ function lesyni_enqueue_assets() {
 		'yellowFreeFrom' => (int) get_option( 'lesyni_yellow_free_from', 800 ),
 		'yellowCost'     => (int) get_option( 'lesyni_yellow_cost',      150 ),
 		'outOfZoneLabel' => get_option( 'lesyni_out_of_zone_label', 'Уточнимо можливість доставки з менеджером' ),
+		'greenPolygon'   => get_option( 'lesyni_green_polygon',  Lesyni_Zone_Shipping::GREEN_POLYGON_DEFAULT ),
+		'yellowPolygon'  => get_option( 'lesyni_yellow_polygon', Lesyni_Zone_Shipping::YELLOW_POLYGON_DEFAULT ),
 	] );
 }
 add_action( 'wp_enqueue_scripts', 'lesyni_enqueue_assets' );

@@ -788,25 +788,111 @@
         });
     });
 
-    /* ── Address geocoding + zone detection ────────────────────── */
-    var zoneCheckTimer   = null;
-    var streetInput      = document.getElementById('oco-street');
-    var houseInput       = document.getElementById('oco-house');
-    var zoneIndicator    = null; // created dynamically
+    /* ── Map (Leaflet) ──────────────────────────────────────────── */
+    var ocoMap        = null;
+    var ocoMarker     = null;
+    var greenLayer    = null;
+    var yellowLayer   = null;
 
-    function getZoneIndicator() {
-        if (!zoneIndicator) {
-            zoneIndicator = document.createElement('div');
-            zoneIndicator.className = 'oco-zone-indicator';
-            zoneIndicator.id = 'oco-zone-indicator';
-            var addrSection = document.getElementById('oco-address-section');
-            if (addrSection) addrSection.appendChild(zoneIndicator);
+    function initZoneMap() {
+        if (ocoMap) return;
+        var mapEl = document.getElementById('oco-zone-map');
+        if (!mapEl || typeof L === 'undefined') return;
+
+        ocoMap = L.map('oco-zone-map', {
+            zoomControl:       true,
+            scrollWheelZoom:   false,
+            attributionControl: true,
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+            maxZoom: 18,
+        }).addTo(ocoMap);
+
+        var greenPoly  = cfg.greenPolygon  || [];
+        var yellowPoly = cfg.yellowPolygon || [];
+
+        if (yellowPoly.length) {
+            yellowLayer = L.polygon(yellowPoly, {
+                color:       '#b8940a',
+                fillColor:   '#f5d85a',
+                fillOpacity: 0.22,
+                weight:      2,
+                dashArray:   '6 4',
+            }).addTo(ocoMap);
+            yellowLayer.bindTooltip(
+                '<b>🟡 Жовта зона</b><br>' + YELLOW_COST + ' грн (від ' + YELLOW_FREE_FROM + ' грн — безкоштовно)',
+                { sticky: true, className: 'oco-map-tooltip oco-map-tooltip--yellow' }
+            );
         }
-        return zoneIndicator;
+
+        if (greenPoly.length) {
+            greenLayer = L.polygon(greenPoly, {
+                color:       '#3a7230',
+                fillColor:   '#7ab86e',
+                fillOpacity: 0.28,
+                weight:      2,
+            }).addTo(ocoMap);
+            greenLayer.bindTooltip(
+                '<b>🟢 Зелена зона</b><br>' + GREEN_COST + ' грн (від ' + GREEN_FREE_FROM + ' грн — безкоштовно)',
+                { sticky: true, className: 'oco-map-tooltip oco-map-tooltip--green' }
+            );
+        }
+
+        // Fit to yellow (larger) zone, fallback to Dnipro center
+        if (yellowLayer) {
+            ocoMap.fitBounds(yellowLayer.getBounds(), { padding: [24, 24] });
+        } else {
+            ocoMap.setView([48.4647, 35.0462], 12);
+        }
     }
 
+    function updateMapMarker(lat, lng, zone) {
+        if (!ocoMap) initZoneMap();
+        if (!ocoMap) return;
+
+        var zoneColors = { green: '#3a7230', yellow: '#b8940a', outside: '#c45a5a' };
+        var color = zoneColors[zone] || '#c4845a';
+
+        // Highlight active zone polygon
+        if (greenLayer)  greenLayer.setStyle({ fillOpacity: zone === 'green'  ? 0.45 : 0.18 });
+        if (yellowLayer) yellowLayer.setStyle({ fillOpacity: zone === 'yellow' ? 0.40 : 0.15 });
+
+        if (ocoMarker) {
+            ocoMarker.setLatLng([lat, lng]);
+            ocoMarker.setStyle({ fillColor: color });
+        } else {
+            ocoMarker = L.circleMarker([lat, lng], {
+                radius:      11,
+                fillColor:   color,
+                color:       '#ffffff',
+                weight:      3,
+                fillOpacity: 0.95,
+            }).addTo(ocoMap);
+        }
+
+        var zoneLabels = {
+            green:   '🟢 Зелена зона',
+            yellow:  '🟡 Жовта зона',
+            outside: '❗ Поза зонами',
+        };
+        ocoMarker.bindPopup(
+            '<b>' + (zoneLabels[zone] || 'Адреса') + '</b><br>Ваша адреса доставки',
+            { closeButton: false }
+        ).openPopup();
+
+        ocoMap.setView([lat, lng], 14, { animate: true, duration: 0.6 });
+    }
+
+    /* ── Address geocoding + zone detection ────────────────────── */
+    var zoneCheckTimer = null;
+    var streetInput    = document.getElementById('oco-street');
+    var houseInput     = document.getElementById('oco-house');
+
     function showZoneIndicator(state, message) {
-        var el = getZoneIndicator();
+        var el = document.getElementById('oco-zone-indicator');
+        if (!el) return;
         el.className = 'oco-zone-indicator oco-zone--' + state;
         el.textContent = message;
         el.style.display = 'flex';
@@ -815,26 +901,25 @@
     function scheduleZoneCheck() {
         clearTimeout(zoneCheckTimer);
         var street = streetInput ? streetInput.value.trim() : '';
-        var house  = houseInput  ? houseInput.value.trim()  : '';
         if (!street) return;
 
         showZoneIndicator('checking', '🔍 Визначаємо зону доставки…');
 
         zoneCheckTimer = setTimeout(function () {
-            var addr = street + (house ? ', ' + house : '');
-            checkZone(addr);
+            var house = houseInput ? houseInput.value.trim() : '';
+            checkZone(street + (house ? ', ' + house : ''));
         }, 900);
     }
 
     function checkZone(address) {
-        var nonce = (typeof lesyniData !== 'undefined') ? lesyniData.nonce : '';
-        var body  = new URLSearchParams({
+        var ajaxUrl = cfg.ajaxUrl || '/wp-admin/admin-ajax.php';
+        var body = new URLSearchParams({
             action:  'lesyni_check_zone',
-            nonce:   nonce,
+            nonce:   cfg.nonce || '',
             address: address,
         });
 
-        fetch((typeof lesyniData !== 'undefined' ? lesyniData.ajaxUrl : '/wp-admin/admin-ajax.php'), {
+        fetch(ajaxUrl, {
             method:      'POST',
             headers:     { 'Content-Type': 'application/x-www-form-urlencoded' },
             body:        body.toString(),
@@ -850,6 +935,7 @@
             }
             detectedZone = data.data.zone;
             applyZoneUI(detectedZone, data.data.rates);
+            updateMapMarker(data.data.lat, data.data.lng, detectedZone);
             recalc();
         })
         .catch(function () {
@@ -863,30 +949,36 @@
         var shippingLbl = document.getElementById('oco-shipping-label');
         var subtotal = 0;
         document.querySelectorAll('#oco-cart-items .oco-row').forEach(function (row) {
-            var unit = parseFloat(row.dataset.unit) || 0;
-            var qty  = parseInt(row.querySelector('.oco-qty-val').textContent, 10) || 1;
-            subtotal += Math.round(unit * qty);
+            subtotal += Math.round((parseFloat(row.dataset.unit) || 0) *
+                        (parseInt(row.querySelector('.oco-qty-val').textContent, 10) || 1));
         });
 
         if (zone === 'green') {
             var freeFrom = rates ? rates.green.free_from : GREEN_FREE_FROM;
             var cost     = rates ? rates.green.cost      : GREEN_COST;
-            showZoneIndicator('green', '🟢 Зелена зона · доставка ' + (subtotal >= freeFrom ? 'безкоштовно' : cost + ' грн (безкоштовно від ' + freeFrom + ' грн)'));
+            showZoneIndicator('green', '🟢 Зелена зона · доставка ' + (subtotal >= freeFrom ? 'безкоштовно' : cost + ' грн (від ' + freeFrom + ' грн — безкоштовно)'));
             if (shippingLbl) shippingLbl.textContent = 'Доставка (зелена зона)';
         } else if (zone === 'yellow') {
             var freeFrom = rates ? rates.yellow.free_from : YELLOW_FREE_FROM;
             var cost     = rates ? rates.yellow.cost      : YELLOW_COST;
-            showZoneIndicator('yellow', '🟡 Жовта зона · доставка ' + (subtotal >= freeFrom ? 'безкоштовно' : cost + ' грн (безкоштовно від ' + freeFrom + ' грн)'));
+            showZoneIndicator('yellow', '🟡 Жовта зона · доставка ' + (subtotal >= freeFrom ? 'безкоштовно' : cost + ' грн (від ' + freeFrom + ' грн — безкоштовно)'));
             if (shippingLbl) shippingLbl.textContent = 'Доставка (жовта зона)';
         } else {
             showZoneIndicator('outside', '❗ ' + OUT_OF_ZONE_LABEL);
             if (shippingLbl) shippingLbl.textContent = 'Доставка';
-            if (shippingVal) { shippingVal.textContent = 'Уточнюється'; shippingVal.style.color = '#c4845a'; }
+            if (shippingVal) { shippingVal.textContent = 'Уточнюється'; shippingVal.style.color = '#c4845a'; shippingVal.style.fontSize = '12px'; }
         }
     }
 
     if (streetInput) streetInput.addEventListener('input', scheduleZoneCheck);
     if (houseInput)  houseInput.addEventListener('input',  scheduleZoneCheck);
+
+    // Init map immediately so zones are visible before address is entered
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initZoneMap);
+    } else {
+        setTimeout(initZoneMap, 100);
+    }
 
     /* ── Payment method ─────────────────────────────────────────── */
     var pmInput = document.getElementById('oco-payment-method-val');

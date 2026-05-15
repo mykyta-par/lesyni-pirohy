@@ -360,6 +360,17 @@ else   $count_str = $n . ' позицій';
                         <input type="text" id="oco-floor" class="oco-input" placeholder="4">
                     </div>
                 </div>
+
+                <!-- Zone indicator + map -->
+                <div id="oco-zone-indicator" class="oco-zone-indicator" style="display:none;"></div>
+
+                <div class="oco-zone-map-wrap" id="oco-zone-map-wrap">
+                    <div class="oco-zone-map-legend">
+                        <span class="oco-legend-item oco-legend-green">🟢 Зелена зона — <?php echo esc_html( get_option('lesyni_green_cost', 100) ); ?> грн (від <?php echo esc_html( get_option('lesyni_green_free_from', 600) ); ?> грн безкоштовно)</span>
+                        <span class="oco-legend-item oco-legend-yellow">🟡 Жовта зона — <?php echo esc_html( get_option('lesyni_yellow_cost', 150) ); ?> грн (від <?php echo esc_html( get_option('lesyni_yellow_free_from', 800) ); ?> грн безкоштовно)</span>
+                    </div>
+                    <div id="oco-zone-map" class="oco-zone-map"></div>
+                </div>
             </div>
 
             <!-- SECTION 4: DELIVERY METHOD -->

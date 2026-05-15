@@ -492,15 +492,13 @@
             try { cfg = JSON.parse(el.dataset.cfg); } catch (e) {}
         }
     }());
-    var GREEN_FREE_FROM  = cfg.greenFreeFrom  || 600;
-    var GREEN_COST       = cfg.greenCost      || 100;
-    var YELLOW_FREE_FROM = cfg.yellowFreeFrom || 800;
-    var YELLOW_COST      = cfg.yellowCost     || 150;
+    var GREEN_FREE_FROM   = cfg.greenFreeFrom  || 600;
+    var GREEN_COST        = cfg.greenCost      || 100;
     var OUT_OF_ZONE_LABEL = cfg.outOfZoneLabel || 'Уточнимо можливість доставки з менеджером';
 
     var deliveryType   = 'courier';
     var deliveryCost   = 0;
-    var detectedZone   = null; // 'green' | 'yellow' | 'outside' | null
+    var detectedZone   = null; // 'green' | 'outside' | null
     var selectedDate   = null;
     var selectedTime   = '14:00–15:00';
 
@@ -605,18 +603,6 @@
                     freeHint.style.color = '#7a9b6e';
                 } else {
                     freeHint.textContent = 'Ще ' + (GREEN_FREE_FROM - subtotal) + ' грн до безкоштовної доставки';
-                    freeHint.style.color = '#c4845a';
-                }
-            }
-            if (shippingVal) { shippingVal.textContent = shipping === 0 ? 'Безкоштовно' : shipping + ' грн'; shippingVal.style.color = shipping === 0 ? '#7a9b6e' : '#3d3d3d'; }
-        } else if (detectedZone === 'yellow') {
-            shipping = subtotal >= YELLOW_FREE_FROM ? 0 : YELLOW_COST;
-            if (freeHint) {
-                if (shipping === 0) {
-                    freeHint.textContent = '✓ Доставка безкоштовна (жовта зона)';
-                    freeHint.style.color = '#7a9b6e';
-                } else {
-                    freeHint.textContent = 'Ще ' + (YELLOW_FREE_FROM - subtotal) + ' грн до безкоштовної доставки';
                     freeHint.style.color = '#c4845a';
                 }
             }
@@ -796,10 +782,9 @@
     });
 
     /* ── Map (Leaflet) ──────────────────────────────────────────── */
-    var ocoMap        = null;
-    var ocoMarker     = null;
-    var greenLayer    = null;
-    var yellowLayer   = null;
+    var ocoMap     = null;
+    var ocoMarker  = null;
+    var greenLayer = null;
 
     function initZoneMap() {
         if (ocoMap) return;
@@ -818,38 +803,8 @@
                 maxZoom: 18,
             }).addTo(ocoMap);
 
-            var greenPoly  = (cfg.greenPolygon  && cfg.greenPolygon.length)  ? cfg.greenPolygon  : [];
-            var yellowData = (cfg.yellowPolygon && cfg.yellowPolygon.length) ? cfg.yellowPolygon : [];
-
-            // Detect multi-polygon: yellowPolygon is [[poly1_pts...], [poly2_pts...], ...]
-            var isMulti = yellowData.length > 0 &&
-                          Array.isArray(yellowData[0]) &&
-                          yellowData[0].length > 0 &&
-                          Array.isArray(yellowData[0][0]);
-            var yellowPolyList = isMulti ? yellowData : (yellowData.length >= 3 ? [yellowData] : []);
-
-            var yellowStyle = {
-                color: '#b8940a', fillColor: '#f5d85a',
-                fillOpacity: 0.22, weight: 2, dashArray: '6 4',
-            };
-            var yellowTip     = '<b>Жовта зона</b><br>' + YELLOW_COST + ' грн (від ' + YELLOW_FREE_FROM + ' грн — безкоштовно)';
-            var yellowTipOpts = { sticky: true, className: 'oco-map-tooltip oco-map-tooltip--yellow' };
-
+            var greenPoly    = (cfg.greenPolygon && cfg.greenPolygon.length) ? cfg.greenPolygon : [];
             var boundsLayers = [];
-
-            if (yellowPolyList.length) {
-                yellowLayer = L.layerGroup().addTo(ocoMap);
-                yellowPolyList.forEach(function (poly) {
-                    if (!poly || poly.length < 3) return;
-                    try {
-                        var p = L.polygon(poly, yellowStyle).addTo(yellowLayer);
-                        p.bindTooltip(yellowTip, yellowTipOpts);
-                        boundsLayers.push(p);
-                    } catch (polyErr) {
-                        console.warn('Yellow polygon error:', polyErr);
-                    }
-                });
-            }
 
             if (greenPoly.length >= 3) {
                 try {
@@ -858,7 +813,7 @@
                         fillOpacity: 0.28, weight: 2,
                     }).addTo(ocoMap);
                     greenLayer.bindTooltip(
-                        '<b>Зелена зона</b><br>' + GREEN_COST + ' грн (від ' + GREEN_FREE_FROM + ' грн — безкоштовно)',
+                        '<b>Зона доставки</b><br>' + GREEN_COST + ' грн (від ' + GREEN_FREE_FROM + ' грн — безкоштовно)',
                         { sticky: true, className: 'oco-map-tooltip oco-map-tooltip--green' }
                     );
                     boundsLayers.push(greenLayer);
@@ -889,21 +844,13 @@
         }
     }
 
-    function setYellowOpacity(opacity) {
-        if (!yellowLayer) return;
-        yellowLayer.eachLayer(function (l) { l.setStyle({ fillOpacity: opacity }); });
-    }
-
     function updateMapMarker(lat, lng, zone) {
         if (!ocoMap) initZoneMap();
         if (!ocoMap) return;
 
-        var zoneColors = { green: '#3a7230', yellow: '#b8940a', outside: '#c45a5a' };
-        var color = zoneColors[zone] || '#c4845a';
+        var color = zone === 'green' ? '#3a7230' : '#c45a5a';
 
-        // Highlight active zone polygon
-        if (greenLayer)  greenLayer.setStyle({ fillOpacity: zone === 'green'  ? 0.45 : 0.18 });
-        setYellowOpacity(zone === 'yellow' ? 0.40 : 0.15);
+        if (greenLayer) greenLayer.setStyle({ fillOpacity: zone === 'green' ? 0.45 : 0.18 });
 
         if (ocoMarker) {
             ocoMarker.setLatLng([lat, lng]);
@@ -919,9 +866,8 @@
         }
 
         var zoneLabels = {
-            green:   '🟢 Зелена зона',
-            yellow:  '🟡 Жовта зона',
-            outside: '❗ Поза зонами',
+            green:   '✓ Зона доставки',
+            outside: '❗ Поза зоною',
         };
         ocoMarker.bindPopup(
             '<b>' + (zoneLabels[zone] || 'Адреса') + '</b><br>Ваша адреса доставки',
@@ -1026,13 +972,8 @@
         if (zone === 'green') {
             var freeFrom = rates ? rates.green.free_from : GREEN_FREE_FROM;
             var cost     = rates ? rates.green.cost      : GREEN_COST;
-            showZoneIndicator('green', '🟢 Зелена зона · доставка ' + (subtotal >= freeFrom ? 'безкоштовно' : cost + ' грн (від ' + freeFrom + ' грн — безкоштовно)'));
-            if (shippingLbl) shippingLbl.textContent = 'Доставка (зелена зона)';
-        } else if (zone === 'yellow') {
-            var freeFrom = rates ? rates.yellow.free_from : YELLOW_FREE_FROM;
-            var cost     = rates ? rates.yellow.cost      : YELLOW_COST;
-            showZoneIndicator('yellow', '🟡 Жовта зона · доставка ' + (subtotal >= freeFrom ? 'безкоштовно' : cost + ' грн (від ' + freeFrom + ' грн — безкоштовно)'));
-            if (shippingLbl) shippingLbl.textContent = 'Доставка (жовта зона)';
+            showZoneIndicator('green', '✓ Адреса у зоні доставки · ' + (subtotal >= freeFrom ? 'безкоштовно' : cost + ' грн (від ' + freeFrom + ' грн — безкоштовно)'));
+            if (shippingLbl) shippingLbl.textContent = 'Доставка по Дніпру';
         } else {
             showZoneIndicator('outside', '❗ ' + OUT_OF_ZONE_LABEL);
             if (shippingLbl) shippingLbl.textContent = 'Доставка';

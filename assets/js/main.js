@@ -470,3 +470,360 @@
     });
 
 })();
+
+/* ==========================================================================
+   One-page Cart + Checkout (oco-)
+   ========================================================================== */
+(function () {
+    'use strict';
+
+    var ocoGrid = document.querySelector('.oco-grid');
+    if (!ocoGrid) return;
+
+    /* ── Constants ──────────────────────────────────────────────── */
+    var MONTHS   = ['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'];
+    var WEEKDAYS = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
+
+    var deliveryType   = 'courier';
+    var deliveryCost   = 0;
+    var selectedDate   = null;
+    var selectedTime   = '14:00–15:00';
+
+    /* ── Date picker ────────────────────────────────────────────── */
+    var picker = document.getElementById('oco-date-picker');
+    if (picker) {
+        var today = new Date();
+        for (var i = 0; i < 14; i++) {
+            var d = new Date(today);
+            d.setDate(today.getDate() + i);
+            var isToday    = i === 0;
+            var isTomorrow = i === 1;
+            var card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'oco-date-card' + (isToday ? ' oco-date--today oco-date--active' : '');
+            card.dataset.date = d.toISOString().slice(0, 10);
+            var dayName = isToday ? 'Сьогодні' : isTomorrow ? 'Завтра' : WEEKDAYS[d.getDay()];
+            card.innerHTML =
+                '<div class="oco-date-day-name">' + dayName + '</div>' +
+                '<div class="oco-date-day-num">' + d.getDate() + '</div>' +
+                '<div class="oco-date-day-month">' + MONTHS[d.getMonth()] + '</div>';
+            card.addEventListener('click', (function (c) {
+                return function () {
+                    picker.querySelectorAll('.oco-date-card').forEach(function (x) { x.classList.remove('oco-date--active'); });
+                    c.classList.add('oco-date--active');
+                    selectedDate = c;
+                    updateWhen();
+                };
+            })(card));
+            picker.appendChild(card);
+            if (isToday) selectedDate = card;
+        }
+    }
+
+    /* ── When label ─────────────────────────────────────────────── */
+    function updateWhen() {
+        var whenEl = document.getElementById('oco-when-label');
+        if (!whenEl) return;
+        var dateLabel = 'сьогодні';
+        if (selectedDate) {
+            var dn = selectedDate.querySelector('.oco-date-day-name').textContent.toLowerCase();
+            if (dn !== 'сьогодні' && dn !== 'завтра') {
+                dateLabel = selectedDate.querySelector('.oco-date-day-num').textContent + ' ' +
+                            selectedDate.querySelector('.oco-date-day-month').textContent;
+            } else {
+                dateLabel = dn;
+            }
+        }
+        if (deliveryType === 'pickup') {
+            whenEl.textContent = 'самовивіз, ' + dateLabel;
+        } else {
+            whenEl.textContent = dateLabel + ', ' + selectedTime;
+        }
+        var dtInput = document.getElementById('oco-delivery-time-val');
+        if (dtInput) dtInput.value = dateLabel + ', ' + selectedTime;
+    }
+
+    /* ── Time slots ─────────────────────────────────────────────── */
+    document.querySelectorAll('.oco-time-slot').forEach(function (slot) {
+        slot.addEventListener('click', function () {
+            document.querySelectorAll('.oco-time-slot').forEach(function (s) { s.classList.remove('oco-time-slot--active'); });
+            slot.classList.add('oco-time-slot--active');
+            selectedTime = slot.dataset.time || slot.textContent.trim();
+            updateWhen();
+        });
+    });
+
+    /* ── Cart recalc ────────────────────────────────────────────── */
+    var summaryEl = document.querySelector('.oco-summary');
+    var initDiscount = summaryEl ? (parseFloat(summaryEl.dataset.discount) || 0) : 0;
+
+    function recalc() {
+        var rows = document.querySelectorAll('#oco-cart-items .oco-row');
+        var subtotal = 0;
+        var itemCount = 0;
+
+        rows.forEach(function (row) {
+            var unit = parseFloat(row.dataset.unit) || 0;
+            var qty  = parseInt(row.querySelector('.oco-qty-val').textContent, 10) || 1;
+            var sum  = Math.round(unit * qty);
+            var sumEl = row.querySelector('.oco-row-sum');
+            if (sumEl) sumEl.textContent = sum;
+            subtotal  += sum;
+            itemCount += qty;
+        });
+
+        var discount = initDiscount;
+        var shipping = deliveryCost;
+
+        // Free shipping hint
+        var freeHint = document.getElementById('oco-cart-free-hint');
+        if (freeHint) {
+            if (subtotal >= 600 && deliveryType === 'courier') {
+                shipping = 0;
+                freeHint.textContent = '✓ Доставка безкоштовна';
+                freeHint.style.color = '#7a9b6e';
+            } else if (subtotal > 0 && deliveryType === 'courier') {
+                freeHint.textContent = 'Ще ' + (600 - subtotal) + ' грн до безкоштовної доставки';
+                freeHint.style.color = '#c4845a';
+            } else {
+                freeHint.textContent = '';
+            }
+        }
+
+        var total = Math.max(0, subtotal - discount + shipping);
+
+        // Update sidebar
+        var subtotalEl  = document.getElementById('oco-sum-subtotal');
+        var totalEl     = document.getElementById('oco-sum-total');
+        var countEl     = document.getElementById('oco-items-count');
+        var cartCountEl = document.getElementById('oco-cart-count');
+        var cartSubEl   = document.getElementById('oco-cart-subtotal');
+        var totalItemsEl = document.getElementById('oco-total-items');
+
+        if (subtotalEl)   subtotalEl.textContent   = subtotal;
+        if (totalEl)      totalEl.textContent      = total;
+        if (countEl)      countEl.textContent      = itemCount;
+        if (cartCountEl)  cartCountEl.textContent  = itemCount;
+        if (cartSubEl)    cartSubEl.textContent    = subtotal;
+        if (totalItemsEl) {
+            var n = itemCount;
+            var str;
+            if     (n % 10 === 1 && n % 100 !== 11) str = n + ' позиція';
+            else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) str = n + ' позиції';
+            else   str = n + ' позицій';
+            totalItemsEl.textContent = str;
+        }
+
+        // Sync hidden qty inputs for WC cart update
+        var hiddenDiv = document.getElementById('oco-cart-hidden-inputs');
+        if (hiddenDiv) {
+            hiddenDiv.innerHTML = '';
+            rows.forEach(function (row) {
+                var key = row.dataset.key;
+                var qty = parseInt(row.querySelector('.oco-qty-val').textContent, 10) || 1;
+                var inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = 'cart[' + key + '][qty]';
+                inp.value = qty;
+                hiddenDiv.appendChild(inp);
+            });
+        }
+    }
+
+    /* ── Cart qty stepper ───────────────────────────────────────── */
+    var cartUpdateTimer = null;
+
+    document.querySelectorAll('#oco-cart-items .oco-row').forEach(function (row) {
+        var val   = row.querySelector('.oco-qty-val');
+        var minus = row.querySelector('.oco-qty-btn--minus');
+        var plus  = row.querySelector('.oco-qty-btn--plus');
+
+        if (minus) minus.addEventListener('click', function () {
+            var q = parseInt(val.textContent, 10) || 1;
+            if (q > 1) { val.textContent = q - 1; recalc(); scheduleCartUpdate(); }
+        });
+        if (plus) plus.addEventListener('click', function () {
+            var q = parseInt(val.textContent, 10) || 1;
+            if (q < 20) { val.textContent = q + 1; recalc(); scheduleCartUpdate(); }
+        });
+    });
+
+    function scheduleCartUpdate() {
+        clearTimeout(cartUpdateTimer);
+        cartUpdateTimer = setTimeout(function () {
+            var btn = document.getElementById('oco-cart-update-btn');
+            if (btn) btn.click();
+        }, 1500);
+    }
+
+    /* ── Cart AJAX remove ───────────────────────────────────────── */
+    document.querySelectorAll('.oco-ci-remove').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            var row = btn.closest('.oco-row');
+            var href = btn.getAttribute('href');
+            if (row) {
+                row.style.transition = 'opacity .2s, transform .2s';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(20px)';
+                setTimeout(function () {
+                    row.remove();
+                    recalc();
+                }, 200);
+            }
+            // Also perform the WC remove via fetch
+            if (href) {
+                fetch(href, { method: 'GET', credentials: 'same-origin' }).catch(function () {});
+            }
+        });
+    });
+
+    /* ── Coupon apply ───────────────────────────────────────────── */
+    var couponBtn   = document.getElementById('oco-coupon-btn');
+    var couponInput = document.getElementById('oco-coupon-input');
+    if (couponBtn && couponInput) {
+        couponBtn.addEventListener('click', function () {
+            var code = couponInput.value.trim();
+            if (!code) return;
+            var body = new URLSearchParams({ coupon_code: code, apply_coupon: 'Apply coupon' });
+            fetch(window.location.href, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString(),
+                credentials: 'same-origin',
+            }).then(function () {
+                window.location.reload();
+            }).catch(function () {
+                window.location.reload();
+            });
+        });
+    }
+
+    /* ── Delivery method ────────────────────────────────────────── */
+    var addrSection = document.getElementById('oco-address-section');
+    var whenSection = document.getElementById('oco-when-section');
+    var addrTitle   = document.getElementById('oco-address-title');
+    var addrHint    = document.getElementById('oco-address-hint');
+    var shippingLbl = document.getElementById('oco-shipping-label');
+    var shippingVal = document.getElementById('oco-sum-shipping');
+    var dtTypeInput = document.getElementById('oco-delivery-type-val');
+
+    document.querySelectorAll('#oco-delivery-options .oco-opt-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+            document.querySelectorAll('#oco-delivery-options .oco-opt-card').forEach(function (c) {
+                c.classList.remove('oco-opt--active');
+            });
+            card.classList.add('oco-opt--active');
+            deliveryType = card.dataset.delivery || 'courier';
+            deliveryCost = parseFloat(card.dataset.cost) || 0;
+            if (dtTypeInput) dtTypeInput.value = deliveryType;
+
+            if (deliveryType === 'pickup') {
+                if (addrSection) addrSection.style.display = 'none';
+                if (whenSection) whenSection.style.display = '';
+                if (shippingLbl) shippingLbl.textContent = 'Самовивіз';
+                if (shippingVal) { shippingVal.textContent = 'Безкоштовно'; shippingVal.style.color = '#7a9b6e'; }
+            } else if (deliveryType === 'np') {
+                if (addrSection) {
+                    addrSection.style.display = '';
+                    if (addrTitle) addrTitle.textContent = 'Відділення Нової Пошти';
+                    if (addrHint)  addrHint.textContent  = 'Вкажіть місто та номер відділення';
+                }
+                if (whenSection) whenSection.style.display = 'none';
+                if (shippingLbl) shippingLbl.textContent = 'Нова Пошта';
+                if (shippingVal) { shippingVal.textContent = deliveryCost + ' грн'; shippingVal.style.color = '#3d3d3d'; }
+            } else {
+                if (addrSection) {
+                    addrSection.style.display = '';
+                    if (addrTitle) addrTitle.textContent = 'Адреса доставки';
+                    if (addrHint)  addrHint.textContent  = 'Доставка по Києву · безкоштовно від 600 грн';
+                }
+                if (whenSection) whenSection.style.display = '';
+                if (shippingLbl) shippingLbl.textContent = 'Доставка по Києву';
+            }
+
+            recalc();
+            updateWhen();
+        });
+    });
+
+    /* ── Payment method ─────────────────────────────────────────── */
+    var pmInput = document.getElementById('oco-payment-method-val');
+    document.querySelectorAll('#oco-payment-options .oco-opt-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+            document.querySelectorAll('#oco-payment-options .oco-opt-card').forEach(function (c) {
+                c.classList.remove('oco-opt--active');
+            });
+            card.classList.add('oco-opt--active');
+            if (pmInput) pmInput.value = card.dataset.payment || 'cod';
+        });
+    });
+
+    /* ── Place order ────────────────────────────────────────────── */
+    var placeBtn = document.getElementById('oco-place-btn');
+    if (placeBtn) {
+        placeBtn.addEventListener('click', function () {
+            // Validate required UI fields
+            var firstName = document.getElementById('oco-first-name');
+            var phone     = document.getElementById('oco-phone');
+            var terms     = document.getElementById('oco-terms-check');
+
+            if (firstName && !firstName.value.trim()) {
+                firstName.focus();
+                firstName.style.borderColor = '#c45a5a';
+                return;
+            }
+            if (phone && !phone.value.trim()) {
+                phone.focus();
+                phone.style.borderColor = '#c45a5a';
+                return;
+            }
+            if (terms && !terms.checked) {
+                terms.closest('.oco-check').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            // Copy UI values to hidden WC form fields
+            var fullName = (firstName ? firstName.value.trim() : '').split(' ');
+            var setHidden = function (id, val) {
+                var el = document.getElementById(id);
+                if (el) el.value = val;
+            };
+            setHidden('wc-billing_first_name', fullName[0] || '');
+            setHidden('wc-billing_last_name',  fullName.slice(1).join(' ') || '');
+            setHidden('wc-billing_phone',       phone ? phone.value.trim() : '');
+            var emailEl = document.getElementById('oco-email');
+            setHidden('wc-billing_email', emailEl ? emailEl.value.trim() : '');
+
+            // Build address
+            var street   = document.getElementById('oco-street');
+            var house    = document.getElementById('oco-house');
+            var apt      = document.getElementById('oco-apt');
+            var entrance = document.getElementById('oco-entrance');
+            var floor    = document.getElementById('oco-floor');
+            var addr = '';
+            if (street)   addr += street.value.trim();
+            if (house && house.value.trim())    addr += ', ' + house.value.trim();
+            if (apt && apt.value.trim())        addr += ', кв.' + apt.value.trim();
+            if (entrance && entrance.value.trim()) addr += ', п.' + entrance.value.trim();
+            if (floor && floor.value.trim())    addr += ', пов.' + floor.value.trim();
+            setHidden('wc-billing_address_1', addr);
+
+            var noteEl = document.getElementById('oco-note');
+            setHidden('wc-order_comments', noteEl ? noteEl.value.trim() : '');
+
+            var giftEl = document.getElementById('oco-gift-check');
+            setHidden('wc-lesyni_gift', giftEl && giftEl.checked ? '1' : '');
+
+            placeBtn.disabled = true;
+            placeBtn.textContent = '...';
+
+            document.getElementById('oco-wc-form').submit();
+        });
+    }
+
+    /* ── Init ───────────────────────────────────────────────────── */
+    recalc();
+    updateWhen();
+
+})();

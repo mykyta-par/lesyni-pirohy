@@ -777,10 +777,10 @@
                 if (addrSection) {
                     addrSection.style.display = '';
                     if (addrTitle) addrTitle.textContent = 'Адреса доставки';
-                    if (addrHint)  addrHint.textContent  = 'Доставка по Києву · безкоштовно від 600 грн';
+                    if (addrHint)  addrHint.textContent  = 'Доставка по Дніпру · безкоштовно від 600 грн';
                 }
                 if (whenSection) whenSection.style.display = '';
-                if (shippingLbl) shippingLbl.textContent = 'Доставка по Києву';
+                if (shippingLbl) shippingLbl.textContent = 'Доставка по Дніпру';
             }
 
             recalc();

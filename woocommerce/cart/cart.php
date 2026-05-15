@@ -120,9 +120,9 @@ else   $count_str = $n . ' позицій';
         <input type="hidden" name="billing_phone"       id="wc-billing_phone"       value="">
         <input type="hidden" name="billing_email"       id="wc-billing_email"       value="">
         <input type="hidden" name="billing_address_1"   id="wc-billing_address_1"   value="">
-        <input type="hidden" name="billing_city"        id="wc-billing_city"        value="Київ">
+        <input type="hidden" name="billing_city"        id="wc-billing_city"        value="Дніпро">
         <input type="hidden" name="billing_country"     id="wc-billing_country"     value="UA">
-        <input type="hidden" name="billing_postcode"    id="wc-billing_postcode"    value="01001">
+        <input type="hidden" name="billing_postcode"    id="wc-billing_postcode"    value="49000">
         <input type="hidden" name="order_comments"      id="wc-order_comments"      value="">
         <input type="hidden" name="lesyni_gift"         id="wc-lesyni_gift"         value="">
         <input type="hidden" name="terms"               value="1">
@@ -324,13 +324,13 @@ else   $count_str = $n . ' позицій';
             <div class="oco-card" id="oco-address-section">
                 <div class="oco-section-head">
                     <h2 class="oco-section-title"><span class="oco-num">3</span><span id="oco-address-title">Адреса доставки</span></h2>
-                    <span class="oco-section-hint" id="oco-address-hint">Доставка по Києву · безкоштовно</span>
+                    <span class="oco-section-hint" id="oco-address-hint">Доставка по Дніпру · вартість залежить від зони</span>
                 </div>
                 <div class="oco-form-row">
                     <div class="oco-field">
                         <label class="oco-label">Місто</label>
                         <div class="oco-city-locked">
-                            <span><span class="oco-city-icon">📍</span>Київ</span>
+                            <span><span class="oco-city-icon">📍</span>Дніпро</span>
                             <span class="oco-city-tag">Поки що лише</span>
                         </div>
                     </div>

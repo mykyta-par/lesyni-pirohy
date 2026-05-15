@@ -15,43 +15,43 @@ defined( 'ABSPATH' ) || exit;
 class Lesyni_Zone_Shipping extends WC_Shipping_Method {
 
     /* ------------------------------------------------------------------
-       Default zone polygons — Kyiv example (edit via WP admin or here)
+       Default zone polygons — Dnipro (edit via WP admin or here)
        Each zone is an array of [lat, lng] pairs forming a closed polygon.
     ------------------------------------------------------------------ */
 
-    // Green zone: central Kyiv (Shevchenkivskyi, Pecherskyi, Podilskyi core)
+    // Green zone: central Dnipro (Tsentralnyi, Sobornyi, core of Shevchenkivskyi)
     const GREEN_POLYGON_DEFAULT = [
-        [50.4730, 30.4630],
-        [50.4890, 30.4880],
-        [50.4980, 30.5240],
-        [50.4920, 30.5640],
-        [50.4750, 30.5780],
-        [50.4530, 30.5680],
-        [50.4350, 30.5440],
-        [50.4270, 30.5100],
-        [50.4380, 30.4720],
-        [50.4570, 30.4580],
-        [50.4730, 30.4630],
+        [48.5000, 35.0000],
+        [48.5100, 35.0310],
+        [48.5060, 35.0700],
+        [48.4900, 35.0900],
+        [48.4700, 35.0850],
+        [48.4480, 35.0700],
+        [48.4380, 35.0380],
+        [48.4430, 35.0040],
+        [48.4620, 34.9880],
+        [48.4820, 34.9840],
+        [48.5000, 35.0000],
     ];
 
-    // Yellow zone: broader Kyiv city area
+    // Yellow zone: broader Dnipro city area
     const YELLOW_POLYGON_DEFAULT = [
-        [50.5280, 30.3680],
-        [50.5560, 30.4200],
-        [50.5720, 30.4980],
-        [50.5710, 30.5760],
-        [50.5500, 30.6380],
-        [50.5140, 30.6840],
-        [50.4720, 30.7060],
-        [50.4240, 30.6920],
-        [50.3880, 30.6460],
-        [50.3700, 30.5800],
-        [50.3720, 30.5080],
-        [50.3900, 30.4420],
-        [50.4260, 30.3920],
-        [50.4700, 30.3620],
-        [50.5120, 30.3580],
-        [50.5280, 30.3680],
+        [48.5640, 34.8820],
+        [48.5830, 34.9560],
+        [48.5830, 35.0540],
+        [48.5700, 35.1360],
+        [48.5450, 35.2060],
+        [48.5100, 35.2500],
+        [48.4680, 35.2580],
+        [48.4270, 35.2360],
+        [48.3960, 35.1960],
+        [48.3760, 35.1280],
+        [48.3680, 35.0440],
+        [48.3780, 34.9620],
+        [48.4090, 34.8940],
+        [48.4510, 34.8520],
+        [48.5100, 34.8460],
+        [48.5640, 34.8820],
     ];
 
     public function __construct() {
@@ -226,7 +226,7 @@ class Lesyni_Zone_Shipping extends WC_Shipping_Method {
      */
     public static function geocode( $address ) {
         // Append city hint to improve accuracy
-        $query = urlencode( $address . ', Київ, Україна' );
+        $query = urlencode( $address . ', Дніпро, Україна' );
         $url   = 'https://nominatim.openstreetmap.org/search?q=' . $query
                . '&format=json&limit=1&addressdetails=0'
                . '&accept-language=uk';

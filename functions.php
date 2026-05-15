@@ -65,11 +65,17 @@ function lesyni_enqueue_assets() {
 		true
 	);
 
-	// Localise AJAX URL for future use
+	// Pass AJAX URL + zone config to JS
 	wp_localize_script( 'lesyni-main', 'lesyniData', [
-		'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-		'shopUrl' => get_permalink( wc_get_page_id( 'shop' ) ),
-		'homeUrl' => home_url( '/' ),
+		'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+		'shopUrl'      => get_permalink( wc_get_page_id( 'shop' ) ),
+		'homeUrl'      => home_url( '/' ),
+		'nonce'        => wp_create_nonce( 'lesyni_zone_nonce' ),
+		'greenFreeFrom'  => (int) get_option( 'lesyni_green_free_from',  600 ),
+		'greenCost'      => (int) get_option( 'lesyni_green_cost',        100 ),
+		'yellowFreeFrom' => (int) get_option( 'lesyni_yellow_free_from', 800 ),
+		'yellowCost'     => (int) get_option( 'lesyni_yellow_cost',      150 ),
+		'outOfZoneLabel' => get_option( 'lesyni_out_of_zone_label', 'Уточнимо можливість доставки з менеджером' ),
 	] );
 }
 add_action( 'wp_enqueue_scripts', 'lesyni_enqueue_assets' );
@@ -219,6 +225,132 @@ function lesyni_nutrition_tab_content() {
         <?php endforeach; ?>
     </div>
     <?php
+}
+
+/* -----------------------------------------------------------------------
+   Delivery zone shipping — load class + register WC method
+----------------------------------------------------------------------- */
+require_once get_template_directory() . '/inc/class-lesyni-zone-shipping.php';
+
+add_filter( 'woocommerce_shipping_methods', function ( $methods ) {
+    $methods['lesyni_zone'] = 'Lesyni_Zone_Shipping';
+    return $methods;
+} );
+
+/* -----------------------------------------------------------------------
+   AJAX: geocode address → detect zone → save to WC session
+----------------------------------------------------------------------- */
+function lesyni_ajax_check_zone() {
+    check_ajax_referer( 'lesyni_zone_nonce', 'nonce' );
+
+    $address = sanitize_text_field( wp_unslash( $_POST['address'] ?? '' ) );
+    if ( ! $address ) {
+        wp_send_json_error( [ 'message' => 'empty_address' ] );
+    }
+
+    $coords = Lesyni_Zone_Shipping::geocode( $address );
+    if ( ! $coords ) {
+        wp_send_json_error( [ 'message' => 'geocode_failed' ] );
+    }
+
+    $zone = Lesyni_Zone_Shipping::detect_zone( $coords['lat'], $coords['lng'] );
+
+    // Store result in WC session so the shipping method can read it
+    if ( WC()->session ) {
+        WC()->session->set( 'lesyni_zone_data', [
+            'zone'    => $zone,
+            'lat'     => $coords['lat'],
+            'lng'     => $coords['lng'],
+            'address' => $address,
+        ] );
+    }
+
+    // Invalidate WC shipping cache so new rate is recalculated
+    WC()->cart->calculate_shipping();
+
+    $rates = [
+        'green'   => [
+            'free_from' => (int) get_option( 'lesyni_green_free_from',  600 ),
+            'cost'      => (int) get_option( 'lesyni_green_cost',        100 ),
+        ],
+        'yellow'  => [
+            'free_from' => (int) get_option( 'lesyni_yellow_free_from', 800 ),
+            'cost'      => (int) get_option( 'lesyni_yellow_cost',      150 ),
+        ],
+    ];
+
+    wp_send_json_success( [
+        'zone'   => $zone,
+        'lat'    => $coords['lat'],
+        'lng'    => $coords['lng'],
+        'rates'  => $rates,
+    ] );
+}
+add_action( 'wp_ajax_lesyni_check_zone',        'lesyni_ajax_check_zone' );
+add_action( 'wp_ajax_nopriv_lesyni_check_zone', 'lesyni_ajax_check_zone' );
+
+/* -----------------------------------------------------------------------
+   Admin: Delivery Zone settings page (WooCommerce → Settings → Lesyni Zones)
+----------------------------------------------------------------------- */
+add_filter( 'woocommerce_settings_tabs_array', function ( $tabs ) {
+    $tabs['lesyni_zones'] = 'Зони доставки';
+    return $tabs;
+}, 50 );
+
+add_action( 'woocommerce_settings_tabs_lesyni_zones', function () {
+    woocommerce_admin_fields( lesyni_zone_settings_fields() );
+} );
+
+add_action( 'woocommerce_update_settings_lesyni_zones', function () {
+    woocommerce_update_options( lesyni_zone_settings_fields() );
+} );
+
+function lesyni_zone_settings_fields() {
+    return [
+        [
+            'title' => 'Зони доставки Lesyni Pirohy',
+            'type'  => 'title',
+            'id'    => 'lesyni_zones_section',
+        ],
+        [
+            'title'   => 'Зелена зона: безкоштовно від',
+            'type'    => 'number',
+            'id'      => 'lesyni_green_free_from',
+            'default' => 600,
+            'desc'    => 'грн — мінімальна сума кошика',
+        ],
+        [
+            'title'   => 'Зелена зона: вартість доставки',
+            'type'    => 'number',
+            'id'      => 'lesyni_green_cost',
+            'default' => 100,
+            'desc'    => 'грн',
+        ],
+        [
+            'title'   => 'Жовта зона: безкоштовно від',
+            'type'    => 'number',
+            'id'      => 'lesyni_yellow_free_from',
+            'default' => 800,
+            'desc'    => 'грн',
+        ],
+        [
+            'title'   => 'Жовта зона: вартість доставки',
+            'type'    => 'number',
+            'id'      => 'lesyni_yellow_cost',
+            'default' => 150,
+            'desc'    => 'грн',
+        ],
+        [
+            'title'   => 'Текст поза зоною доставки',
+            'type'    => 'text',
+            'id'      => 'lesyni_out_of_zone_label',
+            'default' => 'Уточнимо можливість доставки з менеджером',
+        ],
+        [
+            'type' => 'sectionend',
+            'id'   => 'lesyni_zones_section',
+        ],
+    ];
 }
 
 /* -----------------------------------------------------------------------

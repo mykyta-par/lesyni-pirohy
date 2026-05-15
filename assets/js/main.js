@@ -484,8 +484,16 @@
     var MONTHS   = ['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'];
     var WEEKDAYS = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
 
+    var cfg = (typeof lesyniData !== 'undefined') ? lesyniData : {};
+    var GREEN_FREE_FROM  = cfg.greenFreeFrom  || 600;
+    var GREEN_COST       = cfg.greenCost      || 100;
+    var YELLOW_FREE_FROM = cfg.yellowFreeFrom || 800;
+    var YELLOW_COST      = cfg.yellowCost     || 150;
+    var OUT_OF_ZONE_LABEL = cfg.outOfZoneLabel || 'Уточнимо можливість доставки з менеджером';
+
     var deliveryType   = 'courier';
     var deliveryCost   = 0;
+    var detectedZone   = null; // 'green' | 'yellow' | 'outside' | null
     var selectedDate   = null;
     var selectedTime   = '14:00–15:00';
 
@@ -573,20 +581,53 @@
         });
 
         var discount = initDiscount;
-        var shipping = deliveryCost;
+        var shipping = 0;
 
-        // Free shipping hint
-        var freeHint = document.getElementById('oco-cart-free-hint');
-        if (freeHint) {
-            if (subtotal >= 600 && deliveryType === 'courier') {
-                shipping = 0;
-                freeHint.textContent = '✓ Доставка безкоштовна';
-                freeHint.style.color = '#7a9b6e';
-            } else if (subtotal > 0 && deliveryType === 'courier') {
-                freeHint.textContent = 'Ще ' + (600 - subtotal) + ' грн до безкоштовної доставки';
-                freeHint.style.color = '#c4845a';
-            } else {
-                freeHint.textContent = '';
+        // Calc shipping based on detected zone (if courier delivery)
+        var freeHint    = document.getElementById('oco-cart-free-hint');
+        var shippingVal = document.getElementById('oco-sum-shipping');
+        var shippingLbl = document.getElementById('oco-shipping-label');
+
+        if (deliveryType === 'pickup' || deliveryType === 'np') {
+            shipping = deliveryCost;
+        } else if (detectedZone === 'green') {
+            shipping = subtotal >= GREEN_FREE_FROM ? 0 : GREEN_COST;
+            if (freeHint) {
+                if (shipping === 0) {
+                    freeHint.textContent = '✓ Доставка безкоштовна (зелена зона)';
+                    freeHint.style.color = '#7a9b6e';
+                } else {
+                    freeHint.textContent = 'Ще ' + (GREEN_FREE_FROM - subtotal) + ' грн до безкоштовної доставки';
+                    freeHint.style.color = '#c4845a';
+                }
+            }
+            if (shippingVal) { shippingVal.textContent = shipping === 0 ? 'Безкоштовно' : shipping + ' грн'; shippingVal.style.color = shipping === 0 ? '#7a9b6e' : '#3d3d3d'; }
+        } else if (detectedZone === 'yellow') {
+            shipping = subtotal >= YELLOW_FREE_FROM ? 0 : YELLOW_COST;
+            if (freeHint) {
+                if (shipping === 0) {
+                    freeHint.textContent = '✓ Доставка безкоштовна (жовта зона)';
+                    freeHint.style.color = '#7a9b6e';
+                } else {
+                    freeHint.textContent = 'Ще ' + (YELLOW_FREE_FROM - subtotal) + ' грн до безкоштовної доставки';
+                    freeHint.style.color = '#c4845a';
+                }
+            }
+            if (shippingVal) { shippingVal.textContent = shipping === 0 ? 'Безкоштовно' : shipping + ' грн'; shippingVal.style.color = shipping === 0 ? '#7a9b6e' : '#3d3d3d'; }
+        } else if (detectedZone === 'outside') {
+            shipping = 0;
+            if (freeHint) { freeHint.textContent = ''; }
+            if (shippingVal) { shippingVal.textContent = OUT_OF_ZONE_LABEL; shippingVal.style.color = '#c4845a'; shippingVal.style.fontSize = '12px'; }
+        } else {
+            // Zone not yet detected — default courier display
+            shipping = 0;
+            if (freeHint) {
+                if (subtotal > 0) {
+                    freeHint.textContent = 'Введіть адресу для розрахунку доставки';
+                    freeHint.style.color = '#999';
+                } else {
+                    freeHint.textContent = '';
+                }
             }
         }
 
@@ -746,6 +787,106 @@
             updateWhen();
         });
     });
+
+    /* ── Address geocoding + zone detection ────────────────────── */
+    var zoneCheckTimer   = null;
+    var streetInput      = document.getElementById('oco-street');
+    var houseInput       = document.getElementById('oco-house');
+    var zoneIndicator    = null; // created dynamically
+
+    function getZoneIndicator() {
+        if (!zoneIndicator) {
+            zoneIndicator = document.createElement('div');
+            zoneIndicator.className = 'oco-zone-indicator';
+            zoneIndicator.id = 'oco-zone-indicator';
+            var addrSection = document.getElementById('oco-address-section');
+            if (addrSection) addrSection.appendChild(zoneIndicator);
+        }
+        return zoneIndicator;
+    }
+
+    function showZoneIndicator(state, message) {
+        var el = getZoneIndicator();
+        el.className = 'oco-zone-indicator oco-zone--' + state;
+        el.textContent = message;
+        el.style.display = 'flex';
+    }
+
+    function scheduleZoneCheck() {
+        clearTimeout(zoneCheckTimer);
+        var street = streetInput ? streetInput.value.trim() : '';
+        var house  = houseInput  ? houseInput.value.trim()  : '';
+        if (!street) return;
+
+        showZoneIndicator('checking', '🔍 Визначаємо зону доставки…');
+
+        zoneCheckTimer = setTimeout(function () {
+            var addr = street + (house ? ', ' + house : '');
+            checkZone(addr);
+        }, 900);
+    }
+
+    function checkZone(address) {
+        var nonce = (typeof lesyniData !== 'undefined') ? lesyniData.nonce : '';
+        var body  = new URLSearchParams({
+            action:  'lesyni_check_zone',
+            nonce:   nonce,
+            address: address,
+        });
+
+        fetch((typeof lesyniData !== 'undefined' ? lesyniData.ajaxUrl : '/wp-admin/admin-ajax.php'), {
+            method:      'POST',
+            headers:     { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body:        body.toString(),
+            credentials: 'same-origin',
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (!data.success) {
+                showZoneIndicator('unknown', '⚠️ Не вдалося визначити адресу — уточнимо з менеджером');
+                detectedZone = null;
+                recalc();
+                return;
+            }
+            detectedZone = data.data.zone;
+            applyZoneUI(detectedZone, data.data.rates);
+            recalc();
+        })
+        .catch(function () {
+            showZoneIndicator('unknown', '⚠️ Помилка з\'єднання');
+            detectedZone = null;
+        });
+    }
+
+    function applyZoneUI(zone, rates) {
+        var shippingVal = document.getElementById('oco-sum-shipping');
+        var shippingLbl = document.getElementById('oco-shipping-label');
+        var subtotal = 0;
+        document.querySelectorAll('#oco-cart-items .oco-row').forEach(function (row) {
+            var unit = parseFloat(row.dataset.unit) || 0;
+            var qty  = parseInt(row.querySelector('.oco-qty-val').textContent, 10) || 1;
+            subtotal += Math.round(unit * qty);
+        });
+
+        if (zone === 'green') {
+            var freeFrom = rates ? rates.green.free_from : GREEN_FREE_FROM;
+            var cost     = rates ? rates.green.cost      : GREEN_COST;
+            showZoneIndicator('green', '🟢 Зелена зона · доставка ' + (subtotal >= freeFrom ? 'безкоштовно' : cost + ' грн (безкоштовно від ' + freeFrom + ' грн)'));
+            if (shippingLbl) shippingLbl.textContent = 'Доставка (зелена зона)';
+        } else if (zone === 'yellow') {
+            var freeFrom = rates ? rates.yellow.free_from : YELLOW_FREE_FROM;
+            var cost     = rates ? rates.yellow.cost      : YELLOW_COST;
+            showZoneIndicator('yellow', '🟡 Жовта зона · доставка ' + (subtotal >= freeFrom ? 'безкоштовно' : cost + ' грн (безкоштовно від ' + freeFrom + ' грн)'));
+            if (shippingLbl) shippingLbl.textContent = 'Доставка (жовта зона)';
+        } else {
+            showZoneIndicator('outside', '❗ ' + OUT_OF_ZONE_LABEL);
+            if (shippingLbl) shippingLbl.textContent = 'Доставка';
+            if (shippingVal) { shippingVal.textContent = 'Уточнюється'; shippingVal.style.color = '#c4845a'; }
+        }
+    }
+
+    if (streetInput) streetInput.addEventListener('input', scheduleZoneCheck);
+    if (houseInput)  houseInput.addEventListener('input',  scheduleZoneCheck);
 
     /* ── Payment method ─────────────────────────────────────────── */
     var pmInput = document.getElementById('oco-payment-method-val');

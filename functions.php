@@ -261,7 +261,11 @@ add_filter( 'woocommerce_shipping_methods', function ( $methods ) {
    AJAX: geocode address → detect zone → save to WC session
 ----------------------------------------------------------------------- */
 function lesyni_ajax_check_zone() {
-    check_ajax_referer( 'lesyni_zone_nonce', 'nonce' );
+    // Non-fatal nonce check — return JSON error instead of die(-1)
+    $nonce_ok = isset( $_POST['nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'lesyni_zone_nonce' );
+    if ( ! $nonce_ok ) {
+        wp_send_json_error( [ 'message' => 'bad_nonce' ] );
+    }
 
     $address = sanitize_text_field( wp_unslash( $_POST['address'] ?? '' ) );
     if ( ! $address ) {
@@ -275,35 +279,34 @@ function lesyni_ajax_check_zone() {
 
     $zone = Lesyni_Zone_Shipping::detect_zone( $coords['lat'], $coords['lng'] );
 
-    // Store result in WC session so the shipping method can read it
-    if ( WC()->session ) {
+    // Save to WC session for shipping rate calculation
+    if ( function_exists( 'WC' ) && WC()->session ) {
         WC()->session->set( 'lesyni_zone_data', [
             'zone'    => $zone,
             'lat'     => $coords['lat'],
             'lng'     => $coords['lng'],
             'address' => $address,
         ] );
+        // Reset cached shipping so it recalculates with new zone
+        WC()->session->set( 'shipping_for_package_0', null );
     }
 
-    // Invalidate WC shipping cache so new rate is recalculated
-    WC()->cart->calculate_shipping();
-
     $rates = [
-        'green'   => [
+        'green'  => [
             'free_from' => (int) get_option( 'lesyni_green_free_from',  600 ),
             'cost'      => (int) get_option( 'lesyni_green_cost',        100 ),
         ],
-        'yellow'  => [
+        'yellow' => [
             'free_from' => (int) get_option( 'lesyni_yellow_free_from', 800 ),
             'cost'      => (int) get_option( 'lesyni_yellow_cost',      150 ),
         ],
     ];
 
     wp_send_json_success( [
-        'zone'   => $zone,
-        'lat'    => $coords['lat'],
-        'lng'    => $coords['lng'],
-        'rates'  => $rates,
+        'zone'  => $zone,
+        'lat'   => $coords['lat'],
+        'lng'   => $coords['lng'],
+        'rates' => $rates,
     ] );
 }
 add_action( 'wp_ajax_lesyni_check_zone',        'lesyni_ajax_check_zone' );

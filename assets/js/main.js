@@ -948,10 +948,29 @@
             body:        body.toString(),
             credentials: 'same-origin',
         })
-        .then(function (r) { return r.json(); })
+        .then(function (r) {
+            // Read response text first for better error diagnosis
+            return r.text().then(function (text) {
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    // PHP error or HTML returned — log to console for debugging
+                    console.error('lesyni_check_zone non-JSON response:', text.slice(0, 300));
+                    throw new Error('invalid_json');
+                }
+            });
+        })
         .then(function (data) {
             if (!data.success) {
-                showZoneIndicator('unknown', '⚠️ Не вдалося визначити адресу — уточнимо з менеджером');
+                var msg = data.data && data.data.message;
+                if (msg === 'geocode_failed') {
+                    showZoneIndicator('unknown', '⚠️ Адресу не знайдено — перевірте написання вулиці');
+                } else if (msg === 'bad_nonce') {
+                    // Nonce expired (e.g. after session refresh) — reload to get fresh nonce
+                    window.location.reload();
+                } else {
+                    showZoneIndicator('unknown', '⚠️ Не вдалося визначити адресу');
+                }
                 detectedZone = null;
                 recalc();
                 return;
@@ -961,8 +980,12 @@
             updateMapMarker(data.data.lat, data.data.lng, detectedZone);
             recalc();
         })
-        .catch(function () {
-            showZoneIndicator('unknown', '⚠️ Помилка з\'єднання');
+        .catch(function (err) {
+            if (err && err.message === 'invalid_json') {
+                showZoneIndicator('unknown', '⚠️ Помилка сервера (перевірте консоль)');
+            } else {
+                showZoneIndicator('unknown', '⚠️ Немає з\'єднання з сервером');
+            }
             detectedZone = null;
         });
     }

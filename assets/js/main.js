@@ -484,7 +484,14 @@
     var MONTHS   = ['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'];
     var WEEKDAYS = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
 
-    var cfg = (typeof lesyniData !== 'undefined') ? lesyniData : {};
+    // Read config from HTML data attribute (CSP-safe — no inline script required)
+    var cfg = {};
+    (function () {
+        var el = document.getElementById('lesyni-config');
+        if (el && el.dataset.cfg) {
+            try { cfg = JSON.parse(el.dataset.cfg); } catch (e) {}
+        }
+    }());
     var GREEN_FREE_FROM  = cfg.greenFreeFrom  || 600;
     var GREEN_COST       = cfg.greenCost      || 100;
     var YELLOW_FREE_FROM = cfg.yellowFreeFrom || 800;

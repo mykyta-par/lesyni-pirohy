@@ -83,11 +83,14 @@ function lesyni_enqueue_assets() {
 		true
 	);
 
-	// Use wp_add_inline_script for reliable JSON encoding of nested polygon arrays
-	$lesyni_inline_data = 'var lesyniData = ' . wp_json_encode( [
+}
+add_action( 'wp_enqueue_scripts', 'lesyni_enqueue_assets' );
+
+// Output config as a hidden HTML element (data attribute) — CSP-safe, no inline script needed.
+// Runs at priority 5 so the <div> is in the DOM before footer scripts execute.
+add_action( 'wp_footer', function () {
+	$config = [
 		'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
-		'shopUrl'        => get_permalink( wc_get_page_id( 'shop' ) ),
-		'homeUrl'        => home_url( '/' ),
 		'nonce'          => wp_create_nonce( 'lesyni_zone_nonce' ),
 		'greenFreeFrom'  => (int) get_option( 'lesyni_green_free_from',  600 ),
 		'greenCost'      => (int) get_option( 'lesyni_green_cost',        100 ),
@@ -96,10 +99,9 @@ function lesyni_enqueue_assets() {
 		'outOfZoneLabel' => get_option( 'lesyni_out_of_zone_label', 'Уточнимо можливість доставки з менеджером' ),
 		'greenPolygon'   => get_option( 'lesyni_green_polygon',  Lesyni_Zone_Shipping::GREEN_POLYGON_DEFAULT ),
 		'yellowPolygon'  => get_option( 'lesyni_yellow_polygon', Lesyni_Zone_Shipping::YELLOW_POLYGON_DEFAULT ),
-	], JSON_UNESCAPED_UNICODE ) . ';';
-	wp_add_inline_script( 'lesyni-main', $lesyni_inline_data, 'before' );
-}
-add_action( 'wp_enqueue_scripts', 'lesyni_enqueue_assets' );
+	];
+	echo '<div id="lesyni-config" hidden data-cfg="' . esc_attr( wp_json_encode( $config, JSON_UNESCAPED_UNICODE ) ) . '"></div>' . "\n";
+}, 5 );
 
 // Disable default WooCommerce stylesheet (we ship our own)
 add_filter( 'woocommerce_enqueue_styles', '__return_empty_array' );

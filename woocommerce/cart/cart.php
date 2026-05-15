@@ -244,28 +244,30 @@ $cart_count   = $cart->get_cart_contents_count();
         </div><!-- .cart-main -->
 
         <!-- ── RIGHT: Summary ─────────────────────────────────────── -->
-        <div class="cart-summary">
+        <?php
+        $subtotal   = (float) $cart->get_subtotal();
+        $discount   = (float) $cart->get_discount_total();
+        $total      = (float) $cart->get_total( 'edit' );
+        $ship_total = (float) $cart->get_shipping_total();
 
-            <?php
-            $subtotal   = (float) $cart->get_subtotal();
-            $discount   = (float) $cart->get_discount_total();
-            $total      = (float) $cart->get_total( 'edit' );
-            $ship_total = (float) $cart->get_shipping_total();
+        if ( $ship_total > 0 ) {
+            $ship_label = number_format( $ship_total, 0, '', '' ) . ' грн';
+        } elseif ( $cart->needs_shipping() && ! $cart->show_shipping() ) {
+            $ship_label = 'Розраховується';
+        } else {
+            $ship_label = 'Безкоштовно';
+        }
+        ?>
 
-            if ( $ship_total > 0 ) {
-                $ship_label = number_format( $ship_total, 0, '', '' ) . ' грн';
-            } elseif ( $cart->needs_shipping() && ! $cart->show_shipping() ) {
-                $ship_label = 'Розраховується';
-            } else {
-                $ship_label = 'Безкоштовно';
-            }
-            ?>
+        <div class="cart-summary"
+             data-shipping="<?php echo esc_attr( $ship_total ); ?>"
+             data-discount="<?php echo esc_attr( $discount ); ?>">
 
             <h3 class="cart-summary__title">Підсумок замовлення</h3>
 
             <div class="cart-summary__row">
                 <span>Сума товарів</span>
-                <strong><?php echo number_format( $subtotal, 0, '', '' ); ?> грн</strong>
+                <strong><span id="cart-sum-subtotal"><?php echo number_format( $subtotal, 0, '', '' ); ?></span> грн</strong>
             </div>
 
             <?php if ( $discount > 0 ) : ?>
@@ -291,7 +293,7 @@ $cart_count   = $cart->get_cart_contents_count();
             <div class="cart-summary__total">
                 <span class="cart-summary__total-label">До оплати</span>
                 <span class="cart-summary__total-price">
-                    <?php echo number_format( $total, 0, '', '' ); ?>
+                    <span id="cart-sum-total"><?php echo number_format( $total, 0, '', '' ); ?></span>
                     <span class="cart-summary__total-unit">грн</span>
                 </span>
             </div>

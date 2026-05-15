@@ -316,47 +316,57 @@
     }
 
     /* ------------------------------------------------------------------
-       Cart page: qty stepper + row total update
+       Cart page: qty stepper + row total + summary recalc
     ------------------------------------------------------------------ */
-    var cartForm     = document.getElementById('cart-form');
-    var cartRows     = document.querySelectorAll('.cart-row[data-key]');
+    var cartForm      = document.getElementById('cart-form');
+    var cartRows      = document.querySelectorAll('.cart-row[data-key]');
     var cartUpdateBtn = document.getElementById('cart-update-btn');
+    var cartSummaryEl = document.querySelector('.cart-summary');
 
     if (cartForm && cartRows.length) {
         var cartUpdateTimer = null;
+        var shipping = cartSummaryEl ? (parseFloat(cartSummaryEl.dataset.shipping) || 0) : 0;
+        var discount = cartSummaryEl ? (parseFloat(cartSummaryEl.dataset.discount) || 0) : 0;
+        var subtotalEl = document.getElementById('cart-sum-subtotal');
+        var totalEl    = document.getElementById('cart-sum-total');
+
+        function recalcCartSummary() {
+            var subtotal = 0;
+            cartRows.forEach(function (r) {
+                var u = parseFloat(r.dataset.unit) || 0;
+                var q = parseInt(r.querySelector('.ci-qty-val').textContent, 10) || 0;
+                subtotal += Math.round(u * q);
+            });
+            var total = Math.round(subtotal - discount + shipping);
+            if (subtotalEl) subtotalEl.textContent = subtotal;
+            if (totalEl)    totalEl.textContent    = total;
+        }
 
         cartRows.forEach(function (row) {
-            var val     = row.querySelector('.ci-qty-val');
-            var input   = row.querySelector('.ci-qty-input');
-            var sumEl   = row.querySelector('.ci-row-sum');
-            var unit    = parseFloat(row.dataset.unit) || 0;
-            var minus   = row.querySelector('.ci-qty-btn--minus');
-            var plus    = row.querySelector('.ci-qty-btn--plus');
+            var val   = row.querySelector('.ci-qty-val');
+            var input = row.querySelector('.ci-qty-input');
+            var sumEl = row.querySelector('.ci-row-sum');
+            var unit  = parseFloat(row.dataset.unit) || 0;
+            var minus = row.querySelector('.ci-qty-btn--minus');
+            var plus  = row.querySelector('.ci-qty-btn--plus');
 
             function syncRow() {
                 var q = parseInt(val.textContent, 10) || 1;
-                if (input)  input.value = q;
-                if (sumEl)  sumEl.textContent = Math.round(unit * q);
+                if (input) input.value = q;
+                if (sumEl) sumEl.textContent = Math.round(unit * q);
+                recalcCartSummary();
             }
 
             if (minus) {
                 minus.addEventListener('click', function () {
                     var q = parseInt(val.textContent, 10) || 1;
-                    if (q > 1) {
-                        val.textContent = q - 1;
-                        syncRow();
-                        scheduleUpdate();
-                    }
+                    if (q > 1) { val.textContent = q - 1; syncRow(); scheduleUpdate(); }
                 });
             }
             if (plus) {
                 plus.addEventListener('click', function () {
                     var q = parseInt(val.textContent, 10) || 1;
-                    if (q < 20) {
-                        val.textContent = q + 1;
-                        syncRow();
-                        scheduleUpdate();
-                    }
+                    if (q < 20) { val.textContent = q + 1; syncRow(); scheduleUpdate(); }
                 });
             }
         });
@@ -365,7 +375,7 @@
             clearTimeout(cartUpdateTimer);
             cartUpdateTimer = setTimeout(function () {
                 if (cartUpdateBtn) cartUpdateBtn.click();
-            }, 800);
+            }, 1200);
         }
     }
 

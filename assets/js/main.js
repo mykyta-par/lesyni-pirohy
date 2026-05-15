@@ -1105,9 +1105,42 @@
             setHidden('wc-lesyni_gift', giftEl && giftEl.checked ? '1' : '');
 
             placeBtn.disabled = true;
-            placeBtn.textContent = '...';
+            placeBtn.textContent = '⏳ Оформлення…';
 
-            document.getElementById('oco-wc-form').submit();
+            var errBox = document.getElementById('oco-checkout-errors');
+            if (errBox) errBox.style.display = 'none';
+
+            var form = document.getElementById('oco-wc-form');
+            var formData = new FormData(form);
+
+            fetch('/?wc-ajax=checkout', {
+                method:      'POST',
+                body:        new URLSearchParams(formData),
+                credentials: 'same-origin',
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.result === 'success') {
+                    window.location.href = data.redirect;
+                } else {
+                    placeBtn.disabled = false;
+                    placeBtn.textContent = 'Підтвердити замовлення →';
+                    if (errBox && data.messages) {
+                        errBox.innerHTML = data.messages;
+                        errBox.style.display = 'block';
+                        errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    if (data.reload) window.location.reload();
+                }
+            })
+            .catch(function () {
+                placeBtn.disabled = false;
+                placeBtn.textContent = 'Підтвердити замовлення →';
+                if (errBox) {
+                    errBox.innerHTML = '<p>Помилка з\'єднання. Спробуйте ще раз.</p>';
+                    errBox.style.display = 'block';
+                }
+            });
         });
     }
 

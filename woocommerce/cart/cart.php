@@ -106,11 +106,8 @@ else   $count_str = $n . ' позицій';
 
     <?php if ( ! $cart->is_empty() ) : ?>
 
-    <!-- Hidden WC checkout form (processes the actual order) -->
-    <form id="oco-wc-form" name="checkout"
-          method="post"
-          action="<?php echo esc_url( wc_get_checkout_url() ); ?>"
-          style="display:none;">
+    <!-- Hidden WC checkout form (data carrier for AJAX checkout) -->
+    <form id="oco-wc-form" name="checkout" style="display:none;">
         <?php wp_nonce_field( 'woocommerce-process_checkout', 'woocommerce-process-checkout-nonce' ); ?>
         <input type="hidden" name="delivery_type"  id="oco-delivery-type-val" value="courier">
         <input type="hidden" name="delivery_time"  id="oco-delivery-time-val" value="">
@@ -121,12 +118,12 @@ else   $count_str = $n . ' позицій';
         <input type="hidden" name="billing_email"       id="wc-billing_email"       value="">
         <input type="hidden" name="billing_address_1"   id="wc-billing_address_1"   value="">
         <input type="hidden" name="billing_city"        id="wc-billing_city"        value="Дніпро">
+        <input type="hidden" name="billing_state"       id="wc-billing_state"       value="">
         <input type="hidden" name="billing_country"     id="wc-billing_country"     value="UA">
         <input type="hidden" name="billing_postcode"    id="wc-billing_postcode"    value="49000">
         <input type="hidden" name="order_comments"      id="wc-order_comments"      value="">
         <input type="hidden" name="lesyni_gift"         id="wc-lesyni_gift"         value="">
         <input type="hidden" name="terms"               value="1">
-        <?php do_action( 'woocommerce_checkout_order_review' ); ?>
     </form>
 
     <!-- Cart update form (WC requires POST to update quantities) -->
@@ -596,6 +593,8 @@ else   $count_str = $n . ' позицій';
                         <span id="oco-sum-total"><?php echo number_format( $total, 0, '', '' ); ?></span><span class="oco-summary-total-unit">грн</span>
                     </div>
                 </div>
+
+                <div id="oco-checkout-errors" class="oco-checkout-errors" style="display:none;"></div>
 
                 <button type="button" class="oco-place-btn" id="oco-place-btn">
                     Підтвердити замовлення →

@@ -315,6 +315,14 @@ function lesyni_ajax_check_zone() {
 add_action( 'wp_ajax_lesyni_check_zone',        'lesyni_ajax_check_zone' );
 add_action( 'wp_ajax_nopriv_lesyni_check_zone', 'lesyni_ajax_check_zone' );
 
+// Ukraine has no mandatory state/oblast for checkout — remove the requirement
+// so our single-city form doesn't fail WC validation
+add_filter( 'woocommerce_get_country_locale', function ( $locale ) {
+    $locale['UA']['state']['required'] = false;
+    $locale['UA']['state']['hidden']   = true;
+    return $locale;
+} );
+
 /* -----------------------------------------------------------------------
    Admin: Delivery Zone settings page (WooCommerce → Settings → Lesyni Zones)
 ----------------------------------------------------------------------- */

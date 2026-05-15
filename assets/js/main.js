@@ -696,8 +696,17 @@
     function scheduleCartUpdate() {
         clearTimeout(cartUpdateTimer);
         cartUpdateTimer = setTimeout(function () {
-            var btn = document.getElementById('oco-cart-update-btn');
-            if (btn) btn.click();
+            var form = document.getElementById('oco-cart-update-form');
+            if (!form) return;
+            // recalc() has already written latest quantities into oco-cart-hidden-inputs
+            var formData = new FormData(form);
+            formData.append('update_cart', 'Update Cart');
+            fetch(form.action, {
+                method:      'POST',
+                body:        new URLSearchParams(formData),
+                credentials: 'same-origin',
+            }).catch(function () {});
+            // Fire-and-forget: WC updates the session, page stays intact
         }, 1500);
     }
 

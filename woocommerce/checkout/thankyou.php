@@ -113,7 +113,7 @@ $shop_url = get_permalink( wc_get_page_id( 'shop' ) );
                 $name       = $item->get_name();
                 $qty        = $item->get_quantity();
                 $line_total = (float) $item->get_total();
-                $meta_data  = $item->get_all_formatted_meta_data( '' );
+                $meta_data  = $item->get_formatted_meta_data( '' );
             ?>
             <div class="ty-item">
                 <div class="ty-item-img">

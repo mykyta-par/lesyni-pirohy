@@ -40,7 +40,6 @@ $shop_url = get_permalink( wc_get_page_id( 'shop' ) );
             <span>Повернутись в магазин</span>
             <span class="oco-empty-cta-arrow">→</span>
         </a>
-        <?php do_action( 'woocommerce_cart_is_empty' ); ?>
     </div>
 
     <?php

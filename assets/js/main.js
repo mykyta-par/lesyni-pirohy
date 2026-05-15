@@ -810,57 +810,54 @@
             maxZoom: 18,
         }).addTo(ocoMap);
 
-        var greenPoly   = cfg.greenPolygon  || [];
-        var yellowData  = cfg.yellowPolygon || [];
-        // yellowData can be [[lat,lng],...] (single) or [[[lat,lng],...], ...] (multi)
-        var isMulti = yellowData.length > 0 && Array.isArray(yellowData[0][0]);
-        var yellowPolyList = isMulti ? yellowData : (yellowData.length ? [yellowData] : []);
+        var greenPoly  = cfg.greenPolygon  || [];
+        var yellowData = cfg.yellowPolygon || [];
+        // Detect multi-polygon: first element must be an array whose first element is also an array
+        var isMulti = yellowData.length > 0 &&
+                      Array.isArray(yellowData[0]) &&
+                      yellowData[0].length > 0 &&
+                      Array.isArray(yellowData[0][0]);
+        var yellowPolyList = isMulti ? yellowData : (yellowData.length >= 3 ? [yellowData] : []);
 
         var yellowStyle = {
-            color:       '#b8940a',
-            fillColor:   '#f5d85a',
-            fillOpacity: 0.22,
-            weight:      2,
-            dashArray:   '6 4',
+            color: '#b8940a', fillColor: '#f5d85a',
+            fillOpacity: 0.22, weight: 2, dashArray: '6 4',
         };
-        var yellowTooltip = '<b>🟡 Жовта зона</b><br>' + YELLOW_COST + ' грн (від ' + YELLOW_FREE_FROM + ' грн — безкоштовно)';
-        var yellowTooltipOpts = { sticky: true, className: 'oco-map-tooltip oco-map-tooltip--yellow' };
+        var yellowTip     = '<b>🟡 Жовта зона</b><br>' + YELLOW_COST + ' грн (від ' + YELLOW_FREE_FROM + ' грн — безкоштовно)';
+        var yellowTipOpts = { sticky: true, className: 'oco-map-tooltip oco-map-tooltip--yellow' };
+
+        // Collect all added layers so we can fitBounds without creating duplicates
+        var boundsLayers = [];
 
         if (yellowPolyList.length) {
-            yellowLayer = L.layerGroup();
+            yellowLayer = L.layerGroup().addTo(ocoMap);
             yellowPolyList.forEach(function (poly) {
-                L.polygon(poly, yellowStyle)
-                 .bindTooltip(yellowTooltip, yellowTooltipOpts)
-                 .addTo(yellowLayer);
+                if (!poly || poly.length < 3) return;
+                var p = L.polygon(poly, yellowStyle).addTo(yellowLayer);
+                p.bindTooltip(yellowTip, yellowTipOpts);
+                boundsLayers.push(p);
             });
-            yellowLayer.addTo(ocoMap);
         }
 
-        if (greenPoly.length) {
+        if (greenPoly.length >= 3) {
             greenLayer = L.polygon(greenPoly, {
-                color:       '#3a7230',
-                fillColor:   '#7ab86e',
-                fillOpacity: 0.28,
-                weight:      2,
+                color: '#3a7230', fillColor: '#7ab86e',
+                fillOpacity: 0.28, weight: 2,
             }).addTo(ocoMap);
             greenLayer.bindTooltip(
                 '<b>🟢 Зелена зона</b><br>' + GREEN_COST + ' грн (від ' + GREEN_FREE_FROM + ' грн — безкоштовно)',
                 { sticky: true, className: 'oco-map-tooltip oco-map-tooltip--green' }
             );
+            boundsLayers.push(greenLayer);
         }
 
-        // Fit map to cover all zones
-        var allLayers = [];
-        if (yellowPolyList.length) {
-            yellowPolyList.forEach(function (poly) {
-                allLayers.push(L.polygon(poly));
-            });
-        }
-        if (greenPoly.length) allLayers.push(L.polygon(greenPoly));
-
-        if (allLayers.length) {
-            var group = L.featureGroup(allLayers);
-            ocoMap.fitBounds(group.getBounds(), { padding: [24, 24] });
+        // fitBounds using the already-added layers (no duplicates)
+        if (boundsLayers.length) {
+            try {
+                ocoMap.fitBounds(L.featureGroup(boundsLayers).getBounds(), { padding: [24, 24] });
+            } catch (e) {
+                ocoMap.setView([48.4647, 35.0462], 11);
+            }
         } else {
             ocoMap.setView([48.4647, 35.0462], 11);
         }

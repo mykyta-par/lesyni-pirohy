@@ -4036,3 +4036,353 @@ ul.products { list-style: none; margin: 0; padding: 0; }
     .oco-zone-map { height: 220px; }
     .oco-zone-map-legend { gap: 10px; font-size: 11px; }
 }
+
+/* ==========================================================================
+   Thank-you / Order Received page  (ty-)
+   ========================================================================== */
+
+.ty-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.ty-hero {
+    text-align: center;
+    padding: 56px 32px 48px;
+    background: linear-gradient(135deg, #faf5f0 0%, #f5e5d3 100%);
+    border-radius: 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+.ty-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.45) 0%, transparent 35%),
+        radial-gradient(circle at 85% 80%, rgba(196,132,90,.12) 0%, transparent 40%);
+    pointer-events: none;
+}
+.ty-hero-icon {
+    width: 88px; height: 88px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: #7a9b6e;
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px;
+    position: relative; z-index: 1;
+    box-shadow: 0 14px 32px rgba(122,155,110,.35);
+    animation: ty-pop .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes ty-pop {
+    0%   { transform: scale(0); opacity: 0; }
+    60%  { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+.ty-hero-title {
+    font-family: 'Merriweather', serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: #3d3d3d;
+    margin-bottom: 14px;
+    line-height: 1.2;
+    position: relative; z-index: 1;
+}
+.ty-hero-desc {
+    font-size: 15px;
+    color: #6b6b6b;
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto 28px;
+    position: relative; z-index: 1;
+}
+.ty-order-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    background: white;
+    border-radius: 30px;
+    border: 1px solid #e8d5c4;
+    font-size: 13px;
+    color: #6b6b6b;
+    position: relative; z-index: 1;
+    box-shadow: 0 6px 16px rgba(196,132,90,.1);
+}
+.ty-order-tag strong {
+    font-family: 'Merriweather', serif;
+    font-size: 17px;
+    color: #c4845a;
+    font-weight: 700;
+}
+.ty-tag-sep { color: #e8d5c4; }
+
+/* ── Info strip ───────────────────────────────────────────── */
+.ty-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    background: white;
+    border: 1px solid #f0e5d9;
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
+}
+.ty-strip-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 12px;
+    border-right: 1px solid #f0e5d9;
+}
+.ty-strip-cell:last-child { border-right: none; }
+.ty-strip-label {
+    font-size: 10px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+}
+.ty-strip-val {
+    font-family: 'Merriweather', serif;
+    font-size: 17px;
+    color: #3d3d3d;
+    font-weight: 700;
+    line-height: 1.3;
+}
+.ty-strip-val--amount { color: #c4845a; font-size: 19px; }
+.ty-strip-sub { font-size: 11px; color: #6b6b6b; }
+
+/* ── Card ─────────────────────────────────────────────────── */
+.ty-card {
+    background: white;
+    border: 1px solid #f0e5d9;
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+}
+.ty-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0e5d9;
+}
+.ty-card-title {
+    font-family: 'Merriweather', serif;
+    font-size: 20px;
+    color: #3d3d3d;
+    font-weight: 700;
+}
+.ty-card-hint { font-size: 12px; color: #999; }
+
+/* ── Order items ──────────────────────────────────────────── */
+.ty-items { display: flex; flex-direction: column; }
+.ty-item {
+    display: grid;
+    grid-template-columns: 70px 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #f0e5d9;
+}
+.ty-item:last-child { border-bottom: 1px solid #f0e5d9; }
+.ty-item-img {
+    width: 70px; height: 70px;
+    background: linear-gradient(135deg, #faf5f0 0%, #f5e5d3 100%);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.ty-item-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+.ty-item-info { display: flex; flex-direction: column; gap: 4px; }
+.ty-item-name {
+    font-family: 'Merriweather', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #3d3d3d;
+}
+.ty-item-meta { font-size: 12px; color: #6b6b6b; }
+.ty-item-meta strong { color: #3d3d3d; font-weight: 600; }
+.ty-item-price {
+    font-family: 'Merriweather', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #3d3d3d;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* ── Totals ───────────────────────────────────────────────── */
+.ty-totals { margin-top: 8px; padding-top: 16px; }
+.ty-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    font-size: 14px;
+    color: #6b6b6b;
+}
+.ty-total-row strong { color: #3d3d3d; font-weight: 600; }
+.ty-total-grand {
+    margin-top: 8px;
+    padding-top: 16px !important;
+    border-top: 1px solid #f0e5d9;
+    align-items: baseline;
+}
+.ty-grand-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #3d3d3d;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.ty-grand-val {
+    font-family: 'Merriweather', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: #c4845a;
+}
+.ty-grand-unit {
+    font-size: 13px;
+    color: #999;
+    font-weight: 500;
+    margin-left: 4px;
+}
+
+/* ── Delivery info grid ───────────────────────────────────── */
+.ty-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+.ty-info-block {
+    background: #faf5f0;
+    border-radius: 12px;
+    padding: 16px 18px;
+}
+.ty-info-label {
+    font-size: 10px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ty-info-label::before { display: inline-block; font-size: 14px; opacity: .8; }
+.ty-info-label--delivery::before { content: '🚚'; }
+.ty-info-label--payment::before  { content: '💳'; }
+.ty-info-label--contact::before  { content: '👤'; }
+.ty-info-label--time::before     { content: '⏰'; }
+.ty-info-val { font-size: 14px; color: #3d3d3d; line-height: 1.6; }
+.ty-info-val strong { font-family: 'Merriweather', serif; font-weight: 700; }
+.ty-muted { color: #6b6b6b; font-size: 13px; }
+
+/* ── Action button ────────────────────────────────────────── */
+.ty-actions {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+.ty-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 48px;
+    background: #c4845a;
+    color: white;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    transition: background .25s, transform .25s, box-shadow .25s;
+}
+.ty-btn:hover {
+    background: #b27548;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(196,132,90,.3);
+    color: white;
+    text-decoration: none;
+}
+
+/* ── Contact card ─────────────────────────────────────────── */
+.ty-contact {
+    background: white;
+    border: 1px solid #f0e5d9;
+    border-radius: 16px;
+    padding: 26px 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.ty-contact-icon {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f5e5d3 0%, #c4845a 100%);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+}
+.ty-contact-info { flex: 1; min-width: 180px; }
+.ty-contact-title {
+    font-family: 'Merriweather', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #3d3d3d;
+    margin-bottom: 4px;
+}
+.ty-contact-desc { font-size: 13px; color: #6b6b6b; line-height: 1.6; }
+.ty-contact-phone {
+    font-family: 'Merriweather', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #c4845a;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.ty-contact-phone:hover { text-decoration: underline; }
+
+/* ── Confetti ─────────────────────────────────────────────── */
+.ty-confetti {
+    position: fixed;
+    top: -10px;
+    width: 8px; height: 14px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    animation: ty-fall 3.5s linear forwards;
+}
+@keyframes ty-fall {
+    0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 700px) {
+    .ty-wrap { padding: 20px 16px 60px; }
+    .ty-hero { padding: 36px 20px 32px; }
+    .ty-hero-title { font-size: 26px; }
+    .ty-strip { grid-template-columns: 1fr 1fr; }
+    .ty-strip-cell { border-right: none; border-bottom: 1px solid #f0e5d9; padding: 0 0 12px; }
+    .ty-strip-cell:nth-last-child(-n+2) { border-bottom: none; padding-bottom: 0; }
+    .ty-card { padding: 20px 18px; }
+    .ty-item { grid-template-columns: 56px 1fr auto; gap: 12px; }
+    .ty-item-img { width: 56px; height: 56px; font-size: 26px; }
+    .ty-info-grid { grid-template-columns: 1fr; }
+    .ty-contact { flex-direction: column; text-align: center; }
+    .ty-contact-phone { font-size: 20px; }
+}

@@ -1,22 +1,26 @@
 <?php get_header(); ?>
 
 <?php
-// Hero meta — read from front-page post meta with hardcoded fallbacks
+// Hero meta — use saved value if key exists (even if empty), fallback only on first visit
 $_front_id   = get_option( 'page_on_front' );
-$_hm         = function( $key ) use ( $_front_id ) {
-    return get_post_meta( $_front_id, '_hero_' . $key, true );
+$_hf = function( $key, $default ) use ( $_front_id ) {
+    // metadata_exists returns false when key was never saved → use default
+    // Once saved (even as empty string) → use the saved value
+    return metadata_exists( 'post', $_front_id, '_hero_' . $key )
+        ? get_post_meta( $_front_id, '_hero_' . $key, true )
+        : $default;
 };
 
-$hero_eyebrow   = $_hm('eyebrow')   ?: 'Домашня пекарня · Дніпро';
-$hero_title     = $_hm('title')     ?: "Від щирого серця\nдо вашого столу";
-$hero_subtitle  = $_hm('subtitle')  ?: "Ми команда пекарів, закоханих в свою справу.\nСмачні, свіжі пироги на будь-яку нагоду!";
-$hero_badges_raw = $_hm('badges')   ?: "Щодня свіже\nДоставка Дніпром\nЗамовлення з 10:00";
-$hero_badges    = array_filter( array_map( 'trim', explode( "\n", $hero_badges_raw ) ) );
+$hero_eyebrow    = $_hf( 'eyebrow',   'Домашня пекарня · Дніпро' );
+$hero_title      = $_hf( 'title',     "Від щирого серця\nдо вашого столу" );
+$hero_subtitle   = $_hf( 'subtitle',  "Ми команда пекарів, закоханих в свою справу.\nСмачні, свіжі пироги на будь-яку нагоду!" );
+$hero_badges_raw = $_hf( 'badges',    "Щодня свіже\nДоставка Дніпром\nЗамовлення з 10:00" );
+$hero_badges     = array_filter( array_map( 'trim', explode( "\n", $hero_badges_raw ) ) );
 
-$hero_btn1_text = $_hm('btn1_text') ?: 'Замовити';
-$hero_btn1_url  = $_hm('btn1_url')  ?: 'tel:+380632532696';
-$hero_btn2_text = $_hm('btn2_text') ?: 'Переглянути меню';
-$hero_btn2_url  = $_hm('btn2_url')  ?: '';
+$hero_btn1_text  = $_hf( 'btn1_text', 'Замовити' );
+$hero_btn1_url   = $_hf( 'btn1_url',  'tel:+380632532696' );
+$hero_btn2_text  = $_hf( 'btn2_text', 'Переглянути меню' );
+$hero_btn2_url   = $_hf( 'btn2_url',  '' );
 
 $hero_bg_id     = (int) get_post_meta( $_front_id, '_hero_bg_id', true );
 $hero_bg_url    = $hero_bg_id ? wp_get_attachment_image_url( $hero_bg_id, 'full' ) : '';

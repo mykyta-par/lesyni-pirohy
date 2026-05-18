@@ -4670,7 +4670,7 @@ ul.products {
    Single Promo page
    ========================================================================== */
 .promo-single-wrap {
-    max-width: 800px;
+    max-width: var(--max-w);
     margin: 0 auto;
     padding: clamp(32px, 5vw, 64px) var(--px) 80px;
 }
@@ -4687,9 +4687,9 @@ ul.products {
     background: var(--color-surface);
     border: 1px solid #f0e5d9;
     border-radius: var(--radius-xl);
-    padding: clamp(32px, 5vw, 56px);
+    padding: clamp(40px, 6vw, 72px);
     display: flex;
-    gap: 48px;
+    gap: 64px;
     align-items: flex-start;
 }
 

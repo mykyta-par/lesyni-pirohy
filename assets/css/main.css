@@ -859,6 +859,7 @@ a.contact-item__value:hover { color: var(--color-primary); }
     white-space: nowrap;
 }
 .catalog-sort__form { margin: 0; }
+.catalog-container .catalog-sort__form { margin-bottom: 32px; }
 .catalog-sort__select {
     appearance: none;
     padding: 10px 36px 10px 16px;

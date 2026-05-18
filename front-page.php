@@ -1,28 +1,59 @@
 <?php get_header(); ?>
 
+<?php
+// Hero meta — read from front-page post meta with hardcoded fallbacks
+$_front_id   = get_option( 'page_on_front' );
+$_hm         = function( $key ) use ( $_front_id ) {
+    return get_post_meta( $_front_id, '_hero_' . $key, true );
+};
+
+$hero_eyebrow   = $_hm('eyebrow')   ?: 'Домашня пекарня · Дніпро';
+$hero_title     = $_hm('title')     ?: "Від щирого серця\nдо вашого столу";
+$hero_subtitle  = $_hm('subtitle')  ?: "Ми команда пекарів, закоханих в свою справу.\nСмачні, свіжі пироги на будь-яку нагоду!";
+$hero_badges_raw = $_hm('badges')   ?: "Щодня свіже\nДоставка Дніпром\nЗамовлення з 10:00";
+$hero_badges    = array_filter( array_map( 'trim', explode( "\n", $hero_badges_raw ) ) );
+
+$hero_btn1_text = $_hm('btn1_text') ?: 'Замовити';
+$hero_btn1_url  = $_hm('btn1_url')  ?: 'tel:+380632532696';
+$hero_btn2_text = $_hm('btn2_text') ?: 'Переглянути меню';
+$hero_btn2_url  = $_hm('btn2_url')  ?: '';
+
+$hero_bg_id     = (int) get_post_meta( $_front_id, '_hero_bg_id', true );
+$hero_bg_url    = $hero_bg_id ? wp_get_attachment_image_url( $hero_bg_id, 'full' ) : '';
+
+// Build title lines: split on newline for <br> or keep as-is
+$hero_title_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $hero_title ) ) );
+// Build subtitle lines
+$hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $hero_subtitle ) ) );
+?>
+
 <!-- ======================================================================
-   HERO — Variant 2: Playful & Colorful
+   HERO
 ====================================================================== -->
-<section class="hero">
+<section class="hero"<?php if ( $hero_bg_url ) : ?> style="background-image:url('<?php echo esc_url( $hero_bg_url ); ?>');background-size:cover;background-position:center;"<?php endif; ?>>
     <div class="hero__decoration"></div>
     <div class="hero__content">
-        <p class="hero__eyebrow">Домашня пекарня · Дніпро</p>
-        <h1 class="hero__title">Від щирого серця<br>до вашого столу</h1>
-        <p class="hero__subtitle">
-            Ми команда пекарів, закоханих в свою справу.<br>
-            Смачні, свіжі пироги на будь-яку нагоду!
-        </p>
+        <p class="hero__eyebrow"><?php echo esc_html( $hero_eyebrow ); ?></p>
+        <h1 class="hero__title"><?php echo $hero_title_html; ?></h1>
+        <p class="hero__subtitle"><?php echo $hero_subtitle_html; ?></p>
         <div class="hero__cta">
-            <a href="tel:+380632532696" class="btn btn--primary btn--lg">Замовити</a>
-            <?php if ( $shop_url = get_permalink( wc_get_page_id( 'shop' ) ) ) : ?>
-                <a href="<?php echo esc_url( $shop_url ); ?>" class="btn btn--outline btn--lg">Переглянути меню</a>
+            <?php if ( $hero_btn1_text && $hero_btn1_url ) : ?>
+                <a href="<?php echo esc_url( $hero_btn1_url ); ?>" class="btn btn--primary btn--lg"><?php echo esc_html( $hero_btn1_text ); ?></a>
             <?php endif; ?>
+            <?php if ( $hero_btn2_text ) :
+                $btn2_href = $hero_btn2_url ?: ( function_exists('wc_get_page_id') ? get_permalink( wc_get_page_id('shop') ) : '' );
+                if ( $btn2_href ) : ?>
+                    <a href="<?php echo esc_url( $btn2_href ); ?>" class="btn btn--outline btn--lg"><?php echo esc_html( $hero_btn2_text ); ?></a>
+                <?php endif;
+            endif; ?>
         </div>
+        <?php if ( ! empty( $hero_badges ) ) : ?>
         <div class="hero__badges">
-            <span class="hero__badge">Щодня свіже</span>
-            <span class="hero__badge">Доставка Дніпром</span>
-            <span class="hero__badge">Замовлення з 10:00</span>
+            <?php foreach ( $hero_badges as $badge ) : ?>
+                <span class="hero__badge"><?php echo esc_html( $badge ); ?></span>
+            <?php endforeach; ?>
         </div>
+        <?php endif; ?>
     </div>
 </section>
 

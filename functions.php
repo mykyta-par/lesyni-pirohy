@@ -480,6 +480,136 @@ function lesyni_zone_settings_fields() {
 }
 
 /* -----------------------------------------------------------------------
+   Hero section meta box (front page editor)
+----------------------------------------------------------------------- */
+function lesyni_hero_meta_box() {
+    add_meta_box(
+        'lesyni_hero',
+        '🏠 Hero — головний банер',
+        'lesyni_hero_meta_box_html',
+        'page',
+        'normal',
+        'high'
+    );
+}
+add_action( 'add_meta_boxes', 'lesyni_hero_meta_box' );
+
+function lesyni_hero_meta_box_html( $post ) {
+    // Show only on front page
+    if ( (int) get_option( 'page_on_front' ) !== $post->ID ) {
+        echo '<p style="color:#999;">Ці налаштування активні тільки на сторінці, що призначена головною (<em>Налаштування → Читання</em>).</p>';
+        return;
+    }
+    wp_nonce_field( 'lesyni_hero_save', 'lesyni_hero_nonce' );
+    $f = function( $key ) use ( $post ) {
+        return esc_attr( get_post_meta( $post->ID, '_hero_' . $key, true ) );
+    };
+    $bg_id  = (int) get_post_meta( $post->ID, '_hero_bg_id', true );
+    $bg_url = $bg_id ? wp_get_attachment_image_url( $bg_id, 'large' ) : '';
+    ?>
+    <style>
+        .hero-mb label { display:block; font-weight:600; margin:14px 0 4px; font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:#555; }
+        .hero-mb input[type=text], .hero-mb textarea { width:100%; padding:8px 10px; border:1px solid #ddd; border-radius:4px; font-size:14px; }
+        .hero-mb textarea { height:72px; resize:vertical; }
+        .hero-mb .hero-mb-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .hero-mb .hero-bg-preview { max-width:200px; border-radius:6px; margin-top:8px; display:<?php echo $bg_url ? 'block' : 'none'; ?>; }
+    </style>
+    <div class="hero-mb">
+        <label>Рядок над заголовком</label>
+        <input type="text" name="hero_eyebrow" value="<?php echo $f('eyebrow'); ?>" placeholder="Домашня пекарня · Дніпро">
+
+        <label>Заголовок</label>
+        <input type="text" name="hero_title" value="<?php echo $f('title'); ?>" placeholder="Від щирого серця до вашого столу">
+
+        <label>Підзаголовок</label>
+        <textarea name="hero_subtitle" placeholder="Ми команда пекарів, закоханих в свою справу."><?php echo esc_textarea( get_post_meta( $post->ID, '_hero_subtitle', true ) ); ?></textarea>
+
+        <label>Теги (кожен з нового рядка)</label>
+        <textarea name="hero_badges" placeholder="Щодня свіже&#10;Доставка Дніпром&#10;Замовлення з 10:00"><?php echo esc_textarea( get_post_meta( $post->ID, '_hero_badges', true ) ); ?></textarea>
+
+        <div class="hero-mb-row">
+            <div>
+                <label>Кнопка 1 — текст</label>
+                <input type="text" name="hero_btn1_text" value="<?php echo $f('btn1_text'); ?>" placeholder="Замовити">
+            </div>
+            <div>
+                <label>Кнопка 1 — посилання</label>
+                <input type="text" name="hero_btn1_url" value="<?php echo $f('btn1_url'); ?>" placeholder="tel:+380632532696">
+            </div>
+        </div>
+
+        <div class="hero-mb-row">
+            <div>
+                <label>Кнопка 2 — текст</label>
+                <input type="text" name="hero_btn2_text" value="<?php echo $f('btn2_text'); ?>" placeholder="Переглянути меню">
+            </div>
+            <div>
+                <label>Кнопка 2 — посилання (порожньо = каталог)</label>
+                <input type="text" name="hero_btn2_url" value="<?php echo $f('btn2_url'); ?>" placeholder="">
+            </div>
+        </div>
+
+        <label>Фонове зображення</label>
+        <div>
+            <input type="hidden" name="hero_bg_id" id="hero_bg_id" value="<?php echo esc_attr( $bg_id ?: '' ); ?>">
+            <button type="button" class="button" id="hero_bg_btn">Вибрати зображення</button>
+            <button type="button" class="button" id="hero_bg_remove" style="<?php echo $bg_url ? '' : 'display:none;'; ?>">Видалити</button>
+            <img src="<?php echo esc_url( $bg_url ); ?>" id="hero_bg_preview" class="hero-bg-preview">
+        </div>
+    </div>
+    <script>
+    (function(){
+        var frame;
+        document.getElementById('hero_bg_btn').addEventListener('click', function(){
+            if(frame){ frame.open(); return; }
+            frame = wp.media({ title:'Фон hero-секції', multiple:false, library:{type:'image'}, button:{text:'Вибрати'} });
+            frame.on('select', function(){
+                var att = frame.state().get('selection').first().toJSON();
+                document.getElementById('hero_bg_id').value = att.id;
+                document.getElementById('hero_bg_preview').src = att.url;
+                document.getElementById('hero_bg_preview').style.display = 'block';
+                document.getElementById('hero_bg_remove').style.display = '';
+            });
+            frame.open();
+        });
+        document.getElementById('hero_bg_remove').addEventListener('click', function(){
+            document.getElementById('hero_bg_id').value = '';
+            document.getElementById('hero_bg_preview').src = '';
+            document.getElementById('hero_bg_preview').style.display = 'none';
+            this.style.display = 'none';
+        });
+    }());
+    </script>
+    <?php
+}
+
+function lesyni_hero_save_meta( $post_id ) {
+    if ( ! isset( $_POST['lesyni_hero_nonce'] ) ) return;
+    if ( ! wp_verify_nonce( $_POST['lesyni_hero_nonce'], 'lesyni_hero_save' ) ) return;
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+    $fields = [ 'eyebrow', 'title', 'subtitle', 'badges', 'btn1_text', 'btn1_url', 'btn2_text', 'btn2_url' ];
+    foreach ( $fields as $key ) {
+        if ( isset( $_POST[ 'hero_' . $key ] ) ) {
+            update_post_meta( $post_id, '_hero_' . $key, sanitize_textarea_field( $_POST[ 'hero_' . $key ] ) );
+        }
+    }
+    $bg_id = isset( $_POST['hero_bg_id'] ) ? (int) $_POST['hero_bg_id'] : 0;
+    if ( $bg_id ) {
+        update_post_meta( $post_id, '_hero_bg_id', $bg_id );
+    } else {
+        delete_post_meta( $post_id, '_hero_bg_id' );
+    }
+}
+add_action( 'save_post_page', 'lesyni_hero_save_meta' );
+
+// Enqueue media uploader on page edit screen
+add_action( 'admin_enqueue_scripts', function( $hook ) {
+    if ( $hook === 'post.php' || $hook === 'post-new.php' ) {
+        wp_enqueue_media();
+    }
+} );
+
+/* -----------------------------------------------------------------------
    Helper: map product category slug → pie visual CSS class
 ----------------------------------------------------------------------- */
 function lesyni_pie_visual_class( $product ) {

@@ -23,27 +23,14 @@
     </button>
 
     <nav class="site-nav" id="site-nav">
-        <?php if ( is_front_page() ) : ?>
-            <a href="<?php echo esc_url( home_url( '/' ) ); ?>">Головна</a>
-            <?php if ( $shop_url = get_permalink( wc_get_page_id( 'shop' ) ) ) : ?>
-                <a href="<?php echo esc_url( $shop_url ); ?>">Пироги</a>
-            <?php endif; ?>
-            <a href="#popular">Популярні</a>
-            <a href="#promos">Акції</a>
-            <a href="#reviews">Відгуки</a>
-            <a href="#contact">Контакти</a>
-        <?php else : ?>
-            <a href="<?php echo esc_url( home_url( '/' ) ); ?>">Головна</a>
-            <?php if ( $shop_url = get_permalink( wc_get_page_id( 'shop' ) ) ) : ?>
-                <a href="<?php echo esc_url( $shop_url ); ?>"
-                   class="<?php echo is_shop() || is_product_category() || is_product() ? 'active' : ''; ?>">
-                    Пироги
-                </a>
-            <?php endif; ?>
-            <a href="<?php echo esc_url( home_url( '/#promos' ) ); ?>">Акції</a>
-            <a href="<?php echo esc_url( home_url( '/#reviews' ) ); ?>">Відгуки</a>
-            <a href="<?php echo esc_url( home_url( '/#contact' ) ); ?>">Контакти</a>
-        <?php endif; ?>
+        <?php
+        wp_nav_menu( [
+            'theme_location' => 'primary',
+            'container'      => false,
+            'items_wrap'     => '<ul>%3$s</ul>',
+            'fallback_cb'    => 'lesyni_nav_fallback',
+        ] );
+        ?>
     </nav>
 
     <div class="header-cta">

@@ -36,6 +36,19 @@ function lesyni_setup() {
 }
 add_action( 'after_setup_theme', 'lesyni_setup' );
 
+function lesyni_nav_fallback() {
+    $shop = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : '';
+    echo '<ul>';
+    echo '<li><a href="' . esc_url( home_url( '/' ) ) . '">Головна</a></li>';
+    if ( $shop ) {
+        echo '<li><a href="' . esc_url( $shop ) . '">Пироги</a></li>';
+    }
+    echo '<li><a href="' . esc_url( home_url( '/#promos' ) ) . '">Акції</a></li>';
+    echo '<li><a href="' . esc_url( home_url( '/#reviews' ) ) . '">Відгуки</a></li>';
+    echo '<li><a href="' . esc_url( home_url( '/#contact' ) ) . '">Контакти</a></li>';
+    echo '</ul>';
+}
+
 /* -----------------------------------------------------------------------
    Scripts & Styles
 ----------------------------------------------------------------------- */

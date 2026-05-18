@@ -122,8 +122,6 @@
         $icon      = get_post_meta( get_the_ID(), '_promo_icon', true ) ?: '🎁';
         $has_thumb = has_post_thumbnail();
         $short     = get_the_excerpt() ?: wp_trim_words( get_the_content(), 20, '…' );
-        $full      = get_the_content();
-        $modal_id  = 'promo-modal-' . get_the_ID();
         ?>
         <div class="promo-card">
             <div class="promo-card__icon<?php echo $has_thumb ? ' promo-card__icon--image' : ' promo-card__icon--emoji'; ?>">
@@ -135,28 +133,8 @@
             </div>
             <h3 class="promo-card__title"><?php the_title(); ?></h3>
             <p class="promo-card__desc"><?php echo esc_html( $short ); ?></p>
-            <?php if ( $full ) : ?>
-            <button class="btn btn--light btn--sm promo-modal-trigger" data-modal="<?php echo esc_attr( $modal_id ); ?>">Дізнатися більше</button>
-            <?php endif; ?>
+            <a href="<?php echo esc_url( get_permalink() ); ?>" class="btn btn--light btn--sm">Дізнатися більше</a>
         </div>
-
-        <?php if ( $full ) : ?>
-        <div class="promo-modal" id="<?php echo esc_attr( $modal_id ); ?>" role="dialog" aria-modal="true" aria-label="<?php the_title_attribute(); ?>">
-            <div class="promo-modal__overlay promo-modal-close"></div>
-            <div class="promo-modal__box">
-                <button class="promo-modal__close promo-modal-close" aria-label="Закрити">×</button>
-                <div class="promo-modal__icon<?php echo $has_thumb ? ' promo-modal__icon--image' : ' promo-modal__icon--emoji'; ?>">
-                    <?php if ( $has_thumb ) : ?>
-                        <?php the_post_thumbnail( 'medium' ); ?>
-                    <?php else : ?>
-                        <?php echo esc_html( $icon ); ?>
-                    <?php endif; ?>
-                </div>
-                <h3 class="promo-modal__title"><?php the_title(); ?></h3>
-                <div class="promo-modal__content"><?php echo wp_kses_post( $full ); ?></div>
-            </div>
-        </div>
-        <?php endif; ?>
         <?php endwhile; wp_reset_postdata(); ?>
     </div>
     <?php else : ?>

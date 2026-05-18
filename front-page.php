@@ -37,8 +37,8 @@
     $popular_products = function_exists( 'wc_get_products' )
         ? wc_get_products( [
             'limit'   => 4,
-            'orderby' => 'popularity',
-            'order'   => 'DESC',
+            'orderby' => 'menu_order',
+            'order'   => 'ASC',
             'status'  => 'publish',
         ] )
         : [];

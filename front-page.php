@@ -105,24 +105,31 @@
     <p class="section__eyebrow">Спеціальні пропозиції</p>
     <h2 class="section__title">Акції цього місяця</h2>
 
+    <?php
+    $promos = new WP_Query( [
+        'post_type'      => 'lesyni_promo',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'menu_order',
+        'order'          => 'ASC',
+    ] );
+    ?>
+
+    <?php if ( $promos->have_posts() ) : ?>
     <div class="promos-grid">
+        <?php while ( $promos->have_posts() ) : $promos->the_post(); ?>
+        <?php $icon = get_post_meta( get_the_ID(), '_promo_icon', true ) ?: '🎁'; ?>
         <div class="promo-card">
-            <div class="promo-card__icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </div>
-            <h3 class="promo-card__title">День народження?</h3>
-            <p class="promo-card__desc">Отримай знижку 10% при замовленні. Мінімум замовлення 700 грн</p>
-            <a href="tel:+380632532696" class="btn btn--light btn--sm">Дізнатися більше</a>
+            <div class="promo-card__icon promo-card__icon--emoji"><?php echo esc_html( $icon ); ?></div>
+            <h3 class="promo-card__title"><?php the_title(); ?></h3>
+            <p class="promo-card__desc"><?php echo wp_kses_post( get_the_content() ); ?></p>
         </div>
-        <div class="promo-card">
-            <div class="promo-card__icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            </div>
-            <h3 class="promo-card__title">Напиши відгук</h3>
-            <p class="promo-card__desc">Отримай Яблучний пиріг у подарунок при наступному замовленні</p>
-            <a href="tel:+380632532696" class="btn btn--light btn--sm">Написати відгук</a>
-        </div>
+        <?php endwhile; wp_reset_postdata(); ?>
     </div>
+    <?php else : ?>
+    <p style="text-align:center;color:#999;padding:40px 0;">Акцій поки немає. Додай їх в адмінці у розділі «Акції».</p>
+    <?php endif; ?>
+
 </section>
 
 <!-- ======================================================================

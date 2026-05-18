@@ -50,6 +50,57 @@ function lesyni_nav_fallback() {
 }
 
 /* -----------------------------------------------------------------------
+   Custom Post Type: Акції (Promotions)
+----------------------------------------------------------------------- */
+function lesyni_register_promo_cpt() {
+    register_post_type( 'lesyni_promo', [
+        'labels' => [
+            'name'               => 'Акції',
+            'singular_name'      => 'Акція',
+            'add_new'            => 'Додати акцію',
+            'add_new_item'       => 'Нова акція',
+            'edit_item'          => 'Редагувати акцію',
+            'all_items'          => 'Всі акції',
+            'menu_name'          => 'Акції',
+        ],
+        'public'        => false,
+        'show_ui'       => true,
+        'show_in_menu'  => true,
+        'menu_icon'     => 'dashicons-tag',
+        'supports'      => [ 'title', 'editor' ],
+        'has_archive'   => false,
+    ] );
+}
+add_action( 'init', 'lesyni_register_promo_cpt' );
+
+// Meta box for promo icon (emoji)
+function lesyni_promo_meta_box() {
+    add_meta_box(
+        'lesyni_promo_icon',
+        'Іконка (emoji)',
+        function( $post ) {
+            $icon = get_post_meta( $post->ID, '_promo_icon', true );
+            wp_nonce_field( 'lesyni_promo_icon', 'lesyni_promo_icon_nonce' );
+            echo '<input type="text" name="promo_icon" value="' . esc_attr( $icon ) . '" style="width:100%;font-size:24px;" placeholder="напр. 🎂">';
+            echo '<p style="color:#666;font-size:12px;margin-top:6px;">Введіть будь-який emoji як іконку акції</p>';
+        },
+        'lesyni_promo',
+        'side'
+    );
+}
+add_action( 'add_meta_boxes', 'lesyni_promo_meta_box' );
+
+function lesyni_promo_save_meta( $post_id ) {
+    if ( ! isset( $_POST['lesyni_promo_icon_nonce'] ) ) return;
+    if ( ! wp_verify_nonce( $_POST['lesyni_promo_icon_nonce'], 'lesyni_promo_icon' ) ) return;
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+    if ( isset( $_POST['promo_icon'] ) ) {
+        update_post_meta( $post_id, '_promo_icon', sanitize_text_field( $_POST['promo_icon'] ) );
+    }
+}
+add_action( 'save_post_lesyni_promo', 'lesyni_promo_save_meta' );
+
+/* -----------------------------------------------------------------------
    Scripts & Styles
 ----------------------------------------------------------------------- */
 function lesyni_enqueue_assets() {

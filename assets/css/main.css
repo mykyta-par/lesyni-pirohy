@@ -515,6 +515,10 @@ ul, ol   { list-style: none; }
     margin: 0 auto 18px;
     color: #fff;
 }
+.promo-card__icon--emoji {
+    font-size: 36px;
+    line-height: 1;
+}
 
 .promo-card__title {
     font-family: var(--font-serif);

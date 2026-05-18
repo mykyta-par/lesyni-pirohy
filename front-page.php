@@ -132,6 +132,7 @@
             </div>
             <h3 class="promo-card__title"><?php the_title(); ?></h3>
             <p class="promo-card__desc"><?php echo wp_kses_post( get_the_content() ); ?></p>
+            <a href="<?php echo esc_url( get_permalink() ); ?>" class="btn btn--light btn--sm">Дізнатися більше</a>
         </div>
         <?php endwhile; wp_reset_postdata(); ?>
     </div>

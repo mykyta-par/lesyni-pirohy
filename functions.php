@@ -63,12 +63,13 @@ function lesyni_register_promo_cpt() {
             'all_items'          => 'Всі акції',
             'menu_name'          => 'Акції',
         ],
-        'public'        => false,
+        'public'        => true,
         'show_ui'       => true,
         'show_in_menu'  => true,
         'menu_icon'     => 'dashicons-tag',
         'supports'      => [ 'title', 'editor', 'thumbnail' ],
         'has_archive'   => false,
+        'rewrite'       => [ 'slug' => 'promo' ],
     ] );
 }
 add_action( 'init', 'lesyni_register_promo_cpt' );

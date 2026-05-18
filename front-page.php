@@ -36,10 +36,11 @@
     <?php
     $popular_products = function_exists( 'wc_get_products' )
         ? wc_get_products( [
-            'limit'   => 4,
-            'orderby' => 'menu_order',
-            'order'   => 'ASC',
-            'status'  => 'publish',
+            'limit'    => 4,
+            'orderby'  => 'date',
+            'order'    => 'DESC',
+            'status'   => 'publish',
+            'featured' => true,
         ] )
         : [];
     ?>

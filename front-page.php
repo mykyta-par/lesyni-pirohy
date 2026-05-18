@@ -118,9 +118,18 @@
     <?php if ( $promos->have_posts() ) : ?>
     <div class="promos-grid">
         <?php while ( $promos->have_posts() ) : $promos->the_post(); ?>
-        <?php $icon = get_post_meta( get_the_ID(), '_promo_icon', true ) ?: '🎁'; ?>
+        <?php
+        $icon      = get_post_meta( get_the_ID(), '_promo_icon', true ) ?: '🎁';
+        $has_thumb = has_post_thumbnail();
+        ?>
         <div class="promo-card">
-            <div class="promo-card__icon promo-card__icon--emoji"><?php echo esc_html( $icon ); ?></div>
+            <div class="promo-card__icon<?php echo $has_thumb ? ' promo-card__icon--image' : ' promo-card__icon--emoji'; ?>">
+                <?php if ( $has_thumb ) : ?>
+                    <?php the_post_thumbnail( 'thumbnail' ); ?>
+                <?php else : ?>
+                    <?php echo esc_html( $icon ); ?>
+                <?php endif; ?>
+            </div>
             <h3 class="promo-card__title"><?php the_title(); ?></h3>
             <p class="promo-card__desc"><?php echo wp_kses_post( get_the_content() ); ?></p>
         </div>

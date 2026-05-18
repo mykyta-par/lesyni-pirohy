@@ -100,6 +100,32 @@ function lesyni_promo_save_meta( $post_id ) {
 }
 add_action( 'save_post_lesyni_promo', 'lesyni_promo_save_meta' );
 
+// Seed default promos on first load
+function lesyni_seed_promos() {
+    if ( get_option( 'lesyni_promos_seeded' ) ) return;
+
+    $defaults = [
+        [ 'title' => 'День народження?',  'content' => 'Отримай знижку 10% при замовленні. Мінімум замовлення 700 грн',                       'icon' => '🎂' ],
+        [ 'title' => 'Напиши відгук',     'content' => 'Отримай Яблучний пиріг у подарунок при наступному замовленні',                         'icon' => '⭐' ],
+    ];
+
+    foreach ( $defaults as $i => $promo ) {
+        $id = wp_insert_post( [
+            'post_type'    => 'lesyni_promo',
+            'post_title'   => $promo['title'],
+            'post_content' => $promo['content'],
+            'post_status'  => 'publish',
+            'menu_order'   => $i + 1,
+        ] );
+        if ( $id && ! is_wp_error( $id ) ) {
+            update_post_meta( $id, '_promo_icon', $promo['icon'] );
+        }
+    }
+
+    update_option( 'lesyni_promos_seeded', true );
+}
+add_action( 'init', 'lesyni_seed_promos' );
+
 /* -----------------------------------------------------------------------
    Scripts & Styles
 ----------------------------------------------------------------------- */

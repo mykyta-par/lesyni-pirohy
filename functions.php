@@ -67,7 +67,7 @@ function lesyni_register_promo_cpt() {
         'show_ui'       => true,
         'show_in_menu'  => true,
         'menu_icon'     => 'dashicons-tag',
-        'supports'      => [ 'title', 'editor', 'thumbnail' ],
+        'supports'      => [ 'title', 'editor', 'thumbnail', 'excerpt' ],
         'has_archive'   => false,
         'rewrite'       => [ 'slug' => 'promo' ],
     ] );

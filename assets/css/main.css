@@ -4733,3 +4733,92 @@ ul.products {
     .promo-single__icon { width: 100px; height: 100px; }
     .promo-single__emoji { font-size: 48px; }
 }
+
+/* ==========================================================================
+   Promo Modal
+   ========================================================================== */
+.promo-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.promo-modal--open { display: flex; }
+
+.promo-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+}
+.promo-modal__box {
+    position: relative;
+    z-index: 1;
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: clamp(28px, 5vw, 48px);
+    max-width: 520px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,.2);
+    animation: promo-modal-in .25s ease;
+}
+@keyframes promo-modal-in {
+    from { opacity: 0; transform: translateY(20px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.promo-modal__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: #f0e5d9;
+    color: var(--color-text);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
+}
+.promo-modal__close:hover { background: var(--color-border); }
+
+.promo-modal__icon {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #faf5f0 0%, #f5e5d3 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    overflow: hidden;
+}
+.promo-modal__icon--image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.promo-modal__icon--emoji { font-size: 44px; line-height: 1; }
+
+.promo-modal__title {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-text);
+    text-align: center;
+    margin-bottom: 16px;
+}
+.promo-modal__content {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+.promo-modal__content p { margin-bottom: 10px; }
+.promo-modal__content p:last-child { margin-bottom: 0; }

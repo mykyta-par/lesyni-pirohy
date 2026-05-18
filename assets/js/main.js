@@ -24,6 +24,34 @@
     }
 
     /* ------------------------------------------------------------------
+       Promo modals
+    ------------------------------------------------------------------ */
+    document.querySelectorAll('.promo-modal-trigger').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var modal = document.getElementById(btn.dataset.modal);
+            if (!modal) return;
+            modal.classList.add('promo-modal--open');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+    document.querySelectorAll('.promo-modal-close').forEach(function (el) {
+        el.addEventListener('click', function () {
+            var modal = el.closest('.promo-modal');
+            if (!modal) return;
+            modal.classList.remove('promo-modal--open');
+            document.body.style.overflow = '';
+        });
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.promo-modal--open').forEach(function (modal) {
+                modal.classList.remove('promo-modal--open');
+                document.body.style.overflow = '';
+            });
+        }
+    });
+
+    /* ------------------------------------------------------------------
        Sticky header shadow
     ------------------------------------------------------------------ */
     var header = document.querySelector('.site-header');

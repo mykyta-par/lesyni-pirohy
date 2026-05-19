@@ -185,47 +185,41 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
     <p class="section__eyebrow">Що кажуть клієнти</p>
     <h2 class="section__title">Відгуки</h2>
 
+    <?php
+    $reviews = new WP_Query( [
+        'post_type'      => 'lesyni_review',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'menu_order date',
+        'order'          => 'ASC',
+    ] );
+    ?>
+
+    <?php if ( $reviews->have_posts() ) : ?>
     <div class="reviews-grid">
+        <?php while ( $reviews->have_posts() ) : $reviews->the_post();
+            $stars     = (int) ( get_post_meta( get_the_ID(), '_review_stars', true ) ?: 5 );
+            $date_text = get_post_meta( get_the_ID(), '_review_date', true );
+            $name      = get_the_title();
+            $avatar    = mb_strtoupper( mb_substr( $name, 0, 1 ) );
+        ?>
         <div class="review-card">
             <div class="review-card__header">
-                <div class="review-card__avatar">М</div>
+                <div class="review-card__avatar"><?php echo esc_html( $avatar ); ?></div>
                 <div class="review-card__meta">
-                    <strong>Марія</strong>
-                    <span>2 дні тому</span>
+                    <strong><?php echo esc_html( $name ); ?></strong>
+                    <?php if ( $date_text ) : ?>
+                        <span><?php echo esc_html( $date_text ); ?></span>
+                    <?php endif; ?>
                 </div>
             </div>
-            <div class="review-card__stars">★★★★★</div>
-            <p class="review-card__text">
-                Найкращі пироги в місті! Дуже смачно, много начинки, свіже тісто. М'ясний просто божественний!
-            </p>
+            <div class="review-card__stars"><?php echo str_repeat( '★', $stars ) . str_repeat( '☆', 5 - $stars ); ?></div>
+            <p class="review-card__text"><?php echo esc_html( get_the_content() ); ?></p>
         </div>
-        <div class="review-card">
-            <div class="review-card__header">
-                <div class="review-card__avatar">А</div>
-                <div class="review-card__meta">
-                    <strong>Андрій</strong>
-                    <span>5 днів тому</span>
-                </div>
-            </div>
-            <div class="review-card__stars">★★★★★</div>
-            <p class="review-card__text">
-                Жульєн з дуже правильним балансом грибів та курки. Доставили вчасно. Всім рекомендую!
-            </p>
-        </div>
-        <div class="review-card">
-            <div class="review-card__header">
-                <div class="review-card__avatar">О</div>
-                <div class="review-card__meta">
-                    <strong>Олена</strong>
-                    <span>1 тиждень тому</span>
-                </div>
-            </div>
-            <div class="review-card__stars">★★★★★</div>
-            <p class="review-card__text">
-                Гарна альтернатива піці! Колеги в офісі були в захваті. Красиво упаковано, дуже смачно!
-            </p>
-        </div>
+        <?php endwhile; wp_reset_postdata(); ?>
     </div>
+    <?php endif; ?>
+
 </section>
 
 <!-- ======================================================================

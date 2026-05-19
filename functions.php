@@ -128,6 +128,112 @@ function lesyni_seed_promos() {
 add_action( 'init', 'lesyni_seed_promos' );
 
 /* -----------------------------------------------------------------------
+   Reviews CPT
+----------------------------------------------------------------------- */
+function lesyni_register_review_cpt() {
+    register_post_type( 'lesyni_review', [
+        'public'       => false,
+        'show_ui'      => true,
+        'show_in_menu' => true,
+        'menu_icon'    => 'dashicons-star-filled',
+        'labels'       => [
+            'name'          => 'Відгуки',
+            'singular_name' => 'Відгук',
+            'add_new'       => 'Додати відгук',
+            'add_new_item'  => 'Новий відгук',
+            'edit_item'     => 'Редагувати відгук',
+            'all_items'     => 'Всі відгуки',
+        ],
+        'supports'     => [ 'title', 'editor' ],
+        'has_archive'  => false,
+        'rewrite'      => false,
+    ] );
+}
+add_action( 'init', 'lesyni_register_review_cpt' );
+
+function lesyni_review_meta_box() {
+    add_meta_box(
+        'lesyni_review_meta',
+        'Деталі відгуку',
+        'lesyni_review_meta_box_html',
+        'lesyni_review',
+        'side',
+        'high'
+    );
+}
+add_action( 'add_meta_boxes', 'lesyni_review_meta_box' );
+
+function lesyni_review_meta_box_html( $post ) {
+    wp_nonce_field( 'lesyni_review_save', 'lesyni_review_nonce' );
+    $stars = get_post_meta( $post->ID, '_review_stars', true ) ?: '5';
+    $date  = get_post_meta( $post->ID, '_review_date',  true ) ?: '';
+    ?>
+    <p>
+        <label style="display:block;font-weight:600;margin-bottom:4px;">Зірки</label>
+        <select name="review_stars" style="width:100%">
+            <?php foreach ( [ 5, 4, 3, 2, 1 ] as $n ) : ?>
+                <option value="<?php echo $n; ?>" <?php selected( $stars, $n ); ?>><?php echo str_repeat( '★', $n ) . str_repeat( '☆', 5 - $n ); ?></option>
+            <?php endforeach; ?>
+        </select>
+    </p>
+    <p>
+        <label style="display:block;font-weight:600;margin-bottom:4px;">Коли (наприклад: 2 дні тому)</label>
+        <input type="text" name="review_date" value="<?php echo esc_attr( $date ); ?>" placeholder="2 дні тому" style="width:100%">
+    </p>
+    <?php
+}
+
+function lesyni_review_save_meta( $post_id ) {
+    if ( ! isset( $_POST['lesyni_review_nonce'] ) ) return;
+    if ( ! wp_verify_nonce( $_POST['lesyni_review_nonce'], 'lesyni_review_save' ) ) return;
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+    update_post_meta( $post_id, '_review_stars', intval( $_POST['review_stars'] ?? 5 ) );
+    update_post_meta( $post_id, '_review_date',  sanitize_text_field( $_POST['review_date'] ?? '' ) );
+}
+add_action( 'save_post_lesyni_review', 'lesyni_review_save_meta' );
+
+function lesyni_seed_reviews() {
+    if ( get_option( 'lesyni_reviews_seeded' ) ) return;
+
+    $reviews = [
+        [
+            'name'  => 'Марія',
+            'text'  => 'Найкращі пироги в місті! Дуже смачно, много начинки, свіже тісто. М\'ясний просто божественний!',
+            'stars' => 5,
+            'date'  => '2 дні тому',
+        ],
+        [
+            'name'  => 'Андрій',
+            'text'  => 'Жульєн з дуже правильним балансом грибів та курки. Доставили вчасно. Всім рекомендую!',
+            'stars' => 5,
+            'date'  => '5 днів тому',
+        ],
+        [
+            'name'  => 'Олена',
+            'text'  => 'Гарна альтернатива піці! Колеги в офісі були в захваті. Красиво упаковано, дуже смачно!',
+            'stars' => 5,
+            'date'  => '1 тиждень тому',
+        ],
+    ];
+
+    foreach ( $reviews as $r ) {
+        $id = wp_insert_post( [
+            'post_type'    => 'lesyni_review',
+            'post_status'  => 'publish',
+            'post_title'   => $r['name'],
+            'post_content' => $r['text'],
+        ] );
+        if ( $id && ! is_wp_error( $id ) ) {
+            update_post_meta( $id, '_review_stars', $r['stars'] );
+            update_post_meta( $id, '_review_date',  $r['date'] );
+        }
+    }
+
+    update_option( 'lesyni_reviews_seeded', true );
+}
+add_action( 'init', 'lesyni_seed_reviews' );
+
+/* -----------------------------------------------------------------------
    Scripts & Styles
 ----------------------------------------------------------------------- */
 function lesyni_enqueue_assets() {

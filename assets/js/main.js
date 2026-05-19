@@ -1233,12 +1233,37 @@
         }
     }
 
+    function recalcDrawerTotal() {
+        var total = 0;
+        drawerBody.querySelectorAll('.cart-drawer__qty-val').forEach(function (v) {
+            total += Math.round((parseFloat(v.dataset.unit) || 0) * (parseInt(v.textContent, 10) || 0));
+        });
+        if (drawerTotal) drawerTotal.textContent = total + ' грн';
+    }
+
     function attachDrawerItemHandlers() {
         // Remove buttons
         drawerBody.querySelectorAll('.cart-drawer__remove').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var key = btn.dataset.key;
-                btn.disabled = true;
+                var key     = btn.dataset.key;
+                var itemEl  = drawerBody.querySelector('.cart-drawer__item[data-key="' + key + '"]');
+
+                // Remove from DOM immediately
+                if (itemEl) {
+                    itemEl.style.transition = 'opacity .2s, transform .2s';
+                    itemEl.style.opacity    = '0';
+                    itemEl.style.transform  = 'translateX(20px)';
+                    setTimeout(function () {
+                        itemEl.remove();
+                        recalcDrawerTotal();
+                        var remaining = drawerBody.querySelectorAll('.cart-drawer__item');
+                        if (!remaining.length) {
+                            drawerBody.innerHTML = '<div class="cart-drawer__empty"><div class="cart-drawer__empty-icon">🧺</div><p>Кошик порожній</p></div>';
+                            drawerFoot.style.display = 'none';
+                        }
+                    }, 200);
+                }
+
                 fetch('/?wc-ajax=lesyni_cart_remove', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1247,9 +1272,7 @@
                 .then(function (r) { return r.json(); })
                 .then(function (resp) {
                     if (resp.success) updateCartCount(resp.data.count || 0);
-                    loadDrawerContents();
-                })
-                .catch(function () { loadDrawerContents(); });
+                });
             });
         });
 
@@ -1264,15 +1287,26 @@
                 if (qty < 0) return;
 
                 // Optimistic UI
-                valEl.textContent = qty;
-                var unit     = parseFloat(valEl.dataset.unit) || 0;
-                var priceEl  = btn.closest('.cart-drawer__item').querySelector('.cart-drawer__item-price');
-                if (priceEl) priceEl.textContent = Math.round(unit * qty) + ' грн';
-                var total    = 0;
-                drawerBody.querySelectorAll('.cart-drawer__qty-val').forEach(function (v) {
-                    total += Math.round((parseFloat(v.dataset.unit) || 0) * (parseInt(v.textContent, 10) || 0));
-                });
-                if (drawerTotal) drawerTotal.textContent = total + ' грн';
+                var itemEl = btn.closest('.cart-drawer__item');
+                if (qty === 0) {
+                    itemEl.style.transition = 'opacity .2s, transform .2s';
+                    itemEl.style.opacity    = '0';
+                    itemEl.style.transform  = 'translateX(20px)';
+                    setTimeout(function () {
+                        itemEl.remove();
+                        recalcDrawerTotal();
+                        if (!drawerBody.querySelectorAll('.cart-drawer__item').length) {
+                            drawerBody.innerHTML = '<div class="cart-drawer__empty"><div class="cart-drawer__empty-icon">🧺</div><p>Кошик порожній</p></div>';
+                            drawerFoot.style.display = 'none';
+                        }
+                    }, 200);
+                } else {
+                    valEl.textContent = qty;
+                    var unit    = parseFloat(valEl.dataset.unit) || 0;
+                    var priceEl = itemEl.querySelector('.cart-drawer__item-price');
+                    if (priceEl) priceEl.textContent = Math.round(unit * qty) + ' грн';
+                    recalcDrawerTotal();
+                }
 
                 fetch('/?wc-ajax=lesyni_cart_update_qty', {
                     method: 'POST',
@@ -1282,9 +1316,8 @@
                 .then(function (r) { return r.json(); })
                 .then(function (resp) {
                     if (resp.success) updateCartCount(resp.data.count || 0);
-                    if (qty === 0) loadDrawerContents();
                 })
-                .catch(function () { loadDrawerContents(); });
+                .catch(function () {});
             });
         });
     }

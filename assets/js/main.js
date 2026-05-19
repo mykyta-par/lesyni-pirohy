@@ -560,29 +560,30 @@
 
     /* ── Free delivery progress bar ────────────────────────────── */
     function updateFreeBar(subtotal) {
-        var barFill = document.getElementById('oco-free-bar-fill');
-        var barText = document.getElementById('oco-free-bar-text');
-        if (!barFill || !barText) return;
-
-        var freeFrom = detectedZone === 'yellow' ? YELLOW_FREE_FROM : GREEN_FREE_FROM;
+        var freeFrom  = detectedZone === 'yellow' ? YELLOW_FREE_FROM : GREEN_FREE_FROM;
         var remaining = Math.max(0, freeFrom - subtotal);
-        var pct = freeFrom > 0 ? Math.min(100, Math.round(subtotal / freeFrom * 100)) : 100;
+        var pct       = freeFrom > 0 ? Math.min(100, Math.round(subtotal / freeFrom * 100)) : 100;
+        var hide      = detectedZone === 'outside' || deliveryType === 'pickup' || deliveryType === 'np';
 
-        barFill.style.width = pct + '%';
+        ['', '-summary'].forEach(function (suffix) {
+            var wrap = document.getElementById('oco-free-bar-wrap' + suffix);
+            var fill = document.getElementById('oco-free-bar-fill' + suffix);
+            var text = document.getElementById('oco-free-bar-text' + suffix);
+            if (!wrap) return;
 
-        if (detectedZone === 'outside' || deliveryType === 'pickup' || deliveryType === 'np') {
-            document.getElementById('oco-free-bar-wrap') && (document.getElementById('oco-free-bar-wrap').style.display = 'none');
-            return;
-        }
-        document.getElementById('oco-free-bar-wrap') && (document.getElementById('oco-free-bar-wrap').style.display = '');
+            if (hide) { wrap.style.display = 'none'; return; }
+            wrap.style.display = '';
 
-        if (remaining > 0) {
-            barFill.classList.remove('oco-free-bar__fill--done');
-            barText.innerHTML = 'Ще <strong>' + remaining + ' грн</strong> до безкоштовної доставки';
-        } else {
-            barFill.classList.add('oco-free-bar__fill--done');
-            barText.innerHTML = '<span class="oco-free-bar__done">Безкоштовна доставка</span>';
-        }
+            if (fill) {
+                fill.style.width = pct + '%';
+                fill.classList.toggle('oco-free-bar__fill--done', remaining === 0);
+            }
+            if (text) {
+                text.innerHTML = remaining > 0
+                    ? 'Ще <strong>' + remaining + ' грн</strong> до безкоштовної доставки'
+                    : '<span class="oco-free-bar__done">Безкоштовна доставка</span>';
+            }
+        });
     }
 
     /* ── Cart recalc ────────────────────────────────────────────── */

@@ -3562,6 +3562,10 @@ ul.products {
 .oco-free-bar__fill--done {
     background: linear-gradient(90deg, #7a9b6e 0%, #9abf8e 100%);
 }
+.oco-free-bar--summary {
+    padding: 10px 0 14px;
+    border-top: none;
+}
 
 .oco-cart-foot {
     padding: 16px 24px;

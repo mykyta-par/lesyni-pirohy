@@ -606,6 +606,19 @@ else   $count_str = $n . ' позицій';
                     </strong>
                 </div>
 
+                <div class="oco-free-bar oco-free-bar--summary" id="oco-free-bar-wrap-summary">
+                    <div class="oco-free-bar__text" id="oco-free-bar-text-summary">
+                        <?php if ( $_remaining > 0 ) : ?>
+                            Ще <strong><?php echo number_format( $_remaining, 0, '', '' ); ?> грн</strong> до безкоштовної доставки
+                        <?php else : ?>
+                            <span class="oco-free-bar__done">Безкоштовна доставка</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="oco-free-bar__track">
+                        <div class="oco-free-bar__fill" id="oco-free-bar-fill-summary" style="width:<?php echo esc_attr( $_pct ); ?>%"></div>
+                    </div>
+                </div>
+
                 <div class="oco-summary-total">
                     <span class="oco-summary-total-label">До оплати</span>
                     <div class="oco-summary-total-price">

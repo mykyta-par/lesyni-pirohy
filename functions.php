@@ -281,7 +281,7 @@ function lesyni_enqueue_assets() {
 	);
 
 	wp_localize_script( 'lesyni-main', 'lesyniData', [
-		'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+		'ajaxUrl' => home_url( '/?wc-ajax=lesyni_add_to_cart' ),
 		'nonce'   => wp_create_nonce( 'lesyni_add_to_cart' ),
 	] );
 
@@ -317,8 +317,8 @@ function lesyni_ajax_add_to_cart() {
 		wp_send_json_error( [ 'message' => 'Could not add to cart' ] );
 	}
 }
-add_action( 'wp_ajax_lesyni_add_to_cart',        'lesyni_ajax_add_to_cart' );
-add_action( 'wp_ajax_nopriv_lesyni_add_to_cart', 'lesyni_ajax_add_to_cart' );
+add_action( 'wc_ajax_lesyni_add_to_cart',        'lesyni_ajax_add_to_cart' );
+add_action( 'wc_ajax_nopriv_lesyni_add_to_cart', 'lesyni_ajax_add_to_cart' );
 
 
 // Output config as a hidden HTML element (data attribute) — CSP-safe, no inline script needed.

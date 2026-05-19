@@ -112,12 +112,11 @@
     function lesyniAddToCart(itemId, qty, onSuccess, onError) {
         var data = window.lesyniData || {};
         var body = new URLSearchParams({
-            action:   'lesyni_add_to_cart',
-            nonce:    data.nonce    || '',
+            nonce:    data.nonce   || '',
             item_id:  itemId,
             quantity: qty,
         });
-        fetch(data.ajaxUrl || '/wp-admin/admin-ajax.php', {
+        fetch(data.ajaxUrl || '/?wc-ajax=lesyni_add_to_cart', {
             method:  'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body:    body.toString(),

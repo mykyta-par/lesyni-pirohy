@@ -582,8 +582,8 @@ else   $count_str = $n . ' позицій';
 
                 <div class="oco-summary-row">
                     <span id="oco-shipping-label">Доставка по Дніпру</span>
-                    <strong id="oco-sum-shipping" style="color:<?php echo $ship_free ? '#7a9b6e' : '#3d3d3d'; ?>">
-                        <?php echo esc_html( $ship_label ); ?>
+                    <strong id="oco-sum-shipping" style="color:#999;font-weight:400;font-size:12px;">
+                        буде відома після введення адреси
                     </strong>
                 </div>
 

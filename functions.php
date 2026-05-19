@@ -316,6 +316,52 @@ function lesyni_ajax_add_to_cart() {
 add_action( 'wc_ajax_lesyni_add_to_cart',        'lesyni_ajax_add_to_cart' );
 add_action( 'wc_ajax_nopriv_lesyni_add_to_cart', 'lesyni_ajax_add_to_cart' );
 
+/* -----------------------------------------------------------------------
+   AJAX: get cart drawer contents
+----------------------------------------------------------------------- */
+function lesyni_ajax_cart_drawer() {
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+		wp_send_json_error();
+		return;
+	}
+	$items = [];
+	foreach ( WC()->cart->get_cart() as $key => $item ) {
+		$product = $item['data'];
+		if ( ! $product ) continue;
+		$name    = $product->get_name();
+		$qty     = $item['quantity'];
+		$price   = (float) $product->get_price();
+		$thumb   = get_the_post_thumbnail_url( $item['product_id'], 'thumbnail' );
+		$variation_label = '';
+		if ( ! empty( $item['variation'] ) ) {
+			$parts = [];
+			foreach ( $item['variation'] as $attr => $val ) {
+				if ( ! $val ) continue;
+				$taxonomy = str_replace( 'attribute_', '', $attr );
+				$term     = get_term_by( 'slug', $val, $taxonomy );
+				$parts[]  = $term ? $term->name : $val;
+			}
+			$variation_label = implode( ', ', $parts );
+		}
+		$items[] = [
+			'key'       => $key,
+			'name'      => $name,
+			'qty'       => $qty,
+			'price'     => $price,
+			'subtotal'  => round( $price * $qty ),
+			'thumb'     => $thumb ?: '',
+			'variation' => $variation_label,
+		];
+	}
+	wp_send_json_success( [
+		'items' => $items,
+		'total' => round( (float) WC()->cart->get_cart_total_ex_tax() ?: WC()->cart->get_subtotal() ),
+		'count' => WC()->cart->get_cart_contents_count(),
+	] );
+}
+add_action( 'wc_ajax_lesyni_cart_drawer',        'lesyni_ajax_cart_drawer' );
+add_action( 'wc_ajax_nopriv_lesyni_cart_drawer', 'lesyni_ajax_cart_drawer' );
+
 
 // Output config as a hidden HTML element (data attribute) — CSP-safe, no inline script needed.
 // Runs at priority 5 so the <div> is in the DOM before footer scripts execute.

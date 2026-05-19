@@ -131,6 +131,11 @@
                     countEl.classList.toggle('header-cart__count--hidden', count === 0);
                 }
                 if (onSuccess) onSuccess();
+                // Refresh drawer contents if it's open
+                var drawer = document.getElementById('cart-drawer');
+                if (drawer && drawer.classList.contains('open')) {
+                    loadDrawerContents();
+                }
             } else {
                 if (onError) onError();
             }
@@ -1135,5 +1140,86 @@
     /* ── Init ───────────────────────────────────────────────────── */
     recalc();
     updateWhen();
+
+    /* ------------------------------------------------------------------
+       Cart Drawer
+    ------------------------------------------------------------------ */
+    var cartDrawer    = document.getElementById('cart-drawer');
+    var drawerBody    = document.getElementById('cart-drawer-body');
+    var drawerFoot    = document.getElementById('cart-drawer-foot');
+    var drawerTotal   = document.getElementById('cart-drawer-total');
+    var drawerTrigger = document.getElementById('cart-drawer-trigger');
+    var drawerClose   = document.getElementById('cart-drawer-close');
+    var drawerBackdrop = document.getElementById('cart-drawer-backdrop');
+
+    if (!cartDrawer) return;
+
+    function openCartDrawer() {
+        cartDrawer.classList.add('open');
+        cartDrawer.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        loadDrawerContents();
+    }
+
+    function closeCartDrawer() {
+        cartDrawer.classList.remove('open');
+        cartDrawer.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    function loadDrawerContents() {
+        drawerBody.innerHTML = '<div class="cart-drawer__loading"><span class="cart-drawer__spinner"></span></div>';
+        drawerFoot.style.display = 'none';
+
+        fetch('/?wc-ajax=lesyni_cart_drawer', { method: 'POST' })
+            .then(function (r) { return r.json(); })
+            .then(function (resp) {
+                if (!resp.success) { drawerBody.innerHTML = ''; return; }
+                var data  = resp.data;
+                var items = data.items || [];
+
+                if (!items.length) {
+                    drawerBody.innerHTML = '<div class="cart-drawer__empty"><div class="cart-drawer__empty-icon">🧺</div><p>Кошик порожній</p></div>';
+                    drawerFoot.style.display = 'none';
+                    return;
+                }
+
+                var html = '';
+                items.forEach(function (item) {
+                    var img = item.thumb
+                        ? '<img class="cart-drawer__item-img" src="' + item.thumb + '" alt="' + item.name + '">'
+                        : '<div class="cart-drawer__item-img cart-drawer__item-img--placeholder">🥧</div>';
+                    var variation = item.variation
+                        ? '<p class="cart-drawer__item-variation">' + item.variation + '</p>'
+                        : '';
+                    html += '<div class="cart-drawer__item">'
+                        + img
+                        + '<div class="cart-drawer__item-info">'
+                        +   '<p class="cart-drawer__item-name">' + item.name + '</p>'
+                        +   variation
+                        +   '<div class="cart-drawer__item-row">'
+                        +     '<span class="cart-drawer__item-qty">' + item.qty + ' шт</span>'
+                        +     '<span class="cart-drawer__item-price">' + item.subtotal + ' грн</span>'
+                        +   '</div>'
+                        + '</div>'
+                        + '</div>';
+                });
+                drawerBody.innerHTML = html;
+
+                if (drawerTotal) drawerTotal.textContent = data.total + ' грн';
+                drawerFoot.style.display = '';
+            })
+            .catch(function () {
+                drawerBody.innerHTML = '';
+            });
+    }
+
+    if (drawerTrigger)  drawerTrigger.addEventListener('click', openCartDrawer);
+    if (drawerClose)    drawerClose.addEventListener('click', closeCartDrawer);
+    if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeCartDrawer);
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && cartDrawer.classList.contains('open')) closeCartDrawer();
+    });
 
 })();

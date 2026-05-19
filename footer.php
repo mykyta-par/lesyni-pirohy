@@ -48,6 +48,32 @@
     </div>
 </footer>
 
+<?php if ( function_exists( 'WC' ) ) : ?>
+<div class="cart-drawer" id="cart-drawer" aria-hidden="true">
+    <div class="cart-drawer__backdrop" id="cart-drawer-backdrop"></div>
+    <div class="cart-drawer__panel" role="dialog" aria-label="Кошик">
+        <div class="cart-drawer__head">
+            <span class="cart-drawer__title">Кошик</span>
+            <button class="cart-drawer__close" id="cart-drawer-close" aria-label="Закрити">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="cart-drawer__body" id="cart-drawer-body">
+            <div class="cart-drawer__loading">
+                <span class="cart-drawer__spinner"></span>
+            </div>
+        </div>
+        <div class="cart-drawer__foot" id="cart-drawer-foot" style="display:none">
+            <div class="cart-drawer__total-row">
+                <span>Разом:</span>
+                <strong id="cart-drawer-total">0 грн</strong>
+            </div>
+            <a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="btn btn--primary btn--lg cart-drawer__checkout">Оформити замовлення →</a>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <?php wp_footer(); ?>
 </body>
 </html>

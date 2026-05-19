@@ -3241,7 +3241,6 @@ ul.products {
     width: 100%;
     margin: 0 auto;
     padding: 32px var(--px) 80px;
-    overflow-x: hidden;
 }
 
 .oco-left,

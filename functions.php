@@ -573,33 +573,28 @@ add_filter( 'woocommerce_package_rates', function ( $rates, $package ) {
         ? (float) $package['cart_subtotal']
         : (float) WC()->cart->get_subtotal();
 
+    // Courier rate — cost depends on detected zone
     if ( $zone_data && in_array( $zone_data['zone'], [ 'green', 'yellow' ], true ) ) {
         $zone = $zone_data['zone'];
-
         if ( $zone === 'green' ) {
-            $free_from = (float) get_option( 'lesyni_green_free_from',  600 );
-            $cost      = $subtotal >= $free_from ? 0 : (float) get_option( 'lesyni_green_cost', 100 );
+            $free_from    = (float) get_option( 'lesyni_green_free_from',  600 );
+            $courier_cost = $subtotal >= $free_from ? 0 : (float) get_option( 'lesyni_green_cost', 100 );
         } else {
-            $free_from = (float) get_option( 'lesyni_yellow_free_from', 800 );
-            $cost      = $subtotal >= $free_from ? 0 : (float) get_option( 'lesyni_yellow_cost', 150 );
+            $free_from    = (float) get_option( 'lesyni_yellow_free_from', 800 );
+            $courier_cost = $subtotal >= $free_from ? 0 : (float) get_option( 'lesyni_yellow_cost', 150 );
         }
-
-        $label = $cost === 0.0 ? 'Безкоштовна доставка' : 'Доставка по Дніпру — ' . (int) $cost . ' грн';
-
+        $courier_label = $courier_cost === 0.0 ? 'Безкоштовна доставка' : 'Доставка по Дніпру — ' . (int) $courier_cost . ' грн';
     } else {
-        // No zone or outside — free (manager will clarify)
-        $cost  = 0;
-        $label = 'Доставка (уточнюється)';
+        $courier_cost  = 0;
+        $courier_label = 'Доставка (уточнюється)';
     }
 
+    $np_cost = (float) get_option( 'lesyni_np_cost', 80 );
+
     return [
-        'lesyni_zone_rate' => new WC_Shipping_Rate(
-            'lesyni_zone_rate',
-            $label,
-            $cost,
-            [],
-            'lesyni_zone'
-        ),
+        'lesyni_zone_rate'   => new WC_Shipping_Rate( 'lesyni_zone_rate',   $courier_label,    $courier_cost, [], 'lesyni_zone' ),
+        'lesyni_pickup_rate' => new WC_Shipping_Rate( 'lesyni_pickup_rate', 'Самовивіз',       0,             [], 'lesyni_zone' ),
+        'lesyni_np_rate'     => new WC_Shipping_Rate( 'lesyni_np_rate',     'Нова Пошта',      $np_cost,      [], 'lesyni_zone' ),
     ];
 }, 20, 2 );
 

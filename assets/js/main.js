@@ -494,20 +494,6 @@
     var selectedDate   = null;
     var selectedTime   = '14:00–15:00';
 
-    /* ── Mobile: keep .oco-left bottom padding above fixed .oco-right ── */
-    var ocoLeft  = document.querySelector('.oco-left');
-    var ocoRight = document.querySelector('.oco-right');
-    function syncOcoLeftPadding() {
-        if (!ocoLeft || !ocoRight) return;
-        if (window.innerWidth <= 768) {
-            ocoLeft.style.paddingBottom = (ocoRight.offsetHeight + 16) + 'px';
-        } else {
-            ocoLeft.style.paddingBottom = '';
-        }
-    }
-    syncOcoLeftPadding();
-    window.addEventListener('resize', syncOcoLeftPadding);
-
     /* ── Date picker ────────────────────────────────────────────── */
     var picker = document.getElementById('oco-date-picker');
     if (picker) {
@@ -655,8 +641,9 @@
         if (cartCountEl)  cartCountEl.textContent  = itemCount;
         if (cartSubEl)    cartSubEl.textContent    = subtotal;
 
-        // Sync oco-left bottom padding so content isn't hidden under fixed oco-right
-        syncOcoLeftPadding();
+        // Sync mobile sticky bar
+        var stickyTotal = document.getElementById('oco-sticky-total');
+        if (stickyTotal) stickyTotal.textContent = total;
         if (totalItemsEl) {
             var n = itemCount;
             var str;

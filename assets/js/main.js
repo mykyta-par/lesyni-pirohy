@@ -160,19 +160,19 @@
             }
 
             btn.disabled = true;
-            btn.textContent = '✓ Додано';
-            btn.classList.add('btn-add-cart--added');
+            btn.textContent = '...';
 
             lesyniAddToCart(itemId, 1, function () {
+                btn.textContent = '✓ Додано';
+                btn.classList.add('btn-add-cart--added');
                 setTimeout(function () {
                     btn.textContent = 'В кошик';
                     btn.classList.remove('btn-add-cart--added');
                     btn.disabled = false;
-                }, 1500);
+                }, 2000);
             }, function () {
-                btn.textContent = 'В кошик';
-                btn.classList.remove('btn-add-cart--added');
                 btn.disabled = false;
+                btn.textContent = 'В кошик';
             });
         });
     });
@@ -272,18 +272,18 @@
 
             spBtnCart.disabled = true;
             var labelEl = spBtnCart.querySelector('.sp-btn-cart__label');
-            if (labelEl) labelEl.textContent = '✓ Додано!';
-            spBtnCart.classList.add('sp-btn-cart--added');
+            if (labelEl) labelEl.textContent = '...';
 
             lesyniAddToCart(itemId, qty, function () {
+                if (labelEl) labelEl.textContent = '✓ Додано!';
+                spBtnCart.classList.add('sp-btn-cart--added');
                 setTimeout(function () {
                     if (labelEl) labelEl.textContent = 'Додати в кошик';
                     spBtnCart.classList.remove('sp-btn-cart--added');
                     spBtnCart.disabled = false;
-                }, 1500);
+                }, 2000);
             }, function () {
                 if (labelEl) labelEl.textContent = 'Додати в кошик';
-                spBtnCart.classList.remove('sp-btn-cart--added');
                 spBtnCart.disabled = false;
             });
         });

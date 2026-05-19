@@ -640,6 +640,10 @@
         if (countEl)      countEl.textContent      = itemCount;
         if (cartCountEl)  cartCountEl.textContent  = itemCount;
         if (cartSubEl)    cartSubEl.textContent    = subtotal;
+
+        // Sync mobile sticky bar
+        var stickyTotal = document.getElementById('oco-sticky-total');
+        if (stickyTotal) stickyTotal.textContent = total;
         if (totalItemsEl) {
             var n = itemCount;
             var str;

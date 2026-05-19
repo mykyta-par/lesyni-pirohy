@@ -607,17 +607,6 @@ else   $count_str = $n . ' позицій';
 
     </div><!-- .oco-grid -->
 
-    <!-- Mobile sticky summary bar -->
-    <div class="oco-sticky-bar" id="oco-sticky-bar">
-        <div class="oco-sticky-bar__info">
-            <span class="oco-sticky-bar__label">До оплати</span>
-            <span class="oco-sticky-bar__delivery" id="oco-sticky-shipping"><?php echo esc_html( $ship_label ); ?> доставка</span>
-        </div>
-        <div class="oco-sticky-bar__total">
-            <span id="oco-sticky-total"><?php echo number_format( $total, 0, '', '' ); ?></span> грн
-        </div>
-    </div>
-
     <?php else : ?>
 
     <!-- Empty cart -->

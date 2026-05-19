@@ -107,35 +107,36 @@
        Add to cart — unified button for simple & variable products
     ------------------------------------------------------------------ */
 
-    // Use WC Store API: pass variation_id directly for variable products.
-    // This is the only reliable way to distinguish variations in the cart.
+    // Custom WP AJAX handler: pass variation_id directly for variable products.
+    // WooCommerce detects it's a variation and resolves parent + attributes internally.
     function lesyniAddToCart(itemId, qty, onSuccess, onError) {
-        var nonce = (window.lesyniData && window.lesyniData.storeNonce) ? window.lesyniData.storeNonce : '';
-        fetch('/wp-json/wc/store/v1/cart/add-item', {
-            method:  'POST',
-            headers: {
-                'Content-Type':        'application/json',
-                'X-WC-Store-API-Nonce': nonce,
-            },
-            body: JSON.stringify({ id: parseInt(itemId, 10), quantity: qty }),
-        })
-        .then(function (r) {
-            if (!r.ok) throw new Error('http ' + r.status);
-            return r.json();
-        })
-        .then(function (data) {
-            // Update cart count badge
-            var count = data.items_count || 0;
-            var countEl = document.querySelector('.header-cart__count');
-            if (countEl) {
-                countEl.textContent = count;
-                countEl.classList.toggle('header-cart__count--hidden', count === 0);
-            }
-            if (onSuccess) onSuccess(data);
-        })
-        .catch(function (err) {
-            if (onError) onError(err);
+        var data = window.lesyniData || {};
+        var body = new URLSearchParams({
+            action:   'lesyni_add_to_cart',
+            nonce:    data.nonce    || '',
+            item_id:  itemId,
+            quantity: qty,
         });
+        fetch(data.ajaxUrl || '/wp-admin/admin-ajax.php', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body:    body.toString(),
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (resp) {
+            if (resp.success) {
+                var count  = (resp.data && resp.data.count) || 0;
+                var countEl = document.querySelector('.header-cart__count');
+                if (countEl) {
+                    countEl.textContent = count;
+                    countEl.classList.toggle('header-cart__count--hidden', count === 0);
+                }
+                if (onSuccess) onSuccess();
+            } else {
+                if (onError) onError();
+            }
+        })
+        .catch(function () { if (onError) onError(); });
     }
 
     document.querySelectorAll('.btn-add-cart[data-product-id]').forEach(function (btn) {

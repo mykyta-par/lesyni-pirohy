@@ -281,11 +281,45 @@ function lesyni_enqueue_assets() {
 	);
 
 	wp_localize_script( 'lesyni-main', 'lesyniData', [
-		'storeNonce' => wp_create_nonce( 'wc_store_api' ),
+		'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+		'nonce'   => wp_create_nonce( 'lesyni_add_to_cart' ),
 	] );
 
 }
 add_action( 'wp_enqueue_scripts', 'lesyni_enqueue_assets' );
+
+/* -----------------------------------------------------------------------
+   Custom AJAX: add to cart (simple & variable products)
+   Pass item_id = variation_id for variable, product_id for simple.
+   WooCommerce resolves the variation automatically.
+----------------------------------------------------------------------- */
+function lesyni_ajax_add_to_cart() {
+	if ( ! check_ajax_referer( 'lesyni_add_to_cart', 'nonce', false ) ) {
+		wp_send_json_error( [ 'message' => 'Invalid nonce' ], 403 );
+		return;
+	}
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+		wp_send_json_error( [ 'message' => 'WooCommerce not ready' ], 500 );
+		return;
+	}
+	$item_id  = absint( $_POST['item_id'] ?? 0 );
+	$quantity = max( 1, absint( $_POST['quantity'] ?? 1 ) );
+	if ( ! $item_id ) {
+		wp_send_json_error( [ 'message' => 'Invalid product' ], 400 );
+		return;
+	}
+	// Passing variation_id as first argument works: WC detects it's a
+	// variation and automatically resolves the parent + attributes.
+	$key = WC()->cart->add_to_cart( $item_id, $quantity );
+	if ( $key ) {
+		wp_send_json_success( [ 'count' => WC()->cart->get_cart_contents_count() ] );
+	} else {
+		wp_send_json_error( [ 'message' => 'Could not add to cart' ] );
+	}
+}
+add_action( 'wp_ajax_lesyni_add_to_cart',        'lesyni_ajax_add_to_cart' );
+add_action( 'wp_ajax_nopriv_lesyni_add_to_cart', 'lesyni_ajax_add_to_cart' );
+
 
 // Output config as a hidden HTML element (data attribute) — CSP-safe, no inline script needed.
 // Runs at priority 5 so the <div> is in the DOM before footer scripts execute.

@@ -556,7 +556,7 @@ else   $count_str = $n . ' позицій';
                 <h3 class="oco-summary-title">Підсумок замовлення</h3>
 
                 <div class="oco-summary-when">
-                    <div>Доставимо <strong id="oco-when-label">сьогодні, 14:00–15:00</strong></div>
+                    <div>Доставимо <strong id="oco-when-label">сьогодні, 14:00–15:00</strong> · теплим, у фірмовій упаковці</div>
                 </div>
 
                 <div class="oco-summary-row">
@@ -602,21 +602,16 @@ else   $count_str = $n . ' позицій';
 
                 <div class="oco-secure-note">Захищене з'єднання · ваші дані під захистом</div>
 
+                <div class="oco-summary-trust">
+                    <div class="oco-trust-item">Випікаємо під замовлення</div>
+                    <div class="oco-trust-item">Доставка за 2 години</div>
+                    <div class="oco-trust-item">Оплата при отриманні</div>
+                    <div class="oco-trust-item">Скасування безкоштовно</div>
+                </div>
             </div>
         </div><!-- .oco-right -->
 
     </div><!-- .oco-grid -->
-
-    <!-- Mobile sticky summary bar -->
-    <div class="oco-sticky-bar" id="oco-sticky-bar">
-        <div class="oco-sticky-bar__info">
-            <span class="oco-sticky-bar__label">До оплати</span>
-            <span class="oco-sticky-bar__delivery" id="oco-sticky-shipping"><?php echo esc_html( $ship_label ); ?> доставка</span>
-        </div>
-        <div class="oco-sticky-bar__total">
-            <span id="oco-sticky-total"><?php echo number_format( $total, 0, '', '' ); ?></span> грн
-        </div>
-    </div>
 
     <?php else : ?>
 

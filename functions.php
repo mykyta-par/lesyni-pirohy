@@ -839,3 +839,6 @@ function lesyni_pie_visual_class( $product ) {
 	}
 	return 'pie-default';
 }
+
+// Disable WooCommerce shipping debug notices
+add_filter( 'option_woocommerce_shipping_debug_mode', '__return_zero' );

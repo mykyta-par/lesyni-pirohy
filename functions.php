@@ -355,7 +355,7 @@ function lesyni_ajax_cart_drawer() {
 	}
 	wp_send_json_success( [
 		'items' => $items,
-		'total' => round( (float) WC()->cart->get_cart_total_ex_tax() ?: WC()->cart->get_subtotal() ),
+		'total' => round( (float) WC()->cart->get_subtotal() ),
 		'count' => WC()->cart->get_cart_contents_count(),
 	] );
 }

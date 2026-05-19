@@ -1004,9 +1004,7 @@
                 return;
             }
             detectedZone = data.data.zone;
-            // Sync hidden shipping_method field so WC checkout uses correct rate
-            var smInput = document.getElementById('oco-shipping-method-val');
-            if (smInput) smInput.value = 'lesyni_zone:' + detectedZone;
+            // shipping_method[0] is always lesyni_zone_rate — cost is set server-side via woocommerce_package_rates
             // Update zone indicator and shipping display first (must not be blocked by map errors)
             try { applyZoneUI(detectedZone, data.data.rates); } catch (e) { console.error('applyZoneUI:', e); }
             recalc();

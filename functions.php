@@ -560,6 +560,50 @@ add_filter( 'woocommerce_shipping_methods', function ( $methods ) {
 } );
 
 /* -----------------------------------------------------------------------
+   Override ALL WC shipping rates with a single dynamic lesyni rate.
+   This replaces "безкоштовна доставка" / "коштовна доставка" (and any
+   other methods in the matched zone) so checkout always gets one rate
+   with the correct cost based on the detected delivery zone.
+----------------------------------------------------------------------- */
+add_filter( 'woocommerce_package_rates', function ( $rates, $package ) {
+    if ( ! function_exists( 'WC' ) || ! WC()->session ) return $rates;
+
+    $zone_data = WC()->session->get( 'lesyni_zone_data' );
+    $subtotal  = isset( $package['cart_subtotal'] )
+        ? (float) $package['cart_subtotal']
+        : (float) WC()->cart->get_subtotal();
+
+    if ( $zone_data && in_array( $zone_data['zone'], [ 'green', 'yellow' ], true ) ) {
+        $zone = $zone_data['zone'];
+
+        if ( $zone === 'green' ) {
+            $free_from = (float) get_option( 'lesyni_green_free_from',  600 );
+            $cost      = $subtotal >= $free_from ? 0 : (float) get_option( 'lesyni_green_cost', 100 );
+        } else {
+            $free_from = (float) get_option( 'lesyni_yellow_free_from', 800 );
+            $cost      = $subtotal >= $free_from ? 0 : (float) get_option( 'lesyni_yellow_cost', 150 );
+        }
+
+        $label = $cost === 0.0 ? 'Безкоштовна доставка' : 'Доставка по Дніпру — ' . (int) $cost . ' грн';
+
+    } else {
+        // No zone or outside — free (manager will clarify)
+        $cost  = 0;
+        $label = 'Доставка (уточнюється)';
+    }
+
+    return [
+        'lesyni_zone_rate' => new WC_Shipping_Rate(
+            'lesyni_zone_rate',
+            $label,
+            $cost,
+            [],
+            'lesyni_zone'
+        ),
+    ];
+}, 20, 2 );
+
+/* -----------------------------------------------------------------------
    AJAX: geocode address → detect zone → save to WC session
 ----------------------------------------------------------------------- */
 function lesyni_ajax_check_zone() {
@@ -591,8 +635,8 @@ function lesyni_ajax_check_zone() {
         ] );
         // Reset cached shipping so it recalculates with new zone
         WC()->session->set( 'shipping_for_package_0', null );
-        // Force WC to use the correct lesyni_zone rate on checkout
-        WC()->session->set( 'chosen_shipping_methods', [ 'lesyni_zone:' . $zone ] );
+        // Force WC to use our dynamic rate on checkout
+        WC()->session->set( 'chosen_shipping_methods', [ 'lesyni_zone_rate' ] );
     }
 
     $rates = [

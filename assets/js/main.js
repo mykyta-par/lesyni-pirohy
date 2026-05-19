@@ -1194,13 +1194,20 @@
                     var variation = item.variation
                         ? '<p class="cart-drawer__item-variation">' + item.variation + '</p>'
                         : '';
-                    html += '<div class="cart-drawer__item">'
+                    html += '<div class="cart-drawer__item" data-key="' + item.key + '">'
                         + img
                         + '<div class="cart-drawer__item-info">'
-                        +   '<p class="cart-drawer__item-name">' + item.name + '</p>'
+                        +   '<div class="cart-drawer__item-top">'
+                        +     '<p class="cart-drawer__item-name">' + item.name + '</p>'
+                        +     '<button class="cart-drawer__remove" data-key="' + item.key + '" aria-label="Видалити">×</button>'
+                        +   '</div>'
                         +   variation
                         +   '<div class="cart-drawer__item-row">'
-                        +     '<span class="cart-drawer__item-qty">' + item.qty + ' шт</span>'
+                        +     '<div class="cart-drawer__qty">'
+                        +       '<button class="cart-drawer__qty-btn" data-key="' + item.key + '" data-delta="-1">−</button>'
+                        +       '<span class="cart-drawer__qty-val" data-key="' + item.key + '" data-unit="' + item.price + '">' + item.qty + '</span>'
+                        +       '<button class="cart-drawer__qty-btn" data-key="' + item.key + '" data-delta="1">+</button>'
+                        +     '</div>'
                         +     '<span class="cart-drawer__item-price">' + item.subtotal + ' грн</span>'
                         +   '</div>'
                         + '</div>'
@@ -1210,10 +1217,76 @@
 
                 if (drawerTotal) drawerTotal.textContent = data.total + ' грн';
                 drawerFoot.style.display = '';
+
+                attachDrawerItemHandlers();
             })
             .catch(function () {
                 drawerBody.innerHTML = '';
             });
+    }
+
+    function updateCartCount(count) {
+        var el = document.querySelector('.header-cart__count');
+        if (el) {
+            el.textContent = count;
+            el.classList.toggle('header-cart__count--hidden', count === 0);
+        }
+    }
+
+    function attachDrawerItemHandlers() {
+        // Remove buttons
+        drawerBody.querySelectorAll('.cart-drawer__remove').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var key = btn.dataset.key;
+                btn.disabled = true;
+                fetch('/?wc-ajax=lesyni_cart_remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ key: key }).toString(),
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (resp) {
+                    if (resp.success) updateCartCount(resp.data.count || 0);
+                    loadDrawerContents();
+                })
+                .catch(function () { loadDrawerContents(); });
+            });
+        });
+
+        // Qty +/- buttons
+        drawerBody.querySelectorAll('.cart-drawer__qty-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var key   = btn.dataset.key;
+                var delta = parseInt(btn.dataset.delta, 10);
+                var valEl = drawerBody.querySelector('.cart-drawer__qty-val[data-key="' + key + '"]');
+                if (!valEl) return;
+                var qty   = parseInt(valEl.textContent, 10) + delta;
+                if (qty < 0) return;
+
+                // Optimistic UI
+                valEl.textContent = qty;
+                var unit     = parseFloat(valEl.dataset.unit) || 0;
+                var priceEl  = btn.closest('.cart-drawer__item').querySelector('.cart-drawer__item-price');
+                if (priceEl) priceEl.textContent = Math.round(unit * qty) + ' грн';
+                var total    = 0;
+                drawerBody.querySelectorAll('.cart-drawer__qty-val').forEach(function (v) {
+                    total += Math.round((parseFloat(v.dataset.unit) || 0) * (parseInt(v.textContent, 10) || 0));
+                });
+                if (drawerTotal) drawerTotal.textContent = total + ' грн';
+
+                fetch('/?wc-ajax=lesyni_cart_update_qty', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ key: key, qty: qty }).toString(),
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (resp) {
+                    if (resp.success) updateCartCount(resp.data.count || 0);
+                    if (qty === 0) loadDrawerContents();
+                })
+                .catch(function () { loadDrawerContents(); });
+            });
+        });
     }
 
     // Expose so lesyniAddToCart can refresh on success

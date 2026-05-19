@@ -362,6 +362,27 @@ function lesyni_ajax_cart_drawer() {
 add_action( 'wc_ajax_lesyni_cart_drawer',        'lesyni_ajax_cart_drawer' );
 add_action( 'wc_ajax_nopriv_lesyni_cart_drawer', 'lesyni_ajax_cart_drawer' );
 
+function lesyni_ajax_cart_update_qty() {
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) { wp_send_json_error(); return; }
+	$key = sanitize_text_field( $_POST['key'] ?? '' );
+	$qty = max( 0, (int) ( $_POST['qty'] ?? 1 ) );
+	if ( ! $key ) { wp_send_json_error(); return; }
+	WC()->cart->set_quantity( $key, $qty, true );
+	wp_send_json_success( [ 'count' => WC()->cart->get_cart_contents_count() ] );
+}
+add_action( 'wc_ajax_lesyni_cart_update_qty',        'lesyni_ajax_cart_update_qty' );
+add_action( 'wc_ajax_nopriv_lesyni_cart_update_qty', 'lesyni_ajax_cart_update_qty' );
+
+function lesyni_ajax_cart_remove() {
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) { wp_send_json_error(); return; }
+	$key = sanitize_text_field( $_POST['key'] ?? '' );
+	if ( ! $key ) { wp_send_json_error(); return; }
+	WC()->cart->remove_cart_item( $key );
+	wp_send_json_success( [ 'count' => WC()->cart->get_cart_contents_count() ] );
+}
+add_action( 'wc_ajax_lesyni_cart_remove',        'lesyni_ajax_cart_remove' );
+add_action( 'wc_ajax_nopriv_lesyni_cart_remove', 'lesyni_ajax_cart_remove' );
+
 
 // Output config as a hidden HTML element (data attribute) — CSP-safe, no inline script needed.
 // Runs at priority 5 so the <div> is in the DOM before footer scripts execute.

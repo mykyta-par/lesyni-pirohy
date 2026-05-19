@@ -294,10 +294,6 @@ add_action( 'wp_enqueue_scripts', 'lesyni_enqueue_assets' );
    WooCommerce resolves the variation automatically.
 ----------------------------------------------------------------------- */
 function lesyni_ajax_add_to_cart() {
-	if ( ! check_ajax_referer( 'lesyni_add_to_cart', 'nonce', false ) ) {
-		wp_send_json_error( [ 'message' => 'Invalid nonce' ], 403 );
-		return;
-	}
 	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
 		wp_send_json_error( [ 'message' => 'WooCommerce not ready' ], 500 );
 		return;

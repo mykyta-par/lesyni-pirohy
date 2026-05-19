@@ -171,8 +171,6 @@
                     btn.disabled = false;
                 }, 2000);
             }, function () {
-                var link = card ? card.querySelector('.product-name a') : null;
-                if (link) window.location.href = link.href;
                 btn.disabled = false;
                 btn.textContent = 'В кошик';
             });

@@ -558,6 +558,33 @@
         });
     });
 
+    /* ── Free delivery progress bar ────────────────────────────── */
+    function updateFreeBar(subtotal) {
+        var barFill = document.getElementById('oco-free-bar-fill');
+        var barText = document.getElementById('oco-free-bar-text');
+        if (!barFill || !barText) return;
+
+        var freeFrom = detectedZone === 'yellow' ? YELLOW_FREE_FROM : GREEN_FREE_FROM;
+        var remaining = Math.max(0, freeFrom - subtotal);
+        var pct = freeFrom > 0 ? Math.min(100, Math.round(subtotal / freeFrom * 100)) : 100;
+
+        barFill.style.width = pct + '%';
+
+        if (detectedZone === 'outside' || deliveryType === 'pickup' || deliveryType === 'np') {
+            document.getElementById('oco-free-bar-wrap') && (document.getElementById('oco-free-bar-wrap').style.display = 'none');
+            return;
+        }
+        document.getElementById('oco-free-bar-wrap') && (document.getElementById('oco-free-bar-wrap').style.display = '');
+
+        if (remaining > 0) {
+            barFill.classList.remove('oco-free-bar__fill--done');
+            barText.innerHTML = 'Ще <strong>' + remaining + ' грн</strong> до безкоштовної доставки';
+        } else {
+            barFill.classList.add('oco-free-bar__fill--done');
+            barText.innerHTML = '<span class="oco-free-bar__done">Безкоштовна доставка</span>';
+        }
+    }
+
     /* ── Cart recalc ────────────────────────────────────────────── */
     var summaryEl = document.querySelector('.oco-summary');
     var initDiscount = summaryEl ? (parseFloat(summaryEl.dataset.discount) || 0) : 0;
@@ -663,6 +690,8 @@
                 hiddenDiv.appendChild(inp);
             });
         }
+
+        updateFreeBar(subtotal);
     }
 
     /* ── Cart qty stepper ───────────────────────────────────────── */

@@ -396,91 +396,46 @@ else   $count_str = $n . ' позицій';
                     <h2 class="oco-section-title"><span class="oco-num">4</span>Спосіб доставки</h2>
                 </div>
                 <div class="oco-options" id="oco-delivery-options">
-                    <?php
-                    // Get WC shipping methods if available
-                    $packages = WC()->shipping()->get_packages();
-                    $has_wc_shipping = false;
-                    if ( ! empty( $packages ) ) {
-                        foreach ( $packages as $pkg ) {
-                            if ( ! empty( $pkg['rates'] ) ) { $has_wc_shipping = true; break; }
-                        }
-                    }
-                    if ( $has_wc_shipping ) :
-                        foreach ( $packages as $pkg_idx => $pkg ) :
-                            foreach ( $pkg['rates'] as $rate_id => $rate ) :
-                                $active_class = ( $pkg['chosen_method'] === $rate_id ) ? ' oco-opt--active' : '';
-                                $cost = (float) $rate->get_cost();
-                                $cost_label = $cost > 0 ? number_format( $cost, 0, '', '' ) . ' грн' : 'Безкоштовно';
+                    <?php $np_cost = (int) get_option( 'lesyni_np_cost', 80 ); ?>
 
-                                // Map our rate IDs to delivery type, icon, description
-                                if ( $rate_id === 'lesyni_pickup_rate' ) {
-                                    $d_type    = 'pickup';
-                                    $d_icon    = '🏠';
-                                    $d_name    = 'Самовивіз';
-                                    $d_desc    = 'Щодня 10:00–18:30 · безкоштовно';
-                                    $d_addr    = '0';
-                                } elseif ( $rate_id === 'lesyni_np_rate' ) {
-                                    $d_type    = 'np';
-                                    $d_icon    = '📦';
-                                    $d_name    = 'Нова Пошта';
-                                    $d_desc    = 'По всій Україні · ' . $cost_label;
-                                    $d_addr    = '1';
-                                } else {
-                                    $d_type    = 'courier';
-                                    $d_icon    = '🚚';
-                                    $d_name    = 'Кур\'єром по Дніпру';
-                                    $d_desc    = 'Сьогодні · вартість залежить від зони';
-                                    $d_addr    = '1';
-                                }
-                    ?>
-                    <div class="oco-opt-card<?php echo $active_class; ?>"
-                         data-delivery="<?php echo esc_attr( $d_type ); ?>"
-                         data-rate-id="<?php echo esc_attr( $rate_id ); ?>"
-                         data-cost="<?php echo esc_attr( $cost ); ?>"
-                         data-has-address="<?php echo esc_attr( $d_addr ); ?>">
-                        <div class="oco-opt-radio"></div>
-                        <div class="oco-opt-icon"><?php echo $d_icon; ?></div>
-                        <div class="oco-opt-info">
-                            <div class="oco-opt-name"><?php echo esc_html( $d_name ); ?></div>
-                            <div class="oco-opt-desc"><?php echo esc_html( $d_desc ); ?></div>
-                        </div>
-                    </div>
-                    <?php endforeach; endforeach;
-                    else : ?>
                     <div class="oco-opt-card oco-opt--active"
                          data-delivery="courier"
+                         data-rate-id="lesyni_zone_rate"
                          data-cost="0"
                          data-has-address="1">
                         <div class="oco-opt-radio"></div>
                         <div class="oco-opt-icon">🚚</div>
                         <div class="oco-opt-info">
-                            <div class="oco-opt-name">Кур'єром по Києву</div>
-                            <div class="oco-opt-desc">Сьогодні протягом 2 годин або на обраний час · безкоштовно</div>
+                            <div class="oco-opt-name">Кур'єром по Дніпру</div>
+                            <div class="oco-opt-desc">Сьогодні · вартість залежить від зони</div>
                         </div>
                     </div>
+
                     <div class="oco-opt-card"
                          data-delivery="pickup"
+                         data-rate-id="lesyni_pickup_rate"
                          data-cost="0"
                          data-has-address="0">
                         <div class="oco-opt-radio"></div>
                         <div class="oco-opt-icon">🏠</div>
                         <div class="oco-opt-info">
                             <div class="oco-opt-name">Самовивіз</div>
-                            <div class="oco-opt-desc">вул. Прорізна, 15 · щодня 9:00–18:00 · безкоштовно</div>
+                            <div class="oco-opt-desc">Щодня 10:00–18:30 · безкоштовно</div>
                         </div>
                     </div>
+
                     <div class="oco-opt-card"
                          data-delivery="np"
-                         data-cost="80"
+                         data-rate-id="lesyni_np_rate"
+                         data-cost="<?php echo esc_attr( $np_cost ); ?>"
                          data-has-address="1">
                         <div class="oco-opt-radio"></div>
                         <div class="oco-opt-icon">📦</div>
                         <div class="oco-opt-info">
                             <div class="oco-opt-name">Нова Пошта</div>
-                            <div class="oco-opt-desc">По всій Україні · 1–2 робочі дні · у спеціальній упаковці · 80 грн</div>
+                            <div class="oco-opt-desc">По всій Україні · 1–2 робочі дні · <?php echo esc_html( $np_cost ); ?> грн</div>
                         </div>
                     </div>
-                    <?php endif; ?>
                 </div>
             </div>
 

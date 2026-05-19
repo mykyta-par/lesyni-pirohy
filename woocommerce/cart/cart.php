@@ -109,6 +109,7 @@ else   $count_str = $n . ' позицій';
     <!-- Hidden WC checkout form (data carrier for AJAX checkout) -->
     <form id="oco-wc-form" name="checkout" style="display:none;">
         <?php wp_nonce_field( 'woocommerce-process_checkout', 'woocommerce-process-checkout-nonce' ); ?>
+        <input type="hidden" name="shipping_method[0]" id="oco-shipping-method-val" value="lesyni_zone:pending">
         <input type="hidden" name="delivery_type"  id="oco-delivery-type-val" value="courier">
         <input type="hidden" name="delivery_time"  id="oco-delivery-time-val" value="">
         <input type="hidden" name="payment_method" id="oco-payment-method-val" value="cod">

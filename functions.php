@@ -591,6 +591,8 @@ function lesyni_ajax_check_zone() {
         ] );
         // Reset cached shipping so it recalculates with new zone
         WC()->session->set( 'shipping_for_package_0', null );
+        // Force WC to use the correct lesyni_zone rate on checkout
+        WC()->session->set( 'chosen_shipping_methods', [ 'lesyni_zone:' . $zone ] );
     }
 
     $rates = [

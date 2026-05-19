@@ -410,18 +410,39 @@ else   $count_str = $n . ' позицій';
                             foreach ( $pkg['rates'] as $rate_id => $rate ) :
                                 $active_class = ( $pkg['chosen_method'] === $rate_id ) ? ' oco-opt--active' : '';
                                 $cost = (float) $rate->get_cost();
-                                $cost_label = $cost > 0 ? number_format($cost,0,'','') . ' грн' : 'Безкоштовно';
+                                $cost_label = $cost > 0 ? number_format( $cost, 0, '', '' ) . ' грн' : 'Безкоштовно';
+
+                                // Map our rate IDs to delivery type, icon, description
+                                if ( $rate_id === 'lesyni_pickup_rate' ) {
+                                    $d_type    = 'pickup';
+                                    $d_icon    = '🏠';
+                                    $d_name    = 'Самовивіз';
+                                    $d_desc    = 'Щодня 10:00–18:30 · безкоштовно';
+                                    $d_addr    = '0';
+                                } elseif ( $rate_id === 'lesyni_np_rate' ) {
+                                    $d_type    = 'np';
+                                    $d_icon    = '📦';
+                                    $d_name    = 'Нова Пошта';
+                                    $d_desc    = 'По всій Україні · ' . $cost_label;
+                                    $d_addr    = '1';
+                                } else {
+                                    $d_type    = 'courier';
+                                    $d_icon    = '🚚';
+                                    $d_name    = 'Кур\'єром по Дніпру';
+                                    $d_desc    = 'Сьогодні · вартість залежить від зони';
+                                    $d_addr    = '1';
+                                }
                     ?>
                     <div class="oco-opt-card<?php echo $active_class; ?>"
-                         data-delivery="wc_rate"
+                         data-delivery="<?php echo esc_attr( $d_type ); ?>"
                          data-rate-id="<?php echo esc_attr( $rate_id ); ?>"
                          data-cost="<?php echo esc_attr( $cost ); ?>"
-                         data-has-address="1">
+                         data-has-address="<?php echo esc_attr( $d_addr ); ?>">
                         <div class="oco-opt-radio"></div>
-                        <div class="oco-opt-icon">🚚</div>
+                        <div class="oco-opt-icon"><?php echo $d_icon; ?></div>
                         <div class="oco-opt-info">
-                            <div class="oco-opt-name"><?php echo esc_html( $rate->get_label() ); ?></div>
-                            <div class="oco-opt-desc"><?php echo esc_html( $cost_label ); ?></div>
+                            <div class="oco-opt-name"><?php echo esc_html( $d_name ); ?></div>
+                            <div class="oco-opt-desc"><?php echo esc_html( $d_desc ); ?></div>
                         </div>
                     </div>
                     <?php endforeach; endforeach;

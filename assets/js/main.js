@@ -792,12 +792,19 @@
             deliveryCost = parseFloat(card.dataset.cost) || 0;
             if (dtTypeInput) dtTypeInput.value = deliveryType;
 
-            // Tell WC which rate to use for this delivery type
+            // Tell WC which rate to use — prefer explicit rate-id if present
             var smInput = document.getElementById('oco-shipping-method-val');
             if (smInput) {
-                if (deliveryType === 'pickup') smInput.value = 'lesyni_pickup_rate';
-                else if (deliveryType === 'np') smInput.value = 'lesyni_np_rate';
-                else smInput.value = 'lesyni_zone_rate';
+                var rateId = card.dataset.rateId;
+                if (rateId) {
+                    smInput.value = rateId;
+                } else if (deliveryType === 'pickup') {
+                    smInput.value = 'lesyni_pickup_rate';
+                } else if (deliveryType === 'np') {
+                    smInput.value = 'lesyni_np_rate';
+                } else {
+                    smInput.value = 'lesyni_zone_rate';
+                }
             }
 
             if (deliveryType === 'pickup') {

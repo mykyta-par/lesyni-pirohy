@@ -556,7 +556,7 @@ else   $count_str = $n . ' позицій';
                 <h3 class="oco-summary-title">Підсумок замовлення</h3>
 
                 <div class="oco-summary-when">
-                    <div>Доставимо <strong id="oco-when-label">сьогодні, 14:00–15:00</strong> · теплим, у фірмовій упаковці</div>
+                    <div>Доставимо <strong id="oco-when-label">сьогодні, 14:00–15:00</strong></div>
                 </div>
 
                 <div class="oco-summary-row">
@@ -581,7 +581,7 @@ else   $count_str = $n . ' позицій';
                 <?php endif; ?>
 
                 <div class="oco-summary-row">
-                    <span id="oco-shipping-label">Доставка по Києву</span>
+                    <span id="oco-shipping-label">Доставка по Дніпру</span>
                     <strong id="oco-sum-shipping" style="color:<?php echo $ship_free ? '#7a9b6e' : '#3d3d3d'; ?>">
                         <?php echo esc_html( $ship_label ); ?>
                     </strong>
@@ -602,12 +602,6 @@ else   $count_str = $n . ' позицій';
 
                 <div class="oco-secure-note">Захищене з'єднання · ваші дані під захистом</div>
 
-                <div class="oco-summary-trust">
-                    <div class="oco-trust-item">Випікаємо під замовлення</div>
-                    <div class="oco-trust-item">Доставка за 2 години</div>
-                    <div class="oco-trust-item">Оплата при отриманні</div>
-                    <div class="oco-trust-item">Скасування безкоштовно</div>
-                </div>
             </div>
         </div><!-- .oco-right -->
 

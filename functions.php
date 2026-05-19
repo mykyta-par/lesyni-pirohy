@@ -280,6 +280,10 @@ function lesyni_enqueue_assets() {
 		true
 	);
 
+	wp_localize_script( 'lesyni-main', 'lesyniData', [
+		'storeNonce' => wp_create_nonce( 'wc_store_api' ),
+	] );
+
 }
 add_action( 'wp_enqueue_scripts', 'lesyni_enqueue_assets' );
 

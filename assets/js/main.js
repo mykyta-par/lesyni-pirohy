@@ -106,82 +106,73 @@
     /* ------------------------------------------------------------------
        Add to cart — unified button for simple & variable products
     ------------------------------------------------------------------ */
+
+    // Use WC Store API: pass variation_id directly for variable products.
+    // This is the only reliable way to distinguish variations in the cart.
+    function lesyniAddToCart(itemId, qty, onSuccess, onError) {
+        var nonce = (window.lesyniData && window.lesyniData.storeNonce) ? window.lesyniData.storeNonce : '';
+        fetch('/wp-json/wc/store/v1/cart/add-item', {
+            method:  'POST',
+            headers: {
+                'Content-Type':        'application/json',
+                'X-WC-Store-API-Nonce': nonce,
+            },
+            body: JSON.stringify({ id: parseInt(itemId, 10), quantity: qty }),
+        })
+        .then(function (r) {
+            if (!r.ok) throw new Error('http ' + r.status);
+            return r.json();
+        })
+        .then(function (data) {
+            // Update cart count badge
+            var count = data.items_count || 0;
+            var countEl = document.querySelector('.header-cart__count');
+            if (countEl) {
+                countEl.textContent = count;
+                countEl.classList.toggle('header-cart__count--hidden', count === 0);
+            }
+            if (onSuccess) onSuccess(data);
+        })
+        .catch(function (err) {
+            if (onError) onError(err);
+        });
+    }
+
     document.querySelectorAll('.btn-add-cart[data-product-id]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var productId   = btn.dataset.productId;
             var productType = btn.dataset.type;
             var card        = btn.closest('.product-card');
-            var body;
+            var itemId;
 
             if (productType === 'variable') {
-                // Get selected variation id from active size option
                 var activeOpt = card ? card.querySelector('.size-option.active') : null;
                 var variationId = activeOpt ? activeOpt.dataset.variationId : '';
                 if (!variationId) {
-                    // No variation selected — open product page
                     window.location.href = card
                         ? card.querySelector('.product-name a').href
                         : '#';
                     return;
                 }
-                body = new URLSearchParams({
-                    product_id:   productId,
-                    variation_id: variationId,
-                    quantity:     1,
-                });
-                // Pass variation attributes so WooCommerce can distinguish cart items
-                var attrs = {};
-                try { attrs = JSON.parse(activeOpt.dataset.attributes || '{}'); } catch(e) {}
-                Object.keys(attrs).forEach(function(k) { body.append(k, attrs[k]); });
+                itemId = variationId;
             } else {
-                body = new URLSearchParams({
-                    product_id: productId,
-                    quantity:   1,
-                });
+                itemId = productId;
             }
 
             btn.disabled = true;
             btn.textContent = '...';
 
-            fetch('/?wc-ajax=add_to_cart', {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body:    body.toString(),
-            })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                if (data && !data.error) {
-                    btn.textContent = '✓ Додано';
-                    btn.classList.add('btn-add-cart--added');
-
-                    // Update cart count via WooCommerce fragments
-                    if (data.fragments) {
-                        Object.keys(data.fragments).forEach(function (selector) {
-                            var el = document.querySelector(selector);
-                            if (el) {
-                                var tmp = document.createElement('div');
-                                tmp.innerHTML = data.fragments[selector];
-                                if (tmp.firstElementChild) {
-                                    el.replaceWith(tmp.firstElementChild);
-                                }
-                            }
-                        });
-                    }
-
-                    setTimeout(function () {
-                        btn.textContent = 'В кошик';
-                        btn.classList.remove('btn-add-cart--added');
-                        btn.disabled = false;
-                    }, 2000);
-                } else {
-                    // Fallback: navigate to product page
-                    var link = card ? card.querySelector('.product-name a') : null;
-                    if (link) window.location.href = link.href;
-                    btn.disabled = false;
+            lesyniAddToCart(itemId, 1, function () {
+                btn.textContent = '✓ Додано';
+                btn.classList.add('btn-add-cart--added');
+                setTimeout(function () {
                     btn.textContent = 'В кошик';
-                }
-            })
-            .catch(function () {
+                    btn.classList.remove('btn-add-cart--added');
+                    btn.disabled = false;
+                }, 2000);
+            }, function () {
+                var link = card ? card.querySelector('.product-name a') : null;
+                if (link) window.location.href = link.href;
                 btn.disabled = false;
                 btn.textContent = 'В кошик';
             });
@@ -277,60 +268,23 @@
             var productId   = spBtnCart.dataset.productId;
             var productType = spBtnCart.dataset.type;
             var qty         = parseInt(spQtyInput ? spQtyInput.value : 1, 10) || 1;
-            var body;
+            var itemId      = (productType === 'variable') ? spSelectedVariationId : productId;
 
-            if (productType === 'variable') {
-                if (!spSelectedVariationId) return;
-                body = new URLSearchParams({
-                    product_id:   productId,
-                    variation_id: spSelectedVariationId,
-                    quantity:     qty,
-                });
-                Object.keys(spSelectedAttributes).forEach(function(k) { body.append(k, spSelectedAttributes[k]); });
-            } else {
-                body = new URLSearchParams({
-                    product_id: productId,
-                    quantity:   qty,
-                });
-            }
+            if (productType === 'variable' && !spSelectedVariationId) return;
 
             spBtnCart.disabled = true;
             var labelEl = spBtnCart.querySelector('.sp-btn-cart__label');
             if (labelEl) labelEl.textContent = '...';
 
-            fetch('/?wc-ajax=add_to_cart', {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body:    body.toString(),
-            })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                if (data && !data.error) {
-                    if (labelEl) labelEl.textContent = '✓ Додано!';
-                    spBtnCart.classList.add('sp-btn-cart--added');
-
-                    if (data.fragments) {
-                        Object.keys(data.fragments).forEach(function (selector) {
-                            var el = document.querySelector(selector);
-                            if (el) {
-                                var tmp = document.createElement('div');
-                                tmp.innerHTML = data.fragments[selector];
-                                if (tmp.firstElementChild) el.replaceWith(tmp.firstElementChild);
-                            }
-                        });
-                    }
-
-                    setTimeout(function () {
-                        if (labelEl) labelEl.textContent = 'Додати в кошик';
-                        spBtnCart.classList.remove('sp-btn-cart--added');
-                        spBtnCart.disabled = false;
-                    }, 2000);
-                } else {
+            lesyniAddToCart(itemId, qty, function () {
+                if (labelEl) labelEl.textContent = '✓ Додано!';
+                spBtnCart.classList.add('sp-btn-cart--added');
+                setTimeout(function () {
                     if (labelEl) labelEl.textContent = 'Додати в кошик';
+                    spBtnCart.classList.remove('sp-btn-cart--added');
                     spBtnCart.disabled = false;
-                }
-            })
-            .catch(function () {
+                }, 2000);
+            }, function () {
                 if (labelEl) labelEl.textContent = 'Додати в кошик';
                 spBtnCart.disabled = false;
             });

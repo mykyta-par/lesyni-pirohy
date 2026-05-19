@@ -131,11 +131,8 @@
                     countEl.classList.toggle('header-cart__count--hidden', count === 0);
                 }
                 if (onSuccess) onSuccess();
-                // Refresh drawer contents if it's open
-                var drawer = document.getElementById('cart-drawer');
-                if (drawer && drawer.classList.contains('open')) {
-                    loadDrawerContents();
-                }
+                // Refresh drawer if open
+                if (window._lesyniRefreshDrawer) window._lesyniRefreshDrawer();
             } else {
                 if (onError) onError();
             }
@@ -1141,9 +1138,14 @@
     recalc();
     updateWhen();
 
-    /* ------------------------------------------------------------------
-       Cart Drawer
-    ------------------------------------------------------------------ */
+})();
+
+/* ==========================================================================
+   Cart Drawer
+   ========================================================================== */
+(function () {
+    'use strict';
+
     var cartDrawer    = document.getElementById('cart-drawer');
     var drawerBody    = document.getElementById('cart-drawer-body');
     var drawerFoot    = document.getElementById('cart-drawer-foot');
@@ -1213,6 +1215,11 @@
                 drawerBody.innerHTML = '';
             });
     }
+
+    // Expose so lesyniAddToCart can refresh on success
+    window._lesyniRefreshDrawer = function () {
+        if (cartDrawer.classList.contains('open')) loadDrawerContents();
+    };
 
     if (drawerTrigger)  drawerTrigger.addEventListener('click', openCartDrawer);
     if (drawerClose)    drawerClose.addEventListener('click', closeCartDrawer);

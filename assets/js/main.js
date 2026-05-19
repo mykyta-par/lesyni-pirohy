@@ -129,6 +129,10 @@
                     variation_id: variationId,
                     quantity:     1,
                 });
+                // Pass variation attributes so WooCommerce can distinguish cart items
+                var attrs = {};
+                try { attrs = JSON.parse(activeOpt.dataset.attributes || '{}'); } catch(e) {}
+                Object.keys(attrs).forEach(function(k) { body.append(k, attrs[k]); });
             } else {
                 body = new URLSearchParams({
                     product_id: productId,
@@ -214,6 +218,7 @@
 
     var spSelectedVariationId = '';
     var spSelectedPrice       = 0;
+    var spSelectedAttributes  = {};
 
     function updateSpTotal() {
         var qty = parseInt(spQtyInput ? spQtyInput.value : 1, 10) || 1;
@@ -224,6 +229,7 @@
         var firstCard = spSizeCards[0];
         spSelectedVariationId = firstCard.dataset.variationId || '';
         spSelectedPrice       = parseFloat(firstCard.dataset.price) || 0;
+        try { spSelectedAttributes = JSON.parse(firstCard.dataset.attributes || '{}'); } catch(e) {}
         updateSpTotal();
 
         spSizeCards.forEach(function (card) {
@@ -232,6 +238,7 @@
                 card.classList.add('active');
                 spSelectedVariationId = card.dataset.variationId || '';
                 spSelectedPrice       = parseFloat(card.dataset.price) || 0;
+                try { spSelectedAttributes = JSON.parse(card.dataset.attributes || '{}'); } catch(e) {}
                 updateSpTotal();
             });
         });
@@ -279,6 +286,7 @@
                     variation_id: spSelectedVariationId,
                     quantity:     qty,
                 });
+                Object.keys(spSelectedAttributes).forEach(function(k) { body.append(k, spSelectedAttributes[k]); });
             } else {
                 body = new URLSearchParams({
                     product_id: productId,

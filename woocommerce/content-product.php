@@ -83,6 +83,7 @@ if ( $is_variable ) {
                 'price'        => (float) $var['display_price'],
                 'weight'       => $weight_g,
                 'variation_id' => (int) $var['variation_id'],
+                'attributes'   => $attrs,
             );
         }
     }
@@ -159,7 +160,8 @@ $data_cats = implode( ' ', array_map( function( $id ) {
                         class="size-option <?php echo $i === 0 ? 'active' : ''; ?>"
                         data-size="<?php echo $i === 0 ? 'small' : 'large'; ?>"
                         data-variation-id="<?php echo esc_attr( $opt['variation_id'] ); ?>"
-                        data-price="<?php echo esc_attr( $opt['price'] ); ?>">
+                        data-price="<?php echo esc_attr( $opt['price'] ); ?>"
+                        data-attributes="<?php echo esc_attr( wp_json_encode( $opt['attributes'] ) ); ?>">
                         <span class="size-option__label"><?php echo esc_html( $opt['label'] ); ?></span>
                         <?php if ( $opt['weight'] ) : ?>
                             <span class="size-option__weight"><?php echo esc_html( $opt['weight'] ); ?> г</span>

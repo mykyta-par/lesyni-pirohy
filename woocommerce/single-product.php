@@ -201,7 +201,8 @@ while ( have_posts() ) :
                             type="button"
                             data-variation-id="<?php echo esc_attr( $var['variation_id'] ); ?>"
                             data-price="<?php echo esc_attr( $var_price ); ?>"
-                            data-product-id="<?php echo esc_attr( $product->get_id() ); ?>">
+                            data-product-id="<?php echo esc_attr( $product->get_id() ); ?>"
+                            data-attributes="<?php echo esc_attr( wp_json_encode( $var['attributes'] ) ); ?>">
                             <div class="sp-size-card__name"><?php echo esc_html( $size_label ); ?></div>
                             <?php if ( $meta_text ) : ?>
                                 <div class="sp-size-card__meta"><?php echo esc_html( $meta_text ); ?></div>

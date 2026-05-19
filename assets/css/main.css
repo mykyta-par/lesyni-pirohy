@@ -211,7 +211,6 @@ ul, ol   { list-style: none; }
 .site-nav {
     display: flex;
     align-items: center;
-    margin: 0 auto;
 }
 .site-nav ul {
     display: flex;
@@ -242,7 +241,7 @@ ul, ol   { list-style: none; }
     align-items: center;
     gap: 12px;
     flex-shrink: 0;
-    margin-left: auto;
+    margin-left: auto; /* mobile fallback */
 }
 
 .header-phone {
@@ -1364,6 +1363,13 @@ ul.products {
 /* --------------------------------------------------------------------------
    20. Responsive
    -------------------------------------------------------------------------- */
+
+/* True center nav on desktop: logo and CTA each take equal flex space */
+@media (min-width: 769px) {
+    .site-logo   { flex: 1; }
+    .site-nav    { margin: 0; }
+    .header-cta  { flex: 1; justify-content: flex-end; margin-left: 0; }
+}
 @media (max-width: 1100px) {
     .popular-grid   { grid-template-columns: repeat(2, 1fr); }
     .products-grid  { grid-template-columns: repeat(2, 1fr); }

@@ -134,7 +134,7 @@ function lesyni_enqueue_assets() {
 	// Google Fonts
 	wp_enqueue_style(
 		'lesyni-fonts',
-		'https://fonts.googleapis.com/css2?family=Marmelad&family=Poppins:wght@400;500;600;700&display=swap',
+		'https://fonts.googleapis.com/css2?family=Yeseva+One&family=Poppins:wght@400;500;600;700&display=swap',
 		[],
 		null
 	);

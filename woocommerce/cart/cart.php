@@ -293,7 +293,7 @@ else   $count_str = $n . ' позицій';
                     <div class="oco-field">
                         <label class="oco-label" for="oco-first-name">Ім'я <span class="oco-req">*</span></label>
                         <input type="text" id="oco-first-name" class="oco-input"
-                               placeholder="Олена Куценко"
+                               placeholder="Леся"
                                value="<?php echo esc_attr( $checkout->get_value( 'billing_first_name' ) . ( $checkout->get_value( 'billing_last_name' ) ? ' ' . $checkout->get_value( 'billing_last_name' ) : '' ) ); ?>"
                                autocomplete="given-name" required>
                     </div>

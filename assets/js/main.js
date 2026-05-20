@@ -1165,7 +1165,8 @@
             branchSel.innerHTML = '<option value="">Завантаження…</option>';
             branchSel.disabled = true;
             npBranchName = '';
-            fetch('/wp-admin/admin-ajax.php?action=lesyni_np_warehouses&ref=' + encodeURIComponent(ref))
+            var npAjax = (window.lesyniData && lesyniData.npAjaxUrl) ? lesyniData.npAjaxUrl : '/wp-admin/admin-ajax.php';
+            fetch(npAjax + '?action=lesyni_np_warehouses&ref=' + encodeURIComponent(ref))
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     var list = (data.success && data.data) ? data.data : [];
@@ -1192,9 +1193,10 @@
             npCityName = '';
             if (q.length < 2) { cityList.style.display = 'none'; resetBranch(); return; }
             debounce = setTimeout(function () {
+                var npAjax = (window.lesyniData && lesyniData.npAjaxUrl) ? lesyniData.npAjaxUrl : '/wp-admin/admin-ajax.php';
                 cityList.innerHTML = '<li class="oco-autocomplete-item oco-np-loading">Пошук…</li>';
                 cityList.style.display = 'block';
-                fetch('/wp-admin/admin-ajax.php?action=lesyni_np_cities&q=' + encodeURIComponent(q))
+                fetch(npAjax + '?action=lesyni_np_cities&q=' + encodeURIComponent(q))
                     .then(function (r) { return r.json(); })
                     .then(function (data) {
                         var cities = (data.success && data.data) ? data.data : [];

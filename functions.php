@@ -6,15 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
    Helpers
 ----------------------------------------------------------------------- */
 function lesyni_is_np_shipping_enabled() {
-    $zone_ids   = array_keys( WC_Shipping_Zones::get_zones() );
-    $zone_ids[] = 0;
-    foreach ( $zone_ids as $zone_id ) {
-        $zone = new WC_Shipping_Zone( $zone_id );
-        foreach ( $zone->get_shipping_methods( true ) as $method ) {
-            if ( $method->id === 'nova_poshta_shipping' ) return true;
-        }
-    }
-    return false;
+    return get_option( 'lesyni_show_np', 'yes' ) === 'yes';
 }
 
 
@@ -775,6 +767,13 @@ function lesyni_zone_settings_fields() {
             'type'    => 'text',
             'id'      => 'lesyni_out_of_zone_label',
             'default' => 'Уточнимо можливість доставки з менеджером',
+        ],
+        [
+            'title'   => 'Нова Пошта на checkout',
+            'type'    => 'checkbox',
+            'id'      => 'lesyni_show_np',
+            'default' => 'yes',
+            'desc'    => 'Показувати опцію «Нова Пошта» на сторінці оформлення замовлення',
         ],
         [
             'type' => 'sectionend',

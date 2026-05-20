@@ -443,7 +443,13 @@ else   $count_str = $n . ' позицій';
                 <?php if ( $np_enabled ) : ?>
                 <!-- NP fields rendered by wc-ukr-shipping plugin -->
                 <div id="oco-np-fields" style="display:none;margin-top:16px;">
-                    <?php do_action( 'woocommerce_after_checkout_shipping_form', WC()->checkout() ); ?>
+                    <?php
+                    ob_start();
+                    do_action( 'woocommerce_after_checkout_shipping_form', WC()->checkout() );
+                    $np_output = ob_get_clean();
+                    echo '<!-- NP DEBUG: is_checkout=' . ( is_checkout() ? 'true' : 'false' ) . ' output_len=' . strlen( $np_output ) . ' -->';
+                    echo $np_output;
+                    ?>
                 </div>
                 <?php endif; ?>
             </div>

@@ -448,11 +448,10 @@ else   $count_str = $n . ' позицій';
                             <input type="text" id="np-city-input" class="oco-input" placeholder="Введіть назву міста" autocomplete="off">
                             <ul class="oco-autocomplete-list" id="np-city-list"></ul>
                         </div>
-                        <div class="oco-field">
-                            <label class="oco-label" for="np-branch-select">Відділення <span class="oco-req">*</span></label>
-                            <select id="np-branch-select" class="oco-select oco-np-select" disabled>
-                                <option value="">— спочатку оберіть місто —</option>
-                            </select>
+                        <div class="oco-field oco-autocomplete">
+                            <label class="oco-label" for="np-branch-input">Відділення <span class="oco-req">*</span></label>
+                            <input type="text" id="np-branch-input" class="oco-input" placeholder="— спочатку оберіть місто —" autocomplete="off" disabled>
+                            <ul class="oco-autocomplete-list" id="np-branch-list"></ul>
                         </div>
                     </div>
                 </div>

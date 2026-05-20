@@ -1148,52 +1148,79 @@
 
     /* ── Nova Poshta city + warehouse autocomplete ──────────────── */
     (function () {
-        var cityInput  = document.getElementById('np-city-input');
-        var cityList   = document.getElementById('np-city-list');
-        var branchSel  = document.getElementById('np-branch-select');
+        var cityInput    = document.getElementById('np-city-input');
+        var cityList     = document.getElementById('np-city-list');
+        var branchInput  = document.getElementById('np-branch-input');
+        var branchList   = document.getElementById('np-branch-list');
         if (!cityInput) return;
 
+        var allWarehouses = [];
+        var npAjax = (window.lesyniData && lesyniData.npAjaxUrl) ? lesyniData.npAjaxUrl : '/wp-admin/admin-ajax.php';
+
+        function showBranchSuggestions(q) {
+            var filtered = q
+                ? allWarehouses.filter(function (w) { return w.label.toLowerCase().indexOf(q.toLowerCase()) !== -1; })
+                : allWarehouses.slice(0, 50);
+            branchList.innerHTML = '';
+            if (!filtered.length) {
+                branchList.innerHTML = '<li class="oco-autocomplete-item oco-np-loading">Нічого не знайдено</li>';
+                branchList.style.display = 'block';
+                return;
+            }
+            filtered.slice(0, 80).forEach(function (w) {
+                var li = document.createElement('li');
+                li.className = 'oco-autocomplete-item';
+                li.textContent = w.label;
+                li.addEventListener('mousedown', function (e) {
+                    e.preventDefault();
+                    branchInput.value = w.label;
+                    npBranchName = w.label;
+                    branchList.style.display = 'none';
+                    branchInput.style.borderColor = '';
+                });
+                branchList.appendChild(li);
+            });
+            branchList.style.display = 'block';
+        }
+
         function resetBranch() {
-            branchSel.innerHTML = '<option value="">— спочатку оберіть місто —</option>';
-            branchSel.disabled = true;
-            npCityRef  = '';
-            npCityName = '';
+            allWarehouses = [];
+            branchInput.value = '';
+            branchInput.placeholder = '— спочатку оберіть місто —';
+            branchInput.disabled = true;
+            branchList.style.display = 'none';
+            npCityRef    = '';
+            npCityName   = '';
             npBranchName = '';
         }
 
         function loadWarehouses(ref) {
-            branchSel.innerHTML = '<option value="">Завантаження…</option>';
-            branchSel.disabled = true;
+            branchInput.disabled = true;
+            branchInput.placeholder = 'Завантаження…';
+            branchInput.value = '';
             npBranchName = '';
-            var npAjax = (window.lesyniData && lesyniData.npAjaxUrl) ? lesyniData.npAjaxUrl : '/wp-admin/admin-ajax.php';
+            allWarehouses = [];
             fetch(npAjax + '?action=lesyni_np_warehouses&ref=' + encodeURIComponent(ref))
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                    var list = (data.success && data.data) ? data.data : [];
-                    branchSel.innerHTML = '<option value="">— оберіть відділення —</option>';
-                    list.forEach(function (w) {
-                        var opt = document.createElement('option');
-                        opt.value = w.label;
-                        opt.textContent = w.label;
-                        branchSel.appendChild(opt);
-                    });
-                    branchSel.disabled = list.length === 0;
+                    allWarehouses = (data.success && data.data) ? data.data : [];
+                    branchInput.disabled = allWarehouses.length === 0;
+                    branchInput.placeholder = allWarehouses.length ? 'Введіть номер або назву' : 'Відділення не знайдені';
                 })
                 .catch(function () {
-                    branchSel.innerHTML = '<option value="">Помилка завантаження</option>';
-                    branchSel.disabled = true;
+                    branchInput.placeholder = 'Помилка завантаження';
                 });
         }
 
-        var debounce = null;
+        /* City autocomplete */
+        var cityDebounce = null;
         cityInput.addEventListener('input', function () {
-            clearTimeout(debounce);
+            clearTimeout(cityDebounce);
             var q = cityInput.value.trim();
             npCityRef = '';
             npCityName = '';
             if (q.length < 2) { cityList.style.display = 'none'; resetBranch(); return; }
-            debounce = setTimeout(function () {
-                var npAjax = (window.lesyniData && lesyniData.npAjaxUrl) ? lesyniData.npAjaxUrl : '/wp-admin/admin-ajax.php';
+            cityDebounce = setTimeout(function () {
                 cityList.innerHTML = '<li class="oco-autocomplete-item oco-np-loading">Пошук…</li>';
                 cityList.style.display = 'block';
                 fetch(npAjax + '?action=lesyni_np_cities&q=' + encodeURIComponent(q))
@@ -1231,9 +1258,16 @@
             setTimeout(function () { cityList.style.display = 'none'; }, 150);
         });
 
-        branchSel.addEventListener('change', function () {
-            npBranchName = branchSel.value;
-            branchSel.style.borderColor = '';
+        /* Branch autocomplete */
+        branchInput.addEventListener('focus', function () {
+            if (allWarehouses.length) showBranchSuggestions(branchInput.value.trim());
+        });
+        branchInput.addEventListener('input', function () {
+            npBranchName = '';
+            if (allWarehouses.length) showBranchSuggestions(branchInput.value.trim());
+        });
+        branchInput.addEventListener('blur', function () {
+            setTimeout(function () { branchList.style.display = 'none'; }, 150);
         });
     }());
 
@@ -1265,7 +1299,7 @@
             }
             if (deliveryType === 'np') {
                 var npCityEl   = document.getElementById('np-city-input');
-                var npBranchEl = document.getElementById('np-branch-select');
+                var npBranchEl = document.getElementById('np-branch-input');
                 if (!npCityRef) {
                     if (npCityEl) { npCityEl.focus(); npCityEl.style.borderColor = '#c45a5a'; }
                     return;

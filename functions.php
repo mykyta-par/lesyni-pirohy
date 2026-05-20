@@ -391,10 +391,9 @@ function lesyni_enqueue_assets() {
 	);
 
 	wp_localize_script( 'lesyni-main', 'lesyniData', [
-		'ajaxUrl'    => home_url( '/?wc-ajax=lesyni_add_to_cart' ),
-		'nonce'      => wp_create_nonce( 'lesyni_add_to_cart' ),
-		'npAjaxUrl'  => admin_url( 'admin-ajax.php' ),
-		'npHasKey'   => lesyni_get_np_api_key() ? '1' : '0',
+		'ajaxUrl'   => home_url( '/?wc-ajax=lesyni_add_to_cart' ),
+		'nonce'     => wp_create_nonce( 'lesyni_add_to_cart' ),
+		'npAjaxUrl' => admin_url( 'admin-ajax.php' ),
 	] );
 
 }

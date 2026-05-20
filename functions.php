@@ -3,6 +3,23 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /* -----------------------------------------------------------------------
+   Helpers
+----------------------------------------------------------------------- */
+function lesyni_is_np_shipping_enabled() {
+    $zone_ids   = array_keys( WC_Shipping_Zones::get_zones() );
+    $zone_ids[] = 0; // "Rest of the World" zone
+    foreach ( $zone_ids as $zone_id ) {
+        $zone = new WC_Shipping_Zone( $zone_id );
+        foreach ( $zone->get_shipping_methods( true ) as $method ) {
+            if ( stripos( $method->id, 'nova' ) !== false ) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/* -----------------------------------------------------------------------
    Theme setup
 ----------------------------------------------------------------------- */
 function lesyni_setup() {

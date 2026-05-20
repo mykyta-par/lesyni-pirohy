@@ -679,10 +679,19 @@ add_filter( 'woocommerce_package_rates', function ( $rates, $package ) {
         'lesyni_pickup_rate' => new WC_Shipping_Rate( 'lesyni_pickup_rate', 'Самовивіз',    0,             [], 'lesyni_zone' ),
     ];
 
-    // Pass through the Nova Poshta rate from the plugin unchanged
-    foreach ( $rates as $key => $rate ) {
-        if ( $rate->get_method_id() === 'nova_poshta_shipping' ) {
-            $result[ $key ] = $rate;
+    // Include Nova Poshta: prefer plugin's own rate, fall back to creating one with plugin's method ID
+    if ( lesyni_is_np_shipping_enabled() ) {
+        $np_added = false;
+        foreach ( $rates as $key => $rate ) {
+            if ( $rate->get_method_id() === 'nova_poshta_shipping' ) {
+                $result[ $key ] = $rate;
+                $np_added = true;
+            }
+        }
+        if ( ! $np_added ) {
+            $np_rate_key          = lesyni_get_np_rate_key();
+            $np_cost              = lesyni_get_np_display_cost();
+            $result[ $np_rate_key ] = new WC_Shipping_Rate( $np_rate_key, 'Нова Пошта', $np_cost, [], 'nova_poshta_shipping' );
         }
     }
 
@@ -721,8 +730,12 @@ function lesyni_ajax_check_zone() {
         ] );
         // Reset cached shipping so it recalculates with new zone
         WC()->session->set( 'shipping_for_package_0', null );
-        // Force WC to use our dynamic rate on checkout
-        WC()->session->set( 'chosen_shipping_methods', [ 'lesyni_zone_rate' ] );
+        // Set courier as default only if customer hasn't chosen NP or pickup
+        $current = WC()->session->get( 'chosen_shipping_methods', [] );
+        $np_key  = lesyni_get_np_rate_key();
+        if ( empty( $current ) || $current[0] === 'lesyni_zone_rate' || $current[0] === '' ) {
+            WC()->session->set( 'chosen_shipping_methods', [ 'lesyni_zone_rate' ] );
+        }
     }
 
     $rates = [

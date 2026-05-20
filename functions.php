@@ -397,6 +397,15 @@ function lesyni_enqueue_assets() {
 		'nonce'      => wp_create_nonce( 'lesyni_add_to_cart' ),
 		'npAjaxUrl'  => admin_url( 'admin-ajax.php' ),
 		'npHasKey'   => lesyni_get_np_api_key() ? '1' : '0',
+		'npDebugOpts' => ( function() {
+			$zone = lesyni_get_ukraine_zone();
+			foreach ( $zone->get_shipping_methods( true ) as $method ) {
+				if ( $method->id === 'nova_poshta_shipping' ) {
+					return $method->instance_settings;
+				}
+			}
+			return [];
+		} )(),
 	] );
 
 }

@@ -5,42 +5,36 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 /* -----------------------------------------------------------------------
    Helpers
 ----------------------------------------------------------------------- */
+function lesyni_get_ukraine_zone() {
+    return WC_Shipping_Zones::get_zone_matching_package( [
+        'destination' => [ 'country' => 'UA', 'state' => '', 'postcode' => '' ],
+    ] );
+}
+
 function lesyni_is_np_shipping_enabled() {
-    $zone_ids   = array_keys( WC_Shipping_Zones::get_zones() );
-    $zone_ids[] = 0;
-    foreach ( $zone_ids as $zone_id ) {
-        $zone = new WC_Shipping_Zone( $zone_id );
-        foreach ( $zone->get_shipping_methods( true ) as $method ) {
-            if ( $method->id === 'nova_poshta_shipping' ) return true;
-        }
+    $zone = lesyni_get_ukraine_zone();
+    foreach ( $zone->get_shipping_methods( true ) as $method ) {
+        if ( $method->id === 'nova_poshta_shipping' ) return true;
     }
     return false;
 }
 
 function lesyni_get_np_rate_key() {
-    $zone_ids   = array_keys( WC_Shipping_Zones::get_zones() );
-    $zone_ids[] = 0;
-    foreach ( $zone_ids as $zone_id ) {
-        $zone = new WC_Shipping_Zone( $zone_id );
-        foreach ( $zone->get_shipping_methods( true ) as $method ) {
-            if ( $method->id === 'nova_poshta_shipping' ) {
-                return 'nova_poshta_shipping:' . $method->get_instance_id();
-            }
+    $zone = lesyni_get_ukraine_zone();
+    foreach ( $zone->get_shipping_methods( true ) as $method ) {
+        if ( $method->id === 'nova_poshta_shipping' ) {
+            return 'nova_poshta_shipping:' . $method->get_instance_id();
         }
     }
     return 'nova_poshta_shipping';
 }
 
 function lesyni_get_np_display_cost() {
-    $zone_ids   = array_keys( WC_Shipping_Zones::get_zones() );
-    $zone_ids[] = 0;
-    foreach ( $zone_ids as $zone_id ) {
-        $zone = new WC_Shipping_Zone( $zone_id );
-        foreach ( $zone->get_shipping_methods( true ) as $method ) {
-            if ( $method->id === 'nova_poshta_shipping' ) {
-                $cost = $method->get_option( 'cost' );
-                if ( $cost !== null && $cost !== '' ) return (float) $cost;
-            }
+    $zone = lesyni_get_ukraine_zone();
+    foreach ( $zone->get_shipping_methods( true ) as $method ) {
+        if ( $method->id === 'nova_poshta_shipping' ) {
+            $cost = $method->get_option( 'cost' );
+            if ( $cost !== null && $cost !== '' ) return (float) $cost;
         }
     }
     return (float) get_option( 'lesyni_np_cost', 80 );

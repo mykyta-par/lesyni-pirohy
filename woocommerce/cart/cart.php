@@ -260,25 +260,6 @@ else   $count_str = $n . ' позицій';
                         </div>
                     </div>
 
-                    <!-- Free delivery progress bar -->
-                    <?php
-                    $_free_from  = (float) get_option( 'lesyni_green_free_from', 600 );
-                    $_pct        = $_free_from > 0 ? min( 100, round( $subtotal / $_free_from * 100 ) ) : 100;
-                    $_remaining  = max( 0, $_free_from - $subtotal );
-                    ?>
-                    <div class="oco-free-bar" id="oco-free-bar-wrap">
-                        <div class="oco-free-bar__text" id="oco-free-bar-text">
-                            <?php if ( $_remaining > 0 ) : ?>
-                                Ще <strong><?php echo number_format( $_remaining, 0, '', '' ); ?> грн</strong> до безкоштовної доставки
-                            <?php else : ?>
-                                <span class="oco-free-bar__done">Безкоштовна доставка</span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="oco-free-bar__track">
-                            <div class="oco-free-bar__fill" id="oco-free-bar-fill" style="width:<?php echo esc_attr( $_pct ); ?>%"></div>
-                        </div>
-                    </div>
-
                     <!-- Cart foot: coupon -->
                     <?php if ( wc_coupons_enabled() ) : ?>
                     <div class="oco-cart-foot">

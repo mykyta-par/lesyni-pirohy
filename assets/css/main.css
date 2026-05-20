@@ -3895,6 +3895,8 @@ ul.products {
 }
 .oco-autocomplete-item:last-child { border-bottom: none; }
 .oco-autocomplete-item:hover, .oco-autocomplete-item.is-active { background: #fdf6f0; }
+.oco-np-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 600px) { .oco-np-row { grid-template-columns: 1fr; } }
 .oco-np-select { cursor: pointer; }
 .oco-np-loading { color: #999; font-size: 12px; padding: 8px 14px; }
 

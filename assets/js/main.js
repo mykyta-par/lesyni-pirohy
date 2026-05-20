@@ -494,6 +494,10 @@
     var selectedDate   = null;
     var selectedTime   = '14:00–15:00';
 
+    var npCityRef    = '';
+    var npCityName   = '';
+    var npBranchName = '';
+
     /* ── Date picker ────────────────────────────────────────────── */
     var picker = document.getElementById('oco-date-picker');
     if (picker) {
@@ -863,12 +867,6 @@
                 if (whenSection) whenSection.style.display = 'none';
                 if (shippingLbl) shippingLbl.textContent = 'Нова Пошта';
                 if (shippingVal) { shippingVal.textContent = deliveryCost + ' грн'; shippingVal.style.color = '#3d3d3d'; }
-                // Notify wc-ukr-shipping plugin that NP is selected
-                var smInput2 = document.getElementById('oco-shipping-method-val');
-                if (smInput2 && window.jQuery) {
-                    jQuery(smInput2).trigger('change');
-                    jQuery(document.body).trigger('update_checkout');
-                }
             } else {
                 if (addrSection) {
                     addrSection.style.display = '';
@@ -1148,6 +1146,95 @@
         });
     });
 
+    /* ── Nova Poshta city + warehouse autocomplete ──────────────── */
+    (function () {
+        var cityInput  = document.getElementById('np-city-input');
+        var cityList   = document.getElementById('np-city-list');
+        var branchSel  = document.getElementById('np-branch-select');
+        if (!cityInput) return;
+
+        function resetBranch() {
+            branchSel.innerHTML = '<option value="">— спочатку оберіть місто —</option>';
+            branchSel.disabled = true;
+            npCityRef  = '';
+            npCityName = '';
+            npBranchName = '';
+        }
+
+        function loadWarehouses(ref) {
+            branchSel.innerHTML = '<option value="">Завантаження…</option>';
+            branchSel.disabled = true;
+            npBranchName = '';
+            fetch('/wp-admin/admin-ajax.php?action=lesyni_np_warehouses&ref=' + encodeURIComponent(ref))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var list = (data.success && data.data) ? data.data : [];
+                    branchSel.innerHTML = '<option value="">— оберіть відділення —</option>';
+                    list.forEach(function (w) {
+                        var opt = document.createElement('option');
+                        opt.value = w.label;
+                        opt.textContent = w.label;
+                        branchSel.appendChild(opt);
+                    });
+                    branchSel.disabled = list.length === 0;
+                })
+                .catch(function () {
+                    branchSel.innerHTML = '<option value="">Помилка завантаження</option>';
+                    branchSel.disabled = true;
+                });
+        }
+
+        var debounce = null;
+        cityInput.addEventListener('input', function () {
+            clearTimeout(debounce);
+            var q = cityInput.value.trim();
+            npCityRef = '';
+            npCityName = '';
+            if (q.length < 2) { cityList.style.display = 'none'; resetBranch(); return; }
+            debounce = setTimeout(function () {
+                cityList.innerHTML = '<li class="oco-autocomplete-item oco-np-loading">Пошук…</li>';
+                cityList.style.display = 'block';
+                fetch('/wp-admin/admin-ajax.php?action=lesyni_np_cities&q=' + encodeURIComponent(q))
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        var cities = (data.success && data.data) ? data.data : [];
+                        cityList.innerHTML = '';
+                        if (!cities.length) {
+                            cityList.innerHTML = '<li class="oco-autocomplete-item oco-np-loading">Нічого не знайдено</li>';
+                            return;
+                        }
+                        cities.forEach(function (city) {
+                            var li = document.createElement('li');
+                            li.className = 'oco-autocomplete-item';
+                            li.textContent = city.label;
+                            li.addEventListener('mousedown', function (e) {
+                                e.preventDefault();
+                                cityInput.value = city.label;
+                                npCityRef  = city.ref;
+                                npCityName = city.label;
+                                cityList.style.display = 'none';
+                                cityInput.style.borderColor = '';
+                                loadWarehouses(city.ref);
+                            });
+                            cityList.appendChild(li);
+                        });
+                    })
+                    .catch(function () {
+                        cityList.innerHTML = '<li class="oco-autocomplete-item oco-np-loading">Помилка пошуку</li>';
+                    });
+            }, 350);
+        });
+
+        cityInput.addEventListener('blur', function () {
+            setTimeout(function () { cityList.style.display = 'none'; }, 150);
+        });
+
+        branchSel.addEventListener('change', function () {
+            npBranchName = branchSel.value;
+            branchSel.style.borderColor = '';
+        });
+    }());
+
     /* ── Place order ────────────────────────────────────────────── */
     var placeBtn = document.getElementById('oco-place-btn');
     if (placeBtn) {
@@ -1174,6 +1261,18 @@
                 setTimeout(function () { termsLabel.classList.remove('oco-check--error'); }, 2500);
                 return;
             }
+            if (deliveryType === 'np') {
+                var npCityEl   = document.getElementById('np-city-input');
+                var npBranchEl = document.getElementById('np-branch-select');
+                if (!npCityRef) {
+                    if (npCityEl) { npCityEl.focus(); npCityEl.style.borderColor = '#c45a5a'; }
+                    return;
+                }
+                if (!npBranchName) {
+                    if (npBranchEl) { npBranchEl.focus(); npBranchEl.style.borderColor = '#c45a5a'; }
+                    return;
+                }
+            }
 
             // Copy UI values to hidden WC form fields
             var fullName = (firstName ? firstName.value.trim() : '').split(' ');
@@ -1188,7 +1287,11 @@
             setHidden('wc-billing_email', emailEl ? emailEl.value.trim() : '');
 
             // Build address
-            if (deliveryType !== 'np') {
+            if (deliveryType === 'np') {
+                setHidden('wc-np_city',   npCityName);
+                setHidden('wc-np_branch', npBranchName);
+                setHidden('wc-billing_city', npCityName);
+            } else {
                 var street   = document.getElementById('oco-street');
                 var house    = document.getElementById('oco-house');
                 var apt      = document.getElementById('oco-apt');

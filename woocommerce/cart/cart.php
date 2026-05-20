@@ -441,15 +441,20 @@ else   $count_str = $n . ' позицій';
                 </div>
 
                 <?php if ( $np_enabled ) : ?>
-                <!-- NP fields rendered by wc-ukr-shipping plugin -->
-                <div id="oco-np-fields" style="display:none;margin-top:16px;">
-                    <?php
-                    ob_start();
-                    do_action( 'woocommerce_after_checkout_shipping_form', WC()->checkout() );
-                    $np_output = ob_get_clean();
-                    echo '<!-- NP DEBUG: is_checkout=' . ( is_checkout() ? 'true' : 'false' ) . ' output_len=' . strlen( $np_output ) . ' -->';
-                    echo $np_output;
-                    ?>
+                <div id="oco-np-fields" style="display:none;margin-top:20px;">
+                    <div class="oco-np-row">
+                        <div class="oco-field oco-autocomplete">
+                            <label class="oco-label" for="np-city-input">Місто <span class="oco-req">*</span></label>
+                            <input type="text" id="np-city-input" class="oco-input" placeholder="Введіть назву міста" autocomplete="off">
+                            <ul class="oco-autocomplete-list" id="np-city-list"></ul>
+                        </div>
+                        <div class="oco-field">
+                            <label class="oco-label" for="np-branch-select">Відділення <span class="oco-req">*</span></label>
+                            <select id="np-branch-select" class="oco-select oco-np-select" disabled>
+                                <option value="">— спочатку оберіть місто —</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <?php endif; ?>
             </div>

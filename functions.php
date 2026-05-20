@@ -63,7 +63,6 @@ function lesyni_np_cities_handler() {
     if ( mb_strlen( $q ) < 2 ) wp_send_json_success( [] );
 
     $api_key = lesyni_get_np_api_key();
-    if ( ! $api_key ) wp_send_json_error( 'no_api_key' );
 
     $resp = wp_remote_post( 'https://api.novaposhta.ua/v2.0/json/', [
         'headers' => [ 'Content-Type' => 'application/json' ],
@@ -92,7 +91,6 @@ function lesyni_np_warehouses_handler() {
     if ( ! $ref ) wp_send_json_success( [] );
 
     $api_key = lesyni_get_np_api_key();
-    if ( ! $api_key ) wp_send_json_error( 'no_api_key' );
 
     $resp = wp_remote_post( 'https://api.novaposhta.ua/v2.0/json/', [
         'headers' => [ 'Content-Type' => 'application/json' ],

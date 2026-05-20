@@ -398,13 +398,17 @@ function lesyni_enqueue_assets() {
 		'npAjaxUrl'  => admin_url( 'admin-ajax.php' ),
 		'npHasKey'   => lesyni_get_np_api_key() ? '1' : '0',
 		'npDebugOpts' => ( function() {
-			$zone = lesyni_get_ukraine_zone();
-			foreach ( $zone->get_shipping_methods( true ) as $method ) {
-				if ( $method->id === 'nova_poshta_shipping' ) {
-					return $method->instance_settings;
-				}
+			$candidates = [
+				'wcus_api_key', 'wc_ukr_shipping_api_key', 'wcus_settings',
+				'nova_poshta_api_key', 'wc_nova_poshta_api_key',
+				'kirillbdev_wcus_api_key', 'wcus_nova_poshta_api_key',
+			];
+			$result = [];
+			foreach ( $candidates as $key ) {
+				$val = get_option( $key );
+				if ( $val !== false ) $result[ $key ] = $val;
 			}
-			return [];
+			return $result;
 		} )(),
 	] );
 

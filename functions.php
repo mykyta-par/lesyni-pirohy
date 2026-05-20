@@ -496,46 +496,12 @@ add_action( 'wc_ajax_lesyni_cart_remove',        'lesyni_ajax_cart_remove' );
 add_action( 'wc_ajax_nopriv_lesyni_cart_remove', 'lesyni_ajax_cart_remove' );
 
 
-// TEMP: find which WC hooks the NP plugin uses
-add_action( 'wp_footer', function () {
-    if ( ! current_user_can( 'manage_woocommerce' ) || ! is_page() ) return;
-    global $wp_filter;
-    $hooks = [
-        'woocommerce_checkout_shipping',
-        'woocommerce_after_checkout_shipping_form',
-        'woocommerce_checkout_order_review',
-        'woocommerce_review_order_before_payment',
-        'woocommerce_review_order_after_shipping',
-        'woocommerce_checkout_before_order_review',
-        'woocommerce_checkout_after_order_review',
-        'woocommerce_before_checkout_form',
-        'woocommerce_checkout_billing',
-        'woocommerce_checkout_shipping_info',
-    ];
-    $out = [];
-    foreach ( $hooks as $hook ) {
-        if ( ! empty( $wp_filter[ $hook ] ) ) {
-            foreach ( $wp_filter[ $hook ]->callbacks as $pri => $cbs ) {
-                foreach ( $cbs as $cb ) {
-                    $fn = $cb['function'];
-                    if ( is_array( $fn ) ) {
-                        $cls = is_object( $fn[0] ) ? get_class( $fn[0] ) : $fn[0];
-                        $name = $cls . '::' . $fn[1];
-                    } else {
-                        $name = is_string( $fn ) ? $fn : 'closure';
-                    }
-                    if ( stripos( $name, 'nova' ) !== false || stripos( $name, 'ukr' ) !== false || stripos( $name, 'smarty' ) !== false || stripos( $name, 'wcus' ) !== false || stripos( $name, 'np' ) !== false ) {
-                        $out[] = $hook . ' [p' . $pri . ']: ' . $name;
-                    }
-                }
-            }
-        }
+// Make cart page behave as checkout so NP plugin loads its scripts + fields
+add_action( 'wp', function () {
+    if ( is_page( wc_get_page_id( 'cart' ) ) ) {
+        add_filter( 'woocommerce_is_checkout', '__return_true' );
     }
-    echo '<div style="position:fixed;bottom:0;left:0;right:0;background:#222;color:#0f0;font:11px monospace;padding:8px;z-index:99999;max-height:150px;overflow:auto;">';
-    echo '<strong style="color:#ff0">NP PLUGIN HOOKS:</strong><br>';
-    echo esc_html( $out ? implode( "\n", $out ) : 'none found — plugin may use a different approach' );
-    echo '</div>';
-}, 99 );
+} );
 
 // Output config as a hidden HTML element (data attribute) — CSP-safe, no inline script needed.
 // Runs at priority 5 so the <div> is in the DOM before footer scripts execute.

@@ -591,77 +591,6 @@
 
     initTimeSlots();
 
-    /* ── Nova Poshta city autocomplete + warehouse select ── */
-    (function () {
-        var cityInput   = document.getElementById('oco-np-city');
-        var cityList    = document.getElementById('oco-np-city-list');
-        var cityRef     = document.getElementById('oco-np-city-ref');
-        var branchWrap  = document.getElementById('oco-np-branch-wrap');
-        var branchSel   = document.getElementById('oco-np-branch');
-        if (!cityInput || !cityList || !cityRef) return;
-
-        var ajaxUrl = (window.lesyniConfig && lesyniConfig.ajaxUrl) ? lesyniConfig.ajaxUrl : '/wp-admin/admin-ajax.php';
-        var searchTimer;
-
-        function showList(items) {
-            cityList.innerHTML = '';
-            if (!items.length) { cityList.style.display = 'none'; return; }
-            items.forEach(function (c) {
-                var d = document.createElement('div');
-                d.className = 'oco-autocomplete-item';
-                d.textContent = c.label;
-                d.dataset.ref = c.ref;
-                d.addEventListener('click', function () {
-                    cityInput.value = c.label;
-                    cityRef.value   = c.ref;
-                    cityList.style.display = 'none';
-                    loadWarehouses(c.ref);
-                });
-                cityList.appendChild(d);
-            });
-            cityList.style.display = 'block';
-        }
-
-        function loadWarehouses(ref) {
-            if (!branchWrap || !branchSel) return;
-            branchSel.innerHTML = '<option value="">Завантаження…</option>';
-            branchWrap.style.display = '';
-            fetch(ajaxUrl + '?action=lesyni_np_warehouses&ref=' + encodeURIComponent(ref))
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    branchSel.innerHTML = '<option value="">— Оберіть відділення —</option>';
-                    if (data.success && data.data.length) {
-                        data.data.forEach(function (w) {
-                            var opt = document.createElement('option');
-                            opt.value = w.number;
-                            opt.textContent = w.label;
-                            branchSel.appendChild(opt);
-                        });
-                    }
-                });
-        }
-
-        cityInput.addEventListener('input', function () {
-            var q = this.value.trim();
-            cityRef.value = '';
-            if (branchWrap) branchWrap.style.display = 'none';
-            if (branchSel) branchSel.innerHTML = '<option value="">— Оберіть відділення —</option>';
-            clearTimeout(searchTimer);
-            if (q.length < 2) { cityList.style.display = 'none'; return; }
-            cityList.innerHTML = '<div class="oco-np-loading">Пошук…</div>';
-            cityList.style.display = 'block';
-            searchTimer = setTimeout(function () {
-                fetch(ajaxUrl + '?action=lesyni_np_cities&q=' + encodeURIComponent(q))
-                    .then(function (r) { return r.json(); })
-                    .then(function (data) { showList(data.success ? data.data : []); });
-            }, 350);
-        });
-
-        document.addEventListener('click', function (e) {
-            if (!e.target.closest('#oco-np-city-wrap')) cityList.style.display = 'none';
-        });
-    }());
-
     document.querySelectorAll('.oco-time-slot').forEach(function (slot) {
         slot.addEventListener('click', function () {
             if (slot.classList.contains('oco-time-slot--disabled')) return;
@@ -934,6 +863,12 @@
                 if (whenSection) whenSection.style.display = 'none';
                 if (shippingLbl) shippingLbl.textContent = 'Нова Пошта';
                 if (shippingVal) { shippingVal.textContent = deliveryCost + ' грн'; shippingVal.style.color = '#3d3d3d'; }
+                // Notify wc-ukr-shipping plugin that NP is selected
+                var smInput2 = document.getElementById('oco-shipping-method-val');
+                if (smInput2 && window.jQuery) {
+                    jQuery(smInput2).trigger('change');
+                    jQuery(document.body).trigger('update_checkout');
+                }
             } else {
                 if (addrSection) {
                     addrSection.style.display = '';
@@ -1232,19 +1167,6 @@
                 phone.style.borderColor = '#c45a5a';
                 return;
             }
-            if (deliveryType === 'np') {
-                var npCityRef2 = (document.getElementById('oco-np-city-ref') || {}).value || '';
-                var npCityInp  = document.getElementById('oco-np-city');
-                if (!npCityRef2 || !(npCityInp && npCityInp.value.trim())) {
-                    if (npCityInp) { npCityInp.focus(); npCityInp.style.borderColor = '#c45a5a'; }
-                    return;
-                }
-                var npBranch2 = document.getElementById('oco-np-branch');
-                if (!npBranch2 || !npBranch2.value) {
-                    if (npBranch2) { npBranch2.focus(); npBranch2.style.borderColor = '#c45a5a'; }
-                    return;
-                }
-            }
             if (terms && !terms.checked) {
                 var termsLabel = terms.closest('.oco-check');
                 termsLabel.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1266,20 +1188,7 @@
             setHidden('wc-billing_email', emailEl ? emailEl.value.trim() : '');
 
             // Build address
-            if (deliveryType === 'np') {
-                var npCityEl   = document.getElementById('oco-np-city');
-                var npBranchEl = document.getElementById('oco-np-branch');
-                // City label from text input; branch label from selected option text
-                var npCityVal   = npCityEl   ? npCityEl.value.trim() : '';
-                var npBranchNum = npBranchEl ? npBranchEl.value.trim() : '';
-                var npBranchLbl = npBranchEl && npBranchEl.selectedIndex > 0
-                    ? npBranchEl.options[npBranchEl.selectedIndex].text
-                    : npBranchNum;
-                setHidden('wc-np_city',        npCityVal);
-                setHidden('wc-np_branch',      npBranchLbl || npBranchNum);
-                setHidden('wc-billing_address_1', 'Нова Пошта, м. ' + npCityVal + ', відд. ' + (npBranchLbl || npBranchNum));
-                setHidden('wc-billing_city',   npCityVal || 'Дніпро');
-            } else {
+            if (deliveryType !== 'np') {
                 var street   = document.getElementById('oco-street');
                 var house    = document.getElementById('oco-house');
                 var apt      = document.getElementById('oco-apt');

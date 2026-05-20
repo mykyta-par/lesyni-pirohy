@@ -602,6 +602,11 @@ else   $count_str = $n . ' позицій';
                     </strong>
                 </div>
 
+                <div class="oco-summary-row" id="oco-packaging-row" style="display:none;">
+                    <span id="oco-packaging-label">Термопакування</span>
+                    <strong><span id="oco-sum-packaging">0</span> грн</strong>
+                </div>
+
                 <div class="oco-free-bar oco-free-bar--summary" id="oco-free-bar-wrap-summary">
                     <div class="oco-free-bar__text" id="oco-free-bar-text-summary">
                         <?php if ( $_remaining > 0 ) : ?>

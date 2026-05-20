@@ -497,6 +497,7 @@
     var npCityRef    = '';
     var npCityName   = '';
     var npBranchName = '';
+    var prevPayment  = 'cod'; // payment method before NP was selected
 
     /* ── Date picker ────────────────────────────────────────────── */
     var picker = document.getElementById('oco-date-picker');
@@ -700,7 +701,22 @@
             }
         }
 
-        var total = Math.max(0, subtotal - discount + shipping);
+        // Packaging fee for Nova Poshta
+        var packagingRow = document.getElementById('oco-packaging-row');
+        var packagingLbl = document.getElementById('oco-packaging-label');
+        var packagingEl  = document.getElementById('oco-sum-packaging');
+        var packaging = 0;
+        if (deliveryType === 'np') {
+            packaging = itemCount <= 3 ? 100 : 150;
+            var pkgName = itemCount <= 3 ? 'Термопакування мале' : 'Термопакування велике';
+            if (packagingRow) packagingRow.style.display = '';
+            if (packagingLbl) packagingLbl.textContent = pkgName;
+            if (packagingEl)  packagingEl.textContent  = packaging;
+        } else {
+            if (packagingRow) packagingRow.style.display = 'none';
+        }
+
+        var total = Math.max(0, subtotal - discount + shipping + packaging);
 
         // Update sidebar
         var subtotalEl  = document.getElementById('oco-sum-subtotal');
@@ -820,6 +836,43 @@
         });
     }
 
+    /* ── Payment method helpers ─────────────────────────────────── */
+    function restrictToLiqpay() {
+        var pmInput = document.getElementById('oco-payment-method-val');
+        document.querySelectorAll('#oco-payment-options .oco-opt-card').forEach(function (c) {
+            if (c.dataset.payment === 'liqpay') {
+                c.classList.add('oco-opt--active');
+                c.style.display = '';
+            } else {
+                // save current selection before hiding
+                if (c.classList.contains('oco-opt--active')) prevPayment = c.dataset.payment;
+                c.classList.remove('oco-opt--active');
+                c.style.display = 'none';
+            }
+        });
+        if (pmInput) pmInput.value = 'liqpay';
+    }
+
+    function restorePaymentMethods() {
+        var pmInput = document.getElementById('oco-payment-method-val');
+        var hasActive = false;
+        document.querySelectorAll('#oco-payment-options .oco-opt-card').forEach(function (c) {
+            c.style.display = '';
+            if (c.dataset.payment === prevPayment) {
+                c.classList.add('oco-opt--active');
+                hasActive = true;
+            } else {
+                c.classList.remove('oco-opt--active');
+            }
+        });
+        // fallback: activate first card
+        if (!hasActive) {
+            var first = document.querySelector('#oco-payment-options .oco-opt-card');
+            if (first) { first.classList.add('oco-opt--active'); prevPayment = first.dataset.payment || 'cod'; }
+        }
+        if (pmInput) pmInput.value = prevPayment;
+    }
+
     /* ── Delivery method ────────────────────────────────────────── */
     var addrSection = document.getElementById('oco-address-section');
     var whenSection = document.getElementById('oco-when-section');
@@ -861,12 +914,14 @@
                 if (whenSection) whenSection.style.display = '';
                 if (shippingLbl) shippingLbl.textContent = 'Самовивіз';
                 if (shippingVal) { shippingVal.textContent = 'Безкоштовно'; shippingVal.style.color = '#7a9b6e'; }
+                restorePaymentMethods();
             } else if (deliveryType === 'np') {
                 if (addrSection) addrSection.style.display = 'none';
                 if (npFields)    npFields.style.display    = '';
                 if (whenSection) whenSection.style.display = 'none';
                 if (shippingLbl) shippingLbl.textContent = 'Нова Пошта';
                 if (shippingVal) { shippingVal.textContent = deliveryCost + ' грн'; shippingVal.style.color = '#3d3d3d'; }
+                restrictToLiqpay();
             } else {
                 if (addrSection) {
                     addrSection.style.display = '';
@@ -876,6 +931,7 @@
                 if (npFields)    npFields.style.display    = 'none';
                 if (whenSection) whenSection.style.display = '';
                 if (shippingLbl) shippingLbl.textContent = 'Доставка по Дніпру';
+                restorePaymentMethods();
             }
 
             recalc();
@@ -1300,6 +1356,17 @@
             if (deliveryType === 'np') {
                 var npCityEl   = document.getElementById('np-city-input');
                 var npBranchEl = document.getElementById('np-branch-input');
+                // Min order 1000 UAH
+                var subtotalNow = parseInt(document.getElementById('oco-sum-subtotal') ? document.getElementById('oco-sum-subtotal').textContent : '0', 10) || 0;
+                if (subtotalNow < 1000) {
+                    var errBox2 = document.getElementById('oco-checkout-errors');
+                    if (errBox2) {
+                        errBox2.innerHTML = '<ul class="woocommerce-error"><li>Мінімальна сума замовлення для доставки Новою Поштою — 1000 грн.</li></ul>';
+                        errBox2.style.display = 'block';
+                        errBox2.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return;
+                }
                 if (!npCityRef) {
                     if (npCityEl) { npCityEl.focus(); npCityEl.style.borderColor = '#c45a5a'; }
                     return;

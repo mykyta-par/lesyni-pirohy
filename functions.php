@@ -561,6 +561,49 @@ remove_action( 'woocommerce_after_main_content',  'woocommerce_output_content_wr
 remove_action( 'woocommerce_before_shop_loop',    'woocommerce_result_count', 20 );
 
 /* -----------------------------------------------------------------------
+   Nova Poshta: thermal packaging fee + minimum order validation
+----------------------------------------------------------------------- */
+add_action( 'woocommerce_cart_calculate_fees', function ( $cart ) {
+    if ( is_admin() && ! defined( 'DOING_AJAX' ) ) return;
+
+    $is_np = false;
+    // During checkout submission shipping_method comes from POST
+    if ( ! empty( $_POST['shipping_method'] ) ) {
+        foreach ( (array) $_POST['shipping_method'] as $m ) {
+            if ( strpos( (string) $m, 'nova_poshta_shipping' ) !== false ) { $is_np = true; break; }
+        }
+    }
+    // Fallback: check WC session (cart page)
+    if ( ! $is_np && WC()->session ) {
+        foreach ( (array) WC()->session->get( 'chosen_shipping_methods', [] ) as $m ) {
+            if ( strpos( (string) $m, 'nova_poshta_shipping' ) !== false ) { $is_np = true; break; }
+        }
+    }
+    if ( ! $is_np ) return;
+
+    $count = 0;
+    foreach ( $cart->get_cart() as $item ) $count += (int) $item['quantity'];
+
+    if ( $count <= 3 ) {
+        $cart->add_fee( 'Термопакування мале', 100, false );
+    } else {
+        $cart->add_fee( 'Термопакування велике', 150, false );
+    }
+} );
+
+add_action( 'woocommerce_checkout_process', function () {
+    $methods = isset( $_POST['shipping_method'] ) ? (array) $_POST['shipping_method'] : [];
+    $is_np = false;
+    foreach ( $methods as $m ) {
+        if ( strpos( (string) $m, 'nova_poshta_shipping' ) !== false ) { $is_np = true; break; }
+    }
+    if ( ! $is_np ) return;
+    if ( WC()->cart->get_subtotal() < 1000 ) {
+        wc_add_notice( 'Мінімальна сума замовлення для доставки Новою Поштою — 1000 грн.', 'error' );
+    }
+}, 5 );
+
+/* -----------------------------------------------------------------------
    Remove wc-ukr-shipping plugin validation — we handle NP fields ourselves
 ----------------------------------------------------------------------- */
 add_action( 'woocommerce_checkout_process', function () {

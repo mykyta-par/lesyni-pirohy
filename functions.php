@@ -583,6 +583,23 @@ add_action( 'woocommerce_checkout_process', function () {
 }, 1 );
 
 /* -----------------------------------------------------------------------
+   WooCommerce: Thank you page — show NP delivery details
+----------------------------------------------------------------------- */
+add_action( 'woocommerce_thankyou', function ( $order_id ) {
+    $np_city   = get_post_meta( $order_id, '_np_city',   true );
+    $np_branch = get_post_meta( $order_id, '_np_branch', true );
+    if ( ! $np_city && ! $np_branch ) return;
+    echo '<section class="woocommerce-columns woocommerce-columns--2 col2-set addresses">';
+    echo '<div class="woocommerce-column woocommerce-column--1">';
+    echo '<h2 class="woocommerce-column__title">Доставка Нова Пошта</h2>';
+    echo '<address>';
+    if ( $np_city )   echo '<strong>Місто:</strong> ' . esc_html( $np_city ) . '<br>';
+    if ( $np_branch ) echo '<strong>Відділення:</strong> ' . esc_html( $np_branch );
+    echo '</address>';
+    echo '</div></section>';
+}, 20 );
+
+/* -----------------------------------------------------------------------
    WooCommerce: Checkout — save custom order fields
 ----------------------------------------------------------------------- */
 add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {

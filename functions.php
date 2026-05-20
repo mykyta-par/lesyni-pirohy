@@ -457,7 +457,29 @@ add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {
             update_post_meta( $order_id, '_' . $key, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
         }
     }
+
+    // Add visible order note when gift is requested
+    if ( ! empty( $_POST['lesyni_gift'] ) && $_POST['lesyni_gift'] === '1' ) {
+        $order = wc_get_order( $order_id );
+        if ( $order ) {
+            $order->add_order_note( '🎁 Подарунок: додати рукописну листівку та святкову стрічку' );
+        }
+    }
 } );
+
+// Show gift info in order confirmation emails
+add_action( 'woocommerce_email_after_order_table', function ( $order, $sent_to_admin, $plain_text ) {
+    $gift = get_post_meta( $order->get_id(), '_lesyni_gift', true );
+    if ( $gift !== '1' ) return;
+
+    if ( $plain_text ) {
+        echo "\n🎁 Це подарунок — додамо рукописну листівку та святкову стрічку.\n";
+    } else {
+        echo '<p style="margin:16px 0;padding:12px 16px;background:#fff8e1;border-left:4px solid #e07a3f;font-family:Arial,sans-serif;font-size:14px;">
+            🎁 <strong>Це подарунок</strong> — додамо рукописну листівку та святкову стрічку (безкоштовно).
+        </p>';
+    }
+}, 10, 3 );
 
 // Show custom fields in order admin
 add_action( 'woocommerce_admin_order_data_after_billing_address', function ( $order ) {

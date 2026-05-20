@@ -562,6 +562,27 @@ remove_action( 'woocommerce_after_main_content',  'woocommerce_output_content_wr
 remove_action( 'woocommerce_before_shop_loop',    'woocommerce_result_count', 20 );
 
 /* -----------------------------------------------------------------------
+   Remove wc-ukr-shipping plugin validation — we handle NP fields ourselves
+----------------------------------------------------------------------- */
+add_action( 'woocommerce_checkout_process', function () {
+    global $wp_filter;
+    foreach ( [ 'woocommerce_checkout_process', 'woocommerce_after_checkout_validation' ] as $hook ) {
+        if ( ! isset( $wp_filter[ $hook ] ) ) continue;
+        foreach ( $wp_filter[ $hook ]->callbacks as $priority => $callbacks ) {
+            foreach ( $callbacks as $callback ) {
+                $fn = $callback['function'];
+                if ( is_array( $fn ) && is_object( $fn[0] ) ) {
+                    $class = get_class( $fn[0] );
+                    if ( strpos( $class, 'WCUkrShipping' ) !== false || strpos( $class, 'kirillbdev' ) !== false ) {
+                        remove_action( $hook, $fn, $priority );
+                    }
+                }
+            }
+        }
+    }
+}, 1 );
+
+/* -----------------------------------------------------------------------
    WooCommerce: Checkout — save custom order fields
 ----------------------------------------------------------------------- */
 add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {

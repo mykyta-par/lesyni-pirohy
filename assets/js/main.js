@@ -1065,11 +1065,26 @@
     if (streetInput) streetInput.addEventListener('input', scheduleZoneCheck);
     if (houseInput)  houseInput.addEventListener('input',  scheduleZoneCheck);
 
-    // Init map immediately so zones are visible before address is entered
+    // Auto-run zone check on page load if address fields are already prefilled
+    function autoCheckZoneIfPrefilled() {
+        var street = streetInput ? streetInput.value.trim() : '';
+        var house  = houseInput  ? houseInput.value.trim()  : '';
+        if (street && house) {
+            showZoneIndicator('checking', '🔍 Визначаємо зону доставки…');
+            checkZone(street + ', ' + house);
+        }
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initZoneMap);
+        document.addEventListener('DOMContentLoaded', function () {
+            initZoneMap();
+            autoCheckZoneIfPrefilled();
+        });
     } else {
-        setTimeout(initZoneMap, 100);
+        setTimeout(function () {
+            initZoneMap();
+            autoCheckZoneIfPrefilled();
+        }, 100);
     }
 
     /* ── Payment method ─────────────────────────────────────────── */

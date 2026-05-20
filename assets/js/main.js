@@ -1290,9 +1290,10 @@
 
             // Build address
             if (deliveryType === 'np') {
-                setHidden('wc-np_city',   npCityName);
-                setHidden('wc-np_branch', npBranchName);
-                setHidden('wc-billing_city', npCityName);
+                setHidden('wc-np_city',          npCityName);
+                setHidden('wc-np_branch',        npBranchName);
+                setHidden('wc-billing_city',     npCityName);
+                setHidden('wc-billing_address_1', npBranchName);
             } else {
                 var street   = document.getElementById('oco-street');
                 var house    = document.getElementById('oco-house');

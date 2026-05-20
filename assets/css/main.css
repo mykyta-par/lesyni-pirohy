@@ -3602,6 +3602,11 @@ ul.products {
     transition: all .25s;
 }
 .oco-promo-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+@media (max-width: 480px) {
+    .oco-promo { gap: 6px; }
+    .oco-promo-btn { padding: 11px 12px; font-size: 11px; white-space: nowrap; }
+    .oco-promo-input { min-width: 0; }
+}
 
 .oco-coupon-tag {
     padding: 10px 24px;

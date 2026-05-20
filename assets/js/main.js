@@ -552,8 +552,8 @@
     function initTimeSlots() {
         var now = new Date();
         var cur = now.getHours() * 60 + now.getMinutes();
-        // "Якнайшвидше" available 10:00–16:30 (leaves ~2h before 18:30 closing)
-        var WORK_START   = 10 * 60;
+        // "Якнайшвидше" available 09:00–16:30 (leaves ~2h before 18:30 closing)
+        var WORK_START   = 9 * 60;
         var ASAP_CUTOFF  = 16 * 60 + 30;
 
         var firstEnabled = null;

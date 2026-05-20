@@ -451,6 +451,8 @@ add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {
         'delivery_type'     => 'Тип доставки',
         'lesyni_gift'       => 'Подарунок',
         'lesyni_subscribe'  => 'Підписка на новини',
+        'np_city'           => 'Місто НП',
+        'np_branch'         => 'Відділення НП',
     ];
     foreach ( $fields as $key => $label ) {
         if ( isset( $_POST[ $key ] ) && $_POST[ $key ] !== '' ) {
@@ -469,6 +471,20 @@ add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {
 
 // Show gift info in order confirmation emails
 add_action( 'woocommerce_email_after_order_table', function ( $order, $sent_to_admin, $plain_text ) {
+    // Nova Poshta address block
+    $np_city   = get_post_meta( $order->get_id(), '_np_city',   true );
+    $np_branch = get_post_meta( $order->get_id(), '_np_branch', true );
+    if ( $np_city || $np_branch ) {
+        if ( $plain_text ) {
+            echo "\n📦 Нова Пошта: м. " . $np_city . ", відділення " . $np_branch . "\n";
+        } else {
+            echo '<p style="margin:16px 0;padding:12px 16px;background:#f5f5f5;border-left:4px solid #c4845a;font-family:Arial,sans-serif;font-size:14px;">
+                📦 <strong>Нова Пошта:</strong> м. ' . esc_html( $np_city ) . ', відділення ' . esc_html( $np_branch ) . '
+            </p>';
+        }
+    }
+
+    // Gift block
     $gift = get_post_meta( $order->get_id(), '_lesyni_gift', true );
     if ( $gift !== '1' ) return;
 
@@ -487,6 +503,8 @@ add_action( 'woocommerce_admin_order_data_after_billing_address', function ( $or
         '_delivery_type' => 'Тип доставки',
         '_delivery_time' => 'Час доставки',
         '_lesyni_gift'   => 'Подарунок',
+        '_np_city'       => 'Місто НП',
+        '_np_branch'     => 'Відділення НП',
     ];
     foreach ( $fields as $key => $label ) {
         $val = get_post_meta( $order->get_id(), $key, true );

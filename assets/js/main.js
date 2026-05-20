@@ -850,17 +850,16 @@
                 }
             }
 
+            var npFields = document.getElementById('oco-np-fields');
             if (deliveryType === 'pickup') {
                 if (addrSection) addrSection.style.display = 'none';
+                if (npFields)    npFields.style.display    = 'none';
                 if (whenSection) whenSection.style.display = '';
                 if (shippingLbl) shippingLbl.textContent = 'Самовивіз';
                 if (shippingVal) { shippingVal.textContent = 'Безкоштовно'; shippingVal.style.color = '#7a9b6e'; }
             } else if (deliveryType === 'np') {
-                if (addrSection) {
-                    addrSection.style.display = '';
-                    if (addrTitle) addrTitle.textContent = 'Відділення Нової Пошти';
-                    if (addrHint)  addrHint.textContent  = 'Вкажіть місто та номер відділення';
-                }
+                if (addrSection) addrSection.style.display = 'none';
+                if (npFields)    npFields.style.display    = '';
                 if (whenSection) whenSection.style.display = 'none';
                 if (shippingLbl) shippingLbl.textContent = 'Нова Пошта';
                 if (shippingVal) { shippingVal.textContent = deliveryCost + ' грн'; shippingVal.style.color = '#3d3d3d'; }
@@ -870,6 +869,7 @@
                     if (addrTitle) addrTitle.textContent = 'Адреса доставки';
                     if (addrHint)  addrHint.textContent  = 'Доставка по Дніпру · безкоштовно від 600 грн';
                 }
+                if (npFields)    npFields.style.display    = 'none';
                 if (whenSection) whenSection.style.display = '';
                 if (shippingLbl) shippingLbl.textContent = 'Доставка по Дніпру';
             }
@@ -1161,6 +1161,20 @@
                 phone.style.borderColor = '#c45a5a';
                 return;
             }
+            if (deliveryType === 'np') {
+                var npCityVal = (document.getElementById('oco-np-city') || {}).value || '';
+                if (!npCityVal.trim()) {
+                    var f = document.getElementById('oco-np-city');
+                    if (f) { f.focus(); f.style.borderColor = '#c45a5a'; }
+                    return;
+                }
+                var npBranchVal2 = (document.getElementById('oco-np-branch') || {}).value || '';
+                if (!npBranchVal2.trim()) {
+                    var f2 = document.getElementById('oco-np-branch');
+                    if (f2) { f2.focus(); f2.style.borderColor = '#c45a5a'; }
+                    return;
+                }
+            }
             if (terms && !terms.checked) {
                 var termsLabel = terms.closest('.oco-check');
                 termsLabel.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1182,18 +1196,29 @@
             setHidden('wc-billing_email', emailEl ? emailEl.value.trim() : '');
 
             // Build address
-            var street   = document.getElementById('oco-street');
-            var house    = document.getElementById('oco-house');
-            var apt      = document.getElementById('oco-apt');
-            var entrance = document.getElementById('oco-entrance');
-            var floor    = document.getElementById('oco-floor');
-            var addr = '';
-            if (street)   addr += street.value.trim();
-            if (house && house.value.trim())    addr += ', ' + house.value.trim();
-            if (apt && apt.value.trim())        addr += ', кв.' + apt.value.trim();
-            if (entrance && entrance.value.trim()) addr += ', п.' + entrance.value.trim();
-            if (floor && floor.value.trim())    addr += ', пов.' + floor.value.trim();
-            setHidden('wc-billing_address_1', addr);
+            if (deliveryType === 'np') {
+                var npCityEl   = document.getElementById('oco-np-city');
+                var npBranchEl = document.getElementById('oco-np-branch');
+                var npCityVal   = npCityEl   ? npCityEl.value.trim()   : '';
+                var npBranchVal = npBranchEl ? npBranchEl.value.trim() : '';
+                setHidden('wc-np_city',        npCityVal);
+                setHidden('wc-np_branch',      npBranchVal);
+                setHidden('wc-billing_address_1', 'Нова Пошта, м. ' + npCityVal + ', відд. ' + npBranchVal);
+                setHidden('wc-billing_city',   npCityVal || 'Дніпро');
+            } else {
+                var street   = document.getElementById('oco-street');
+                var house    = document.getElementById('oco-house');
+                var apt      = document.getElementById('oco-apt');
+                var entrance = document.getElementById('oco-entrance');
+                var floor    = document.getElementById('oco-floor');
+                var addr = '';
+                if (street)   addr += street.value.trim();
+                if (house && house.value.trim())       addr += ', ' + house.value.trim();
+                if (apt && apt.value.trim())           addr += ', кв.' + apt.value.trim();
+                if (entrance && entrance.value.trim()) addr += ', п.' + entrance.value.trim();
+                if (floor && floor.value.trim())       addr += ', пов.' + floor.value.trim();
+                setHidden('wc-billing_address_1', addr);
+            }
 
             var noteEl = document.getElementById('oco-note');
             setHidden('wc-order_comments', noteEl ? noteEl.value.trim() : '');

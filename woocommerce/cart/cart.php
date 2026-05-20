@@ -119,6 +119,8 @@ else   $count_str = $n . ' позицій';
         <input type="hidden" name="billing_email"       id="wc-billing_email"       value="">
         <input type="hidden" name="billing_address_1"   id="wc-billing_address_1"   value="">
         <input type="hidden" name="billing_city"        id="wc-billing_city"        value="Дніпро">
+        <input type="hidden" name="np_city"             id="wc-np_city"             value="">
+        <input type="hidden" name="np_branch"           id="wc-np_branch"           value="">
         <input type="hidden" name="billing_state"       id="wc-billing_state"       value="">
         <input type="hidden" name="billing_country"     id="wc-billing_country"     value="UA">
         <input type="hidden" name="billing_postcode"    id="wc-billing_postcode"    value="49000">
@@ -429,6 +431,20 @@ else   $count_str = $n . ' позицій';
                         <div class="oco-opt-info">
                             <div class="oco-opt-name">Нова Пошта</div>
                             <div class="oco-opt-desc">По всій Україні · 1–2 робочі дні · <?php echo esc_html( $np_cost ); ?> грн</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NP fields: shown only when Нова Пошта is selected -->
+                <div id="oco-np-fields" style="display:none;margin-top:16px;">
+                    <div class="oco-row">
+                        <div class="oco-field" style="flex:1 1 55%;">
+                            <label class="oco-label">Місто</label>
+                            <input type="text" id="oco-np-city" class="oco-input" placeholder="Київ">
+                        </div>
+                        <div class="oco-field" style="flex:1 1 40%;">
+                            <label class="oco-label">Відділення №</label>
+                            <input type="text" id="oco-np-branch" class="oco-input" placeholder="12">
                         </div>
                     </div>
                 </div>

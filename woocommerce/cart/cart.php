@@ -332,30 +332,44 @@ else   $count_str = $n . ' позицій';
                             <span class="oco-city-tag">Поки що лише</span>
                         </div>
                     </div>
+                    <?php
+                    // Parse saved billing_address_1 back into individual components.
+                    // Format saved by JS: "вулиця, будинок[, кв.X][, п.X][, пов.X]"
+                    $_addr_raw  = (string) $checkout->get_value( 'billing_address_1' );
+                    $_a_floor   = $_a_entrance = $_a_apt = $_a_house = $_a_street = '';
+                    if ( $_addr_raw ) {
+                        if ( preg_match( '/,\s*пов\.([^,]+)/u',  $_addr_raw, $_m ) ) { $_a_floor    = trim( $_m[1] ); $_addr_raw = str_replace( $_m[0], '', $_addr_raw ); }
+                        if ( preg_match( '/,\s*п\.([^,]+)/u',    $_addr_raw, $_m ) ) { $_a_entrance = trim( $_m[1] ); $_addr_raw = str_replace( $_m[0], '', $_addr_raw ); }
+                        if ( preg_match( '/,\s*кв\.([^,]+)/u',   $_addr_raw, $_m ) ) { $_a_apt      = trim( $_m[1] ); $_addr_raw = str_replace( $_m[0], '', $_addr_raw ); }
+                        $_addr_parts = array_map( 'trim', explode( ',', $_addr_raw, 2 ) );
+                        $_a_street   = $_addr_parts[0] ?? '';
+                        $_a_house    = $_addr_parts[1] ?? '';
+                    }
+                    ?>
                     <div class="oco-field">
                         <label class="oco-label" for="oco-street">Вулиця <span class="oco-req">*</span></label>
                         <input type="text" id="oco-street" class="oco-input"
                                placeholder="напр. Хрещатик"
-                               value="<?php echo esc_attr( $checkout->get_value( 'billing_address_1' ) ); ?>"
+                               value="<?php echo esc_attr( $_a_street ); ?>"
                                autocomplete="address-line1">
                     </div>
                 </div>
                 <div class="oco-form-row oco-form-row--addr">
                     <div class="oco-field">
                         <label class="oco-label" for="oco-house">Будинок <span class="oco-req">*</span></label>
-                        <input type="text" id="oco-house" class="oco-input" placeholder="12">
+                        <input type="text" id="oco-house" class="oco-input" placeholder="12" value="<?php echo esc_attr( $_a_house ); ?>">
                     </div>
                     <div class="oco-field">
                         <label class="oco-label" for="oco-apt">Кв./Офіс</label>
-                        <input type="text" id="oco-apt" class="oco-input" placeholder="45">
+                        <input type="text" id="oco-apt" class="oco-input" placeholder="45" value="<?php echo esc_attr( $_a_apt ); ?>">
                     </div>
                     <div class="oco-field">
                         <label class="oco-label" for="oco-entrance">Під'їзд</label>
-                        <input type="text" id="oco-entrance" class="oco-input" placeholder="2">
+                        <input type="text" id="oco-entrance" class="oco-input" placeholder="2" value="<?php echo esc_attr( $_a_entrance ); ?>">
                     </div>
                     <div class="oco-field">
                         <label class="oco-label" for="oco-floor">Поверх</label>
-                        <input type="text" id="oco-floor" class="oco-input" placeholder="4">
+                        <input type="text" id="oco-floor" class="oco-input" placeholder="4" value="<?php echo esc_attr( $_a_floor ); ?>">
                     </div>
                 </div>
 

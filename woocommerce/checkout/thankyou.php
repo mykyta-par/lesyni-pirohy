@@ -39,7 +39,12 @@ $city       = $order->get_billing_city() ?: 'Дніпро';
 
 switch ( $delivery_type ) {
     case 'pickup': $delivery_label = 'Самовивіз'; $delivery_sub = 'вул. Воскресенська, 41 · Дніпро'; break;
-    case 'np':     $delivery_label = 'Нова Пошта'; $delivery_sub = $address ?: ''; break;
+    case 'np':
+        $np_city   = $order->get_meta( '_np_city' );
+        $np_branch = $order->get_meta( '_np_branch' );
+        $delivery_label = 'Нова Пошта';
+        $delivery_sub   = trim( ( $np_city ? 'м. ' . $np_city : '' ) . ( $np_branch ? ', ' . $np_branch : '' ), ', ' );
+        break;
     default:       $delivery_label = 'Кур\'єр'; $delivery_sub = $address ? $address . ', ' . $city : $city; break;
 }
 

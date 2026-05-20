@@ -6,7 +6,44 @@ if ( ! defined( 'ABSPATH' ) ) exit;
    Helpers
 ----------------------------------------------------------------------- */
 function lesyni_is_np_shipping_enabled() {
-    return get_option( 'lesyni_show_np', 'yes' ) === 'yes';
+    $zone_ids   = array_keys( WC_Shipping_Zones::get_zones() );
+    $zone_ids[] = 0;
+    foreach ( $zone_ids as $zone_id ) {
+        $zone = new WC_Shipping_Zone( $zone_id );
+        foreach ( $zone->get_shipping_methods( true ) as $method ) {
+            if ( $method->id === 'nova_poshta_shipping' ) return true;
+        }
+    }
+    return false;
+}
+
+function lesyni_get_np_rate_key() {
+    $zone_ids   = array_keys( WC_Shipping_Zones::get_zones() );
+    $zone_ids[] = 0;
+    foreach ( $zone_ids as $zone_id ) {
+        $zone = new WC_Shipping_Zone( $zone_id );
+        foreach ( $zone->get_shipping_methods( true ) as $method ) {
+            if ( $method->id === 'nova_poshta_shipping' ) {
+                return 'nova_poshta_shipping:' . $method->get_instance_id();
+            }
+        }
+    }
+    return 'nova_poshta_shipping';
+}
+
+function lesyni_get_np_display_cost() {
+    $zone_ids   = array_keys( WC_Shipping_Zones::get_zones() );
+    $zone_ids[] = 0;
+    foreach ( $zone_ids as $zone_id ) {
+        $zone = new WC_Shipping_Zone( $zone_id );
+        foreach ( $zone->get_shipping_methods( true ) as $method ) {
+            if ( $method->id === 'nova_poshta_shipping' ) {
+                $cost = $method->get_option( 'cost' );
+                if ( $cost !== null && $cost !== '' ) return (float) $cost;
+            }
+        }
+    }
+    return (float) get_option( 'lesyni_np_cost', 80 );
 }
 
 
@@ -637,13 +674,19 @@ add_filter( 'woocommerce_package_rates', function ( $rates, $package ) {
         $courier_label = 'Доставка (уточнюється)';
     }
 
-    $np_cost = (float) get_option( 'lesyni_np_cost', 80 );
-
-    return [
-        'lesyni_zone_rate'   => new WC_Shipping_Rate( 'lesyni_zone_rate',   $courier_label,    $courier_cost, [], 'lesyni_zone' ),
-        'lesyni_pickup_rate' => new WC_Shipping_Rate( 'lesyni_pickup_rate', 'Самовивіз',       0,             [], 'lesyni_zone' ),
-        'lesyni_np_rate'     => new WC_Shipping_Rate( 'lesyni_np_rate',     'Нова Пошта',      $np_cost,      [], 'lesyni_zone' ),
+    $result = [
+        'lesyni_zone_rate'   => new WC_Shipping_Rate( 'lesyni_zone_rate',   $courier_label, $courier_cost, [], 'lesyni_zone' ),
+        'lesyni_pickup_rate' => new WC_Shipping_Rate( 'lesyni_pickup_rate', 'Самовивіз',    0,             [], 'lesyni_zone' ),
     ];
+
+    // Pass through the Nova Poshta rate from the plugin unchanged
+    foreach ( $rates as $key => $rate ) {
+        if ( $rate->get_method_id() === 'nova_poshta_shipping' ) {
+            $result[ $key ] = $rate;
+        }
+    }
+
+    return $result;
 }, 20, 2 );
 
 /* -----------------------------------------------------------------------
@@ -767,13 +810,6 @@ function lesyni_zone_settings_fields() {
             'type'    => 'text',
             'id'      => 'lesyni_out_of_zone_label',
             'default' => 'Уточнимо можливість доставки з менеджером',
-        ],
-        [
-            'title'   => 'Нова Пошта на checkout',
-            'type'    => 'checkbox',
-            'id'      => 'lesyni_show_np',
-            'default' => 'yes',
-            'desc'    => 'Показувати опцію «Нова Пошта» на сторінці оформлення замовлення',
         ],
         [
             'type' => 'sectionend',

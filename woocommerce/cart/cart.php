@@ -393,8 +393,9 @@ else   $count_str = $n . ' позицій';
                     <h2 class="oco-section-title"><span class="oco-num">4</span>Спосіб доставки</h2>
                 </div>
                 <?php
-                $np_cost    = (int) get_option( 'lesyni_np_cost', 80 );
-                $np_enabled = lesyni_is_np_shipping_enabled();
+                $np_enabled  = lesyni_is_np_shipping_enabled();
+                $np_rate_key = $np_enabled ? lesyni_get_np_rate_key()    : '';
+                $np_cost     = $np_enabled ? lesyni_get_np_display_cost() : 0;
                 ?>
                 <div class="oco-options" id="oco-delivery-options">
                     <div class="oco-opt-card oco-opt--active"
@@ -426,14 +427,14 @@ else   $count_str = $n . ' позицій';
                     <?php if ( $np_enabled ) : ?>
                     <div class="oco-opt-card"
                          data-delivery="np"
-                         data-rate-id="lesyni_np_rate"
+                         data-rate-id="<?php echo esc_attr( $np_rate_key ); ?>"
                          data-cost="<?php echo esc_attr( $np_cost ); ?>"
                          data-has-address="1">
                         <div class="oco-opt-radio"></div>
                         <div class="oco-opt-icon">📦</div>
                         <div class="oco-opt-info">
                             <div class="oco-opt-name">Нова Пошта</div>
-                            <div class="oco-opt-desc">По всій Україні · 1–2 робочі дні · <?php echo esc_html( $np_cost ); ?> грн</div>
+                            <div class="oco-opt-desc">По всій Україні · 1–2 робочі дні<?php if ( $np_cost > 0 ) echo ' · ' . (int) $np_cost . ' грн'; ?></div>
                         </div>
                     </div>
                     <?php endif; ?>

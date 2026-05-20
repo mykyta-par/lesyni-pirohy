@@ -443,15 +443,19 @@ else   $count_str = $n . ' позицій';
                 <?php if ( $np_enabled ) : ?>
                 <!-- NP fields: shown only when Нова Пошта is selected -->
                 <div id="oco-np-fields" style="display:none;margin-top:16px;">
-                    <div class="oco-row">
-                        <div class="oco-field" style="flex:1 1 55%;">
-                            <label class="oco-label">Місто</label>
-                            <input type="text" id="oco-np-city" class="oco-input" placeholder="Київ">
+                    <div class="oco-field">
+                        <label class="oco-label">Місто</label>
+                        <div class="oco-autocomplete" id="oco-np-city-wrap">
+                            <input type="text" id="oco-np-city" class="oco-input" placeholder="Введіть назву міста..." autocomplete="off">
+                            <input type="hidden" id="oco-np-city-ref" value="">
+                            <div class="oco-autocomplete-list" id="oco-np-city-list"></div>
                         </div>
-                        <div class="oco-field" style="flex:1 1 40%;">
-                            <label class="oco-label">Відділення №</label>
-                            <input type="text" id="oco-np-branch" class="oco-input" placeholder="12">
-                        </div>
+                    </div>
+                    <div class="oco-field" id="oco-np-branch-wrap" style="display:none;margin-top:12px;">
+                        <label class="oco-label">Відділення</label>
+                        <select id="oco-np-branch" class="oco-input oco-np-select">
+                            <option value="">— Оберіть відділення —</option>
+                        </select>
                     </div>
                 </div>
                 <?php endif; ?>

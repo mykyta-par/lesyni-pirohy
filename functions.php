@@ -40,7 +40,79 @@ function lesyni_get_np_display_cost() {
     return (float) get_option( 'lesyni_np_cost', 80 );
 }
 
+function lesyni_get_np_api_key() {
+    $zone = lesyni_get_ukraine_zone();
+    foreach ( $zone->get_shipping_methods( true ) as $method ) {
+        if ( $method->id === 'nova_poshta_shipping' ) {
+            foreach ( [ 'api_key', 'apiKey', 'nova_poshta_api_key', 'key' ] as $opt ) {
+                $val = $method->get_option( $opt );
+                if ( $val ) return $val;
+            }
+        }
+    }
+    return get_option( 'lesyni_np_api_key', '' );
+}
 
+/* -----------------------------------------------------------------------
+   Nova Poshta API — AJAX proxies (city search + warehouse list)
+----------------------------------------------------------------------- */
+add_action( 'wp_ajax_lesyni_np_cities',        'lesyni_np_cities_handler' );
+add_action( 'wp_ajax_nopriv_lesyni_np_cities', 'lesyni_np_cities_handler' );
+function lesyni_np_cities_handler() {
+    $q = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) );
+    if ( mb_strlen( $q ) < 2 ) wp_send_json_success( [] );
+
+    $api_key = lesyni_get_np_api_key();
+    if ( ! $api_key ) wp_send_json_error( 'no_api_key' );
+
+    $resp = wp_remote_post( 'https://api.novaposhta.ua/v2.0/json/', [
+        'headers' => [ 'Content-Type' => 'application/json' ],
+        'timeout' => 8,
+        'body'    => wp_json_encode( [
+            'apiKey'           => $api_key,
+            'modelName'        => 'Address',
+            'calledMethod'     => 'searchSettlements',
+            'methodProperties' => [ 'CityName' => $q, 'Limit' => '12', 'Language' => 'ua' ],
+        ] ),
+    ] );
+    if ( is_wp_error( $resp ) ) wp_send_json_error( 'request_failed' );
+
+    $body = json_decode( wp_remote_retrieve_body( $resp ), true );
+    $cities = [];
+    foreach ( $body['data'][0]['Addresses'] ?? [] as $a ) {
+        $cities[] = [ 'ref' => $a['DeliveryCity'] ?? $a['Ref'] ?? '', 'label' => $a['Present'] ?? '' ];
+    }
+    wp_send_json_success( $cities );
+}
+
+add_action( 'wp_ajax_lesyni_np_warehouses',        'lesyni_np_warehouses_handler' );
+add_action( 'wp_ajax_nopriv_lesyni_np_warehouses', 'lesyni_np_warehouses_handler' );
+function lesyni_np_warehouses_handler() {
+    $ref = sanitize_text_field( wp_unslash( $_GET['ref'] ?? '' ) );
+    if ( ! $ref ) wp_send_json_success( [] );
+
+    $api_key = lesyni_get_np_api_key();
+    if ( ! $api_key ) wp_send_json_error( 'no_api_key' );
+
+    $resp = wp_remote_post( 'https://api.novaposhta.ua/v2.0/json/', [
+        'headers' => [ 'Content-Type' => 'application/json' ],
+        'timeout' => 8,
+        'body'    => wp_json_encode( [
+            'apiKey'           => $api_key,
+            'modelName'        => 'AddressGeneral',
+            'calledMethod'     => 'getWarehouses',
+            'methodProperties' => [ 'CityRef' => $ref, 'Language' => 'ua', 'Limit' => '300' ],
+        ] ),
+    ] );
+    if ( is_wp_error( $resp ) ) wp_send_json_error( 'request_failed' );
+
+    $body = json_decode( wp_remote_retrieve_body( $resp ), true );
+    $warehouses = [];
+    foreach ( $body['data'] ?? [] as $w ) {
+        $warehouses[] = [ 'ref' => $w['Ref'] ?? '', 'label' => $w['Description'] ?? '', 'number' => $w['Number'] ?? '' ];
+    }
+    wp_send_json_success( $warehouses );
+}
 
 /* -----------------------------------------------------------------------
    Theme setup
@@ -784,6 +856,12 @@ function lesyni_zone_settings_fields() {
             'title' => 'Зони доставки Lesyni Pirohy',
             'type'  => 'title',
             'id'    => 'lesyni_zones_section',
+        ],
+        [
+            'title' => 'Nova Poshta API ключ',
+            'type'  => 'text',
+            'id'    => 'lesyni_np_api_key',
+            'desc'  => 'Для автодоповнення міст і відділень. Отримати: cabinet.novaposhta.ua → Налаштування → Безпека.',
         ],
         [
             'title'   => 'Зелена зона: безкоштовно від',

@@ -3871,6 +3871,33 @@ ul.products {
     border-color: #c45a5a;
 }
 
+/* ── Nova Poshta autocomplete ─────────────────────────── */
+.oco-autocomplete { position: relative; }
+.oco-autocomplete-list {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #fff;
+    border: 1px solid #e0d5c8;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.10);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 200;
+}
+.oco-autocomplete-item {
+    padding: 10px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    border-bottom: 1px solid #f5f0eb;
+    transition: background .15s;
+}
+.oco-autocomplete-item:last-child { border-bottom: none; }
+.oco-autocomplete-item:hover, .oco-autocomplete-item.is-active { background: #fdf6f0; }
+.oco-np-select { cursor: pointer; }
+.oco-np-loading { color: #999; font-size: 12px; padding: 8px 14px; }
+
 /* ── Summary sidebar ───────────────────────────────────── */
 .oco-summary {
     background: var(--color-surface);

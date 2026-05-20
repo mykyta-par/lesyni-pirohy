@@ -41,44 +41,6 @@ function lesyni_get_np_display_cost() {
 }
 
 
-// TEMP: admin debug — shows plugin checkout fields + scripts on cart page
-add_action( 'wp_footer', function () {
-    if ( ! current_user_can( 'manage_woocommerce' ) ) return;
-    if ( ! is_page() ) return;
-
-    // Checkout fields added by plugins
-    $all_fields = [];
-    if ( function_exists( 'WC' ) && WC()->checkout() ) {
-        foreach ( WC()->checkout()->get_checkout_fields() as $section => $fields ) {
-            foreach ( $fields as $key => $field ) {
-                // Show any non-standard WC field
-                $standard = [ 'billing_first_name','billing_last_name','billing_company','billing_country','billing_address_1','billing_address_2','billing_city','billing_state','billing_postcode','billing_phone','billing_email','shipping_first_name','shipping_last_name','shipping_company','shipping_country','shipping_address_1','shipping_address_2','shipping_city','shipping_state','shipping_postcode','order_comments','account_username','account_password','account_password-2' ];
-                if ( ! in_array( $key, $standard, true ) ) {
-                    $all_fields[] = $key . ' (label: ' . ( $field['label'] ?? '—' ) . ')';
-                }
-            }
-        }
-    }
-
-    // Enqueued scripts
-    global $wp_scripts;
-    $plugin_scripts = [];
-    foreach ( ( $wp_scripts->queue ?? [] ) as $handle ) {
-        if ( isset( $wp_scripts->registered[ $handle ] ) ) {
-            $src = $wp_scripts->registered[ $handle ]->src ?? '';
-            if ( stripos( $src, 'plugin' ) !== false || stripos( $src, 'nova' ) !== false || stripos( $src, 'ukr' ) !== false || stripos( $src, 'poshta' ) !== false || stripos( $src, 'smarty' ) !== false ) {
-                $plugin_scripts[] = $handle . ': ' . $src;
-            }
-        }
-    }
-
-    echo '<div style="position:fixed;bottom:0;left:0;right:0;background:#222;color:#0f0;font:11px monospace;padding:8px;z-index:99999;max-height:160px;overflow:auto;">';
-    echo '<strong style="color:#ff0">PLUGIN CHECKOUT FIELDS:</strong><br>';
-    echo esc_html( $all_fields ? implode( "\n", $all_fields ) : 'none found' );
-    echo '<br><strong style="color:#ff0">PLUGIN SCRIPTS:</strong><br>';
-    echo esc_html( $plugin_scripts ? implode( "\n", $plugin_scripts ) : 'none found' );
-    echo '</div>';
-} );
 
 /* -----------------------------------------------------------------------
    Theme setup

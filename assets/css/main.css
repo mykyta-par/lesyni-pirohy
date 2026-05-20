@@ -3856,6 +3856,20 @@ ul.products {
 .oco-check input:checked + .oco-check-box::after { content: '✓'; }
 .oco-check a { color: var(--color-accent); text-decoration: none; }
 .oco-check a:hover { text-decoration: underline; }
+@keyframes oco-shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+}
+.oco-check--error {
+    animation: oco-shake .4s ease;
+    color: #c45a5a;
+}
+.oco-check--error .oco-check-box {
+    border-color: #c45a5a;
+}
 
 /* ── Summary sidebar ───────────────────────────────────── */
 .oco-summary {

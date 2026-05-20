@@ -1162,7 +1162,10 @@
                 return;
             }
             if (terms && !terms.checked) {
-                terms.closest('.oco-check').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                var termsLabel = terms.closest('.oco-check');
+                termsLabel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                termsLabel.classList.add('oco-check--error');
+                setTimeout(function () { termsLabel.classList.remove('oco-check--error'); }, 2500);
                 return;
             }
 

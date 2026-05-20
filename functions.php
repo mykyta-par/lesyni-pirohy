@@ -8,37 +8,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 function lesyni_is_np_shipping_enabled() {
     $zone_ids   = array_keys( WC_Shipping_Zones::get_zones() );
     $zone_ids[] = 0;
-    $keywords   = [ 'nova', 'нова', 'пошта', 'poshta', 'np_' ];
     foreach ( $zone_ids as $zone_id ) {
         $zone = new WC_Shipping_Zone( $zone_id );
         foreach ( $zone->get_shipping_methods( true ) as $method ) {
-            $haystack = strtolower( $method->id . ' ' . $method->get_title() . ' ' . ( $method->method_title ?? '' ) );
-            foreach ( $keywords as $kw ) {
-                if ( strpos( $haystack, $kw ) !== false ) return true;
-            }
+            if ( $method->id === 'nova_poshta_shipping' ) return true;
         }
     }
     return false;
 }
 
-// Temporary admin debug: shows all enabled shipping method IDs on the checkout page
-add_action( 'wp_footer', function () {
-    if ( ! is_user_logged_in() || ! current_user_can( 'manage_woocommerce' ) ) return;
-    if ( ! is_page() ) return;
-    $zone_ids   = array_keys( WC_Shipping_Zones::get_zones() );
-    $zone_ids[] = 0;
-    $found = [];
-    foreach ( $zone_ids as $zone_id ) {
-        $zone = new WC_Shipping_Zone( $zone_id );
-        foreach ( $zone->get_shipping_methods() as $method ) {
-            $found[] = '[' . ( $method->is_enabled() ? 'ON' : 'off' ) . '] id=' . $method->id . ' title=' . $method->get_title();
-        }
-    }
-    echo '<div style="position:fixed;bottom:0;left:0;right:0;background:#222;color:#0f0;font:12px monospace;padding:8px;z-index:99999;max-height:120px;overflow:auto;">';
-    echo '<strong style="color:#ff0">WC Shipping methods (admin debug):</strong><br>';
-    echo esc_html( implode( "\n", $found ) );
-    echo '</div>';
-} );
 
 /* -----------------------------------------------------------------------
    Theme setup

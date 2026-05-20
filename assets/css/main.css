@@ -3816,6 +3816,12 @@ ul.products {
     color: var(--color-accent);
     box-shadow: 0 4px 10px rgba(196,132,90,.12);
 }
+.oco-time-slot--disabled {
+    opacity: .35;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    pointer-events: none;
+}
 
 /* ── Checkbox ──────────────────────────────────────────── */
 .oco-check {

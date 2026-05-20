@@ -549,8 +549,51 @@
     }
 
     /* ── Time slots ─────────────────────────────────────────────── */
+    function initTimeSlots() {
+        var now = new Date();
+        var cur = now.getHours() * 60 + now.getMinutes();
+        // "Якнайшвидше" available 10:00–16:30 (leaves ~2h before 18:30 closing)
+        var WORK_START   = 10 * 60;
+        var ASAP_CUTOFF  = 16 * 60 + 30;
+
+        var firstEnabled = null;
+        var asapSlot     = null;
+
+        document.querySelectorAll('.oco-time-slot').forEach(function (slot) {
+            var time = slot.dataset.time || '';
+            var disabled = false;
+
+            if (time === 'Якнайшвидше') {
+                asapSlot = slot;
+                disabled = cur < WORK_START || cur > ASAP_CUTOFF;
+            } else {
+                // Parse start hour from "HH:MM–HH:MM"
+                var m = time.match(/^(\d+):(\d+)/);
+                if (m) {
+                    var slotStart = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+                    disabled = cur >= slotStart;
+                }
+            }
+
+            slot.disabled = disabled;
+            slot.classList.toggle('oco-time-slot--disabled', disabled);
+            if (!disabled && !firstEnabled) firstEnabled = slot;
+        });
+
+        // Auto-select: Якнайшвидше if available, else first enabled slot
+        var toSelect = (asapSlot && !asapSlot.disabled) ? asapSlot : firstEnabled;
+        if (toSelect) {
+            document.querySelectorAll('.oco-time-slot').forEach(function (s) { s.classList.remove('oco-time-slot--active'); });
+            toSelect.classList.add('oco-time-slot--active');
+            selectedTime = toSelect.dataset.time || toSelect.textContent.trim();
+        }
+    }
+
+    initTimeSlots();
+
     document.querySelectorAll('.oco-time-slot').forEach(function (slot) {
         slot.addEventListener('click', function () {
+            if (slot.classList.contains('oco-time-slot--disabled')) return;
             document.querySelectorAll('.oco-time-slot').forEach(function (s) { s.classList.remove('oco-time-slot--active'); });
             slot.classList.add('oco-time-slot--active');
             selectedTime = slot.dataset.time || slot.textContent.trim();

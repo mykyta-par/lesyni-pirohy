@@ -450,7 +450,7 @@ else   $count_str = $n . ' позицій';
                     <button type="button" class="oco-time-slot" data-time="11:00–12:00">11:00–12:00</button>
                     <button type="button" class="oco-time-slot" data-time="12:00–13:00">12:00–13:00</button>
                     <button type="button" class="oco-time-slot" data-time="13:00–14:00">13:00–14:00</button>
-                    <button type="button" class="oco-time-slot oco-time-slot--active" data-time="14:00–15:00">14:00–15:00</button>
+                    <button type="button" class="oco-time-slot" data-time="14:00–15:00">14:00–15:00</button>
                     <button type="button" class="oco-time-slot" data-time="15:00–16:00">15:00–16:00</button>
                     <button type="button" class="oco-time-slot" data-time="16:00–17:00">16:00–17:00</button>
                     <button type="button" class="oco-time-slot" data-time="17:00–18:00">17:00–18:00</button>

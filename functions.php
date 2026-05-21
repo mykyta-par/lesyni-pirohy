@@ -561,34 +561,36 @@ remove_action( 'woocommerce_after_main_content',  'woocommerce_output_content_wr
 remove_action( 'woocommerce_before_shop_loop',    'woocommerce_result_count', 20 );
 
 /* -----------------------------------------------------------------------
-   Nova Poshta: thermal packaging fee + minimum order validation
+   Nova Poshta: thermal packaging (as products) + minimum order validation
 ----------------------------------------------------------------------- */
-add_action( 'woocommerce_cart_calculate_fees', function ( $cart ) {
-    if ( is_admin() && ! defined( 'DOING_AJAX' ) ) return;
+define( 'LESYNI_THERMAL_SMALL_ID', 0 ); // TODO: replace with real product ID
+define( 'LESYNI_THERMAL_LARGE_ID', 0 ); // TODO: replace with real product ID
 
-    $is_np = false;
-    // During checkout submission shipping_method comes from POST
-    if ( ! empty( $_POST['shipping_method'] ) ) {
-        foreach ( (array) $_POST['shipping_method'] as $m ) {
-            if ( strpos( (string) $m, 'nova_poshta_shipping' ) !== false ) { $is_np = true; break; }
-        }
-    }
-    // Fallback: check WC session (cart page)
-    if ( ! $is_np && WC()->session ) {
-        foreach ( (array) WC()->session->get( 'chosen_shipping_methods', [] ) as $m ) {
-            if ( strpos( (string) $m, 'nova_poshta_shipping' ) !== false ) { $is_np = true; break; }
-        }
+add_action( 'woocommerce_checkout_create_order', function ( $order ) {
+    $methods = isset( $_POST['shipping_method'] ) ? (array) $_POST['shipping_method'] : [];
+    $is_np   = false;
+    foreach ( $methods as $m ) {
+        if ( strpos( (string) $m, 'nova_poshta_shipping' ) !== false ) { $is_np = true; break; }
     }
     if ( ! $is_np ) return;
 
     $count = 0;
-    foreach ( $cart->get_cart() as $item ) $count += (int) $item['quantity'];
+    foreach ( WC()->cart->get_cart() as $item ) $count += (int) $item['quantity'];
 
-    if ( $count <= 3 ) {
-        $cart->add_fee( 'Термопакування мале', 100, false );
-    } else {
-        $cart->add_fee( 'Термопакування велике', 150, false );
-    }
+    $product_id = $count <= 3 ? LESYNI_THERMAL_SMALL_ID : LESYNI_THERMAL_LARGE_ID;
+    if ( ! $product_id ) return;
+
+    $product = wc_get_product( $product_id );
+    if ( ! $product ) return;
+
+    $line_item = new WC_Order_Item_Product();
+    $line_item->set_props( [
+        'product'  => $product,
+        'quantity' => 1,
+        'subtotal' => wc_get_price_excluding_tax( $product ),
+        'total'    => wc_get_price_excluding_tax( $product ),
+    ] );
+    $order->add_item( $line_item );
 } );
 
 add_action( 'woocommerce_checkout_process', function () {

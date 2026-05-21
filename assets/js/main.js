@@ -790,8 +790,11 @@
         if (hiddenDiv) {
             hiddenDiv.innerHTML = '';
             rows.forEach(function (row) {
+                if (row.dataset.packaging) return;
                 var key = row.dataset.key;
-                var qty = parseInt(row.querySelector('.oco-qty-val').textContent, 10) || 1;
+                if (!key) return;
+                var qtyEl = row.querySelector('.oco-qty-val');
+                var qty = qtyEl ? (parseInt(qtyEl.textContent, 10) || 1) : 1;
                 var inp = document.createElement('input');
                 inp.type = 'hidden';
                 inp.name = 'cart[' + key + '][qty]';

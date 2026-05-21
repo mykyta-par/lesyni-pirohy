@@ -390,10 +390,22 @@ function lesyni_enqueue_assets() {
 		true
 	);
 
+	// Detect the LiqPay gateway ID (handles liqpay, liqpay_woocommerce, woo_liqpay, etc.)
+	$liqpay_id = '';
+	if ( function_exists( 'WC' ) && WC()->payment_gateways ) {
+		foreach ( array_keys( WC()->payment_gateways()->payment_gateways() ) as $gw_id ) {
+			if ( stripos( $gw_id, 'liqpay' ) !== false ) {
+				$liqpay_id = $gw_id;
+				break;
+			}
+		}
+	}
+
 	wp_localize_script( 'lesyni-main', 'lesyniData', [
 		'ajaxUrl'   => home_url( '/?wc-ajax=lesyni_add_to_cart' ),
 		'nonce'     => wp_create_nonce( 'lesyni_add_to_cart' ),
 		'npAjaxUrl' => admin_url( 'admin-ajax.php' ),
+		'liqpayId'  => $liqpay_id,
 	] );
 
 }

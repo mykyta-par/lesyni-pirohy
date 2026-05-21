@@ -885,20 +885,30 @@
     }
 
     /* ── Payment method helpers ─────────────────────────────────── */
+    function getLiqpayId() {
+        // Use PHP-detected ID first, then fall back to any card with 'liqpay' in its data-payment
+        var phpId = (typeof lesyniData !== 'undefined' && lesyniData.liqpayId) ? lesyniData.liqpayId : '';
+        if (phpId) return phpId;
+        var found = document.querySelector('#oco-payment-options .oco-opt-card[data-payment*="liqpay"]');
+        return found ? found.dataset.payment : '';
+    }
+
     function restrictToLiqpay() {
-        var pmInput = document.getElementById('oco-payment-method-val');
+        var liqpayId = getLiqpayId();
+        var pmInput  = document.getElementById('oco-payment-method-val');
+        // If we can't identify the LiqPay card, don't hide anything
+        if (!liqpayId) return;
         document.querySelectorAll('#oco-payment-options .oco-opt-card').forEach(function (c) {
-            if (c.dataset.payment === 'liqpay') {
+            if (c.dataset.payment === liqpayId) {
                 c.classList.add('oco-opt--active');
                 c.style.display = '';
             } else {
-                // save current selection before hiding
                 if (c.classList.contains('oco-opt--active')) prevPayment = c.dataset.payment;
                 c.classList.remove('oco-opt--active');
                 c.style.display = 'none';
             }
         });
-        if (pmInput) pmInput.value = 'liqpay';
+        if (pmInput) pmInput.value = liqpayId;
     }
 
     function restorePaymentMethods() {

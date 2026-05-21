@@ -455,13 +455,13 @@ else   $count_str = $n . ' позицій';
                     <div class="oco-opt-card"
                          data-delivery="np"
                          data-rate-id="<?php echo esc_attr( $np_rate_key ); ?>"
-                         data-cost="<?php echo esc_attr( $np_cost ); ?>"
+                         data-cost="0"
                          data-has-address="1">
                         <div class="oco-opt-radio"></div>
                         <div class="oco-opt-icon">📦</div>
                         <div class="oco-opt-info">
                             <div class="oco-opt-name">Нова Пошта</div>
-                            <div class="oco-opt-desc">По всій Україні · 1–2 робочі дні<?php if ( $np_cost > 0 ) echo ' · ' . (int) $np_cost . ' грн'; ?></div>
+                            <div class="oco-opt-desc">По всій Україні · 1–2 робочі дні · сплачується при отриманні</div>
                         </div>
                     </div>
                     <?php endif; ?>

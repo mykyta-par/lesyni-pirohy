@@ -921,7 +921,7 @@
                 if (npFields)    npFields.style.display    = '';
                 if (whenSection) whenSection.style.display = 'none';
                 if (shippingLbl) shippingLbl.textContent = 'Нова Пошта';
-                if (shippingVal) { shippingVal.textContent = deliveryCost + ' грн'; shippingVal.style.color = '#3d3d3d'; }
+                if (shippingVal) { shippingVal.textContent = 'за тарифами перевізника'; shippingVal.style.color = '#999'; shippingVal.style.fontWeight = '400'; shippingVal.style.fontSize = '12px'; }
                 restrictToLiqpay();
             } else {
                 if (addrSection) {

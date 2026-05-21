@@ -731,7 +731,7 @@
         if (totalEl)      totalEl.textContent      = total;
         if (countEl)      countEl.textContent      = itemCount;
         if (cartCountEl)  cartCountEl.textContent  = itemCount;
-        if (cartSubEl)    cartSubEl.textContent    = subtotal;
+        if (cartSubEl)    cartSubEl.textContent    = subtotal + packaging;
         if (totalItemsEl) {
             var n = itemCount;
             var str;

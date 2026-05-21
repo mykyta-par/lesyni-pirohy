@@ -644,9 +644,11 @@
         var itemCount = 0;
 
         rows.forEach(function (row) {
-            var unit = parseFloat(row.dataset.unit) || 0;
-            var qty  = parseInt(row.querySelector('.oco-qty-val').textContent, 10) || 1;
-            var sum  = Math.round(unit * qty);
+            if (row.dataset.packaging) return; // skip packaging rows
+            var unit  = parseFloat(row.dataset.unit) || 0;
+            var qtyEl = row.querySelector('.oco-qty-val');
+            var qty   = qtyEl ? (parseInt(qtyEl.textContent, 10) || 1) : 1;
+            var sum   = Math.round(unit * qty);
             var sumEl = row.querySelector('.oco-row-sum');
             if (sumEl) sumEl.textContent = sum;
             subtotal  += sum;
@@ -701,18 +703,24 @@
             }
         }
 
-        // Packaging fee for Nova Poshta
-        var packagingRow = document.getElementById('oco-packaging-row');
-        var packagingLbl = document.getElementById('oco-packaging-label');
-        var packagingEl  = document.getElementById('oco-sum-packaging');
+        // Packaging for Nova Poshta — cart rows + summary row
+        var packagingRow  = document.getElementById('oco-packaging-row');
+        var packagingLbl  = document.getElementById('oco-packaging-label');
+        var packagingEl   = document.getElementById('oco-sum-packaging');
+        var pkgSmallRow   = document.getElementById('oco-packaging-small');
+        var pkgLargeRow   = document.getElementById('oco-packaging-large');
         var packaging = 0;
         if (deliveryType === 'np') {
-            packaging = itemCount <= 3 ? 100 : 150;
-            var pkgName = itemCount <= 3 ? 'Термопакування мале' : 'Термопакування велике';
+            var isSmall = itemCount <= 3;
+            packaging   = isSmall ? 100 : 150;
+            if (pkgSmallRow) pkgSmallRow.style.display = isSmall ? '' : 'none';
+            if (pkgLargeRow) pkgLargeRow.style.display = isSmall ? 'none' : '';
             if (packagingRow) packagingRow.style.display = '';
-            if (packagingLbl) packagingLbl.textContent = pkgName;
+            if (packagingLbl) packagingLbl.textContent = isSmall ? 'Термопакування мале' : 'Термопакування велике';
             if (packagingEl)  packagingEl.textContent  = packaging;
         } else {
+            if (pkgSmallRow)  pkgSmallRow.style.display  = 'none';
+            if (pkgLargeRow)  pkgLargeRow.style.display  = 'none';
             if (packagingRow) packagingRow.style.display = 'none';
         }
 

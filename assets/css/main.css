@@ -3399,6 +3399,8 @@ ul.products {
 .oco-ci-img img { width: 100%; height: 100%; object-fit: cover; }
 .oco-ci-img .pie-visual { width: 90px; height: 90px; border-radius: 12px; }
 .oco-ci-img a { display: block; line-height: 0; }
+.oco-pkg-icon { font-size: 36px; line-height: 1; }
+.oco-row--packaging { opacity: .92; background: #f7f3ef; border-radius: 12px; }
 
 .oco-ci-info {
     display: flex;

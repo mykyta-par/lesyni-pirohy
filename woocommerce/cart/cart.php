@@ -248,6 +248,33 @@ else   $count_str = $n . ' позицій';
 
                     <?php endforeach; ?>
 
+                    <!-- Thermal packaging rows (shown when Nova Poshta selected) -->
+                    <div class="oco-row oco-row--packaging" id="oco-packaging-small" data-packaging="1" style="display:none;">
+                        <div class="oco-ci-img"><span class="oco-pkg-icon">❄️</span></div>
+                        <div class="oco-ci-info">
+                            <span class="oco-ci-cat">Пакування</span>
+                            <span class="oco-ci-name">Термопакування мале</span>
+                            <span class="oco-ci-meta">До 3 пирогів · додається автоматично</span>
+                        </div>
+                        <div class="oco-ci-qty" style="visibility:hidden;"></div>
+                        <div class="oco-ci-price">
+                            <span class="oco-ci-price-now">100 грн</span>
+                        </div>
+                    </div>
+
+                    <div class="oco-row oco-row--packaging" id="oco-packaging-large" data-packaging="1" style="display:none;">
+                        <div class="oco-ci-img"><span class="oco-pkg-icon">❄️</span></div>
+                        <div class="oco-ci-info">
+                            <span class="oco-ci-cat">Пакування</span>
+                            <span class="oco-ci-name">Термопакування велике</span>
+                            <span class="oco-ci-meta">4–6 пирогів · додається автоматично</span>
+                        </div>
+                        <div class="oco-ci-qty" style="visibility:hidden;"></div>
+                        <div class="oco-ci-price">
+                            <span class="oco-ci-price-now">150 грн</span>
+                        </div>
+                    </div>
+
                     <!-- Cart subtotal strip -->
                     <div class="oco-cart-subtotal">
                         <div class="oco-cart-subtotal-label">

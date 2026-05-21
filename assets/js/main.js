@@ -703,25 +703,18 @@
             }
         }
 
-        // Packaging for Nova Poshta — cart rows + summary row
-        var packagingRow  = document.getElementById('oco-packaging-row');
-        var packagingLbl  = document.getElementById('oco-packaging-label');
-        var packagingEl   = document.getElementById('oco-sum-packaging');
-        var pkgSmallRow   = document.getElementById('oco-packaging-small');
-        var pkgLargeRow   = document.getElementById('oco-packaging-large');
+        // Packaging cart rows for Nova Poshta
+        var pkgSmallRow = document.getElementById('oco-packaging-small');
+        var pkgLargeRow = document.getElementById('oco-packaging-large');
         var packaging = 0;
         if (deliveryType === 'np') {
             var isSmall = itemCount <= 3;
             packaging   = isSmall ? 100 : 150;
             if (pkgSmallRow) pkgSmallRow.style.display = isSmall ? '' : 'none';
             if (pkgLargeRow) pkgLargeRow.style.display = isSmall ? 'none' : '';
-            if (packagingRow) packagingRow.style.display = '';
-            if (packagingLbl) packagingLbl.textContent = isSmall ? 'Термопакування мале' : 'Термопакування велике';
-            if (packagingEl)  packagingEl.textContent  = packaging;
         } else {
-            if (pkgSmallRow)  pkgSmallRow.style.display  = 'none';
-            if (pkgLargeRow)  pkgLargeRow.style.display  = 'none';
-            if (packagingRow) packagingRow.style.display = 'none';
+            if (pkgSmallRow) pkgSmallRow.style.display = 'none';
+            if (pkgLargeRow) pkgLargeRow.style.display = 'none';
         }
 
         var total = Math.max(0, subtotal - discount + shipping + packaging);

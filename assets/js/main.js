@@ -607,11 +607,35 @@
     });
 
     /* ── Free delivery progress bar ────────────────────────────── */
+    var NP_MIN_ORDER = 1000;
+
     function updateFreeBar(subtotal) {
+        if (deliveryType === 'np') {
+            var remaining = Math.max(0, NP_MIN_ORDER - subtotal);
+            var pct       = Math.min(100, Math.round(subtotal / NP_MIN_ORDER * 100));
+            ['', '-summary'].forEach(function (suffix) {
+                var wrap = document.getElementById('oco-free-bar-wrap' + suffix);
+                var fill = document.getElementById('oco-free-bar-fill' + suffix);
+                var text = document.getElementById('oco-free-bar-text' + suffix);
+                if (!wrap) return;
+                wrap.style.display = '';
+                if (fill) {
+                    fill.style.width = pct + '%';
+                    fill.classList.toggle('oco-free-bar__fill--done', remaining === 0);
+                }
+                if (text) {
+                    text.innerHTML = remaining > 0
+                        ? 'Ще <strong>' + remaining + ' грн</strong> до мінімального замовлення НП'
+                        : '<span class="oco-free-bar__done">✓ Мінімальна сума досягнута</span>';
+                }
+            });
+            return;
+        }
+
         var freeFrom  = detectedZone === 'yellow' ? YELLOW_FREE_FROM : GREEN_FREE_FROM;
         var remaining = Math.max(0, freeFrom - subtotal);
         var pct       = freeFrom > 0 ? Math.min(100, Math.round(subtotal / freeFrom * 100)) : 100;
-        var hide      = detectedZone === 'outside' || deliveryType === 'pickup' || deliveryType === 'np';
+        var hide      = detectedZone === 'outside' || deliveryType === 'pickup';
 
         ['', '-summary'].forEach(function (suffix) {
             var wrap = document.getElementById('oco-free-bar-wrap' + suffix);
@@ -663,8 +687,21 @@
         var shippingVal = document.getElementById('oco-sum-shipping');
         var shippingLbl = document.getElementById('oco-shipping-label');
 
-        if (deliveryType === 'pickup' || deliveryType === 'np') {
+        if (deliveryType === 'pickup') {
             shipping = deliveryCost;
+            if (freeHint) { freeHint.textContent = ''; }
+        } else if (deliveryType === 'np') {
+            shipping = deliveryCost;
+            var npRemaining = Math.max(0, NP_MIN_ORDER - subtotal);
+            if (freeHint) {
+                if (npRemaining > 0) {
+                    freeHint.textContent = 'Ще ' + npRemaining + ' грн до мінімального замовлення';
+                    freeHint.style.color = '#c4845a';
+                } else {
+                    freeHint.textContent = '✓ Мінімальна сума досягнута';
+                    freeHint.style.color = '#7a9b6e';
+                }
+            }
         } else if (detectedZone === 'green') {
             shipping = subtotal >= GREEN_FREE_FROM ? 0 : GREEN_COST;
             if (freeHint) {

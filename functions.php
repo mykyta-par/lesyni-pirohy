@@ -563,8 +563,8 @@ remove_action( 'woocommerce_before_shop_loop',    'woocommerce_result_count', 20
 /* -----------------------------------------------------------------------
    Nova Poshta: thermal packaging (as products) + minimum order validation
 ----------------------------------------------------------------------- */
-define( 'LESYNI_THERMAL_SMALL_ID', 0 ); // TODO: replace with real product ID
-define( 'LESYNI_THERMAL_LARGE_ID', 0 ); // TODO: replace with real product ID
+define( 'LESYNI_THERMAL_SMALL_ID', 33000 );
+define( 'LESYNI_THERMAL_LARGE_ID', 33001 );
 
 add_action( 'woocommerce_checkout_create_order', function ( $order ) {
     $methods = isset( $_POST['shipping_method'] ) ? (array) $_POST['shipping_method'] : [];

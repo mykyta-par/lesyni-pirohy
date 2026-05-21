@@ -635,7 +635,8 @@
         var freeFrom  = detectedZone === 'yellow' ? YELLOW_FREE_FROM : GREEN_FREE_FROM;
         var remaining = Math.max(0, freeFrom - subtotal);
         var pct       = freeFrom > 0 ? Math.min(100, Math.round(subtotal / freeFrom * 100)) : 100;
-        var hide      = detectedZone === 'outside' || deliveryType === 'pickup';
+        // Hide bar if zone not yet known (address not entered), outside zone, or pickup selected
+        var hide      = detectedZone === null || detectedZone === 'outside' || deliveryType === 'pickup';
 
         ['', '-summary'].forEach(function (suffix) {
             var wrap = document.getElementById('oco-free-bar-wrap' + suffix);

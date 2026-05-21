@@ -606,6 +606,11 @@ else   $count_str = $n . ' позицій';
                     <strong><span id="oco-sum-subtotal"><?php echo number_format( $subtotal, 0, '', '' ); ?></span> грн</strong>
                 </div>
 
+                <div class="oco-summary-row" id="oco-packaging-row" style="display:none;">
+                    <span id="oco-packaging-label">Термопакування</span>
+                    <strong><span id="oco-sum-packaging">0</span> грн</strong>
+                </div>
+
                 <?php if ( $discount > 0 ) : ?>
                 <div class="oco-summary-row oco-summary-row--discount" id="oco-discount-row">
                     <span>Знижка

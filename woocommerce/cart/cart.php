@@ -375,12 +375,13 @@ else   $count_str = $n . ' позицій';
                         $_a_house    = $_addr_parts[1] ?? '';
                     }
                     ?>
-                    <div class="oco-field">
+                    <div class="oco-field oco-autocomplete">
                         <label class="oco-label" for="oco-street">Вулиця <span class="oco-req">*</span></label>
                         <input type="text" id="oco-street" class="oco-input"
                                placeholder="напр. Хрещатик"
                                value="<?php echo esc_attr( $_a_street ); ?>"
-                               autocomplete="address-line1">
+                               autocomplete="off">
+                        <ul class="oco-autocomplete-list" id="street-list"></ul>
                     </div>
                 </div>
                 <div class="oco-form-row oco-form-row--addr">

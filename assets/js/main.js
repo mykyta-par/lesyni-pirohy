@@ -1114,6 +1114,128 @@
         ocoMap.setView([lat, lng], 14, { animate: true, duration: 0.6 });
     }
 
+    /* ── Street autocomplete (Nominatim / OpenStreetMap) ───────── */
+    (function () {
+        var input    = document.getElementById('oco-street');
+        var list     = document.getElementById('street-list');
+        if (!input || !list) return;
+
+        var timer    = null;
+        var lastQ    = '';
+        var DELAY    = 1000; // respect Nominatim 1 req/sec limit
+
+        function closeList() {
+            list.innerHTML = '';
+            list.style.display = 'none';
+        }
+
+        function fillStreet(displayName, addr) {
+            // Prefer Ukrainian-specific road fields, fall back to display_name parts
+            var road = addr.road || addr.pedestrian || addr.footway || addr.path || '';
+            if (!road) {
+                // Take first part of display_name before the first comma
+                road = displayName.split(',')[0].trim();
+            }
+            input.value = road;
+            // If Nominatim returned a house number, fill it in too
+            if (addr.house_number) {
+                var houseEl = document.getElementById('oco-house');
+                if (houseEl && !houseEl.value) houseEl.value = addr.house_number;
+            }
+            closeList();
+            // Trigger zone detection with the selected street
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        function renderList(results) {
+            list.innerHTML = '';
+            if (!results.length) { list.style.display = 'none'; return; }
+            results.forEach(function (r) {
+                var addr = r.address || {};
+                var road = addr.road || addr.pedestrian || addr.footway || addr.path
+                           || r.display_name.split(',')[0].trim();
+                var city = addr.city || addr.town || addr.village || '';
+                var li = document.createElement('li');
+                li.className = 'oco-autocomplete-item';
+                li.textContent = road + (city && city !== road ? ', ' + city : '');
+                li.addEventListener('mousedown', function (e) {
+                    e.preventDefault();
+                    fillStreet(r.display_name, addr);
+                });
+                list.appendChild(li);
+            });
+            list.style.display = 'block';
+        }
+
+        function search(q) {
+            if (q === lastQ) return;
+            lastQ = q;
+            var url = 'https://nominatim.openstreetmap.org/search'
+                + '?q=' + encodeURIComponent(q + ', Дніпро')
+                + '&format=json&addressdetails=1&limit=7&countrycodes=ua'
+                + '&accept-language=uk'
+                + '&featuretype=street';
+
+            fetch(url, { headers: { 'Accept-Language': 'uk' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    // Filter to street-level results only
+                    var streets = data.filter(function (r) {
+                        var t = r.type || '';
+                        var cls = r.class || '';
+                        return cls === 'highway' || t === 'road' || t === 'residential'
+                            || t === 'pedestrian' || t === 'living_street' || t === 'secondary'
+                            || t === 'tertiary' || t === 'unclassified';
+                    });
+                    // De-duplicate by road name
+                    var seen = {};
+                    streets = streets.filter(function (r) {
+                        var road = (r.address || {}).road || r.display_name.split(',')[0].trim();
+                        if (seen[road]) return false;
+                        seen[road] = true;
+                        return true;
+                    });
+                    renderList(streets);
+                })
+                .catch(function () { closeList(); });
+        }
+
+        input.addEventListener('input', function () {
+            clearTimeout(timer);
+            var q = input.value.trim();
+            if (q.length < 3) { closeList(); lastQ = ''; return; }
+            timer = setTimeout(function () { search(q); }, DELAY);
+        });
+
+        input.addEventListener('blur', function () {
+            setTimeout(closeList, 200);
+        });
+
+        // Keyboard navigation
+        input.addEventListener('keydown', function (e) {
+            var items = list.querySelectorAll('.oco-autocomplete-item');
+            var active = list.querySelector('.oco-autocomplete-item.is-active');
+            var idx = -1;
+            items.forEach(function (it, i) { if (it === active) idx = i; });
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                var next = items[idx + 1] || items[0];
+                if (active) active.classList.remove('is-active');
+                if (next) next.classList.add('is-active');
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                var prev = items[idx - 1] || items[items.length - 1];
+                if (active) active.classList.remove('is-active');
+                if (prev) prev.classList.add('is-active');
+            } else if (e.key === 'Enter' && active) {
+                e.preventDefault();
+                active.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+            } else if (e.key === 'Escape') {
+                closeList();
+            }
+        });
+    }());
+
     /* ── Address geocoding + zone detection ────────────────────── */
     var zoneCheckTimer = null;
     var streetInput    = document.getElementById('oco-street');

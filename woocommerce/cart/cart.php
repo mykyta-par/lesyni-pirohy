@@ -434,7 +434,7 @@ else   $count_str = $n . ' позицій';
                         <div class="oco-opt-icon">🚚</div>
                         <div class="oco-opt-info">
                             <div class="oco-opt-name">Кур'єром по Дніпру</div>
-                            <div class="oco-opt-desc">Сьогодні · вартість залежить від зони</div>
+                            <div class="oco-opt-desc">Вартість залежить від зони</div>
                         </div>
                     </div>
 

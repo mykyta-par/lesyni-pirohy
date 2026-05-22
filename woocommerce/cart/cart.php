@@ -339,7 +339,7 @@ else   $count_str = $n . ' позицій';
                     <div class="oco-field">
                         <label class="oco-label" for="oco-email">E-mail</label>
                         <input type="email" id="oco-email" class="oco-input"
-                               placeholder="olena@gmail.com"
+                               placeholder="lesya@gmail.com"
                                value="<?php echo esc_attr( $checkout->get_value( 'billing_email' ) ); ?>"
                                autocomplete="email">
                         <span class="oco-hint">Надішлемо чек і статус замовлення</span>
@@ -378,7 +378,7 @@ else   $count_str = $n . ' позицій';
                     <div class="oco-field">
                         <label class="oco-label" for="oco-street">Вулиця <span class="oco-req">*</span></label>
                         <input type="text" id="oco-street" class="oco-input"
-                               placeholder="напр. Хрещатик"
+                               placeholder="напр. Яворницького"
                                value="<?php echo esc_attr( $_a_street ); ?>"
                                autocomplete="off">
                     </div>

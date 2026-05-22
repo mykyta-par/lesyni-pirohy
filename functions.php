@@ -1009,15 +1009,6 @@ function lesyni_zone_settings_fields() {
             'default' => 'Уточнимо можливість доставки з менеджером',
         ],
         [
-            'type' => 'sectionend',
-            'id'   => 'lesyni_zones_section',
-        ],
-        [
-            'title' => 'Функції кошика',
-            'type'  => 'title',
-            'id'    => 'lesyni_features_section',
-        ],
-        [
             'title'   => 'Опція «Це подарунок»',
             'type'    => 'checkbox',
             'id'      => 'lesyni_gift_enabled',
@@ -1026,7 +1017,7 @@ function lesyni_zone_settings_fields() {
         ],
         [
             'type' => 'sectionend',
-            'id'   => 'lesyni_features_section',
+            'id'   => 'lesyni_zones_section',
         ],
     ];
 }

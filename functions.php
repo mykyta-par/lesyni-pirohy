@@ -682,8 +682,9 @@ add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {
         }
     }
 
-    // Add visible order note when gift is requested
-    if ( ! empty( $_POST['lesyni_gift'] ) && $_POST['lesyni_gift'] === '1' ) {
+    // Add visible order note when gift is requested (only if feature is enabled)
+    if ( get_option( 'lesyni_gift_enabled', 'no' ) === 'yes'
+        && ! empty( $_POST['lesyni_gift'] ) && $_POST['lesyni_gift'] === '1' ) {
         $order = wc_get_order( $order_id );
         if ( $order ) {
             $order->add_order_note( '🎁 Подарунок: додати рукописну листівку та святкову стрічку' );
@@ -1010,6 +1011,22 @@ function lesyni_zone_settings_fields() {
         [
             'type' => 'sectionend',
             'id'   => 'lesyni_zones_section',
+        ],
+        [
+            'title' => 'Функції кошика',
+            'type'  => 'title',
+            'id'    => 'lesyni_features_section',
+        ],
+        [
+            'title'   => 'Опція «Це подарунок»',
+            'type'    => 'checkbox',
+            'id'      => 'lesyni_gift_enabled',
+            'default' => 'no',
+            'desc'    => 'Показувати чекбокс «Це подарунок — додамо рукописну листівку та святкову стрічку» на сторінці кошика',
+        ],
+        [
+            'type' => 'sectionend',
+            'id'   => 'lesyni_features_section',
         ],
     ];
 }

@@ -573,11 +573,13 @@ else   $count_str = $n . ' позицій';
                               placeholder="Особливі побажання: подзвонити перед доставкою, передати без контакту, додати листівку…"></textarea>
                 </div>
 
+                <?php if ( get_option( 'lesyni_gift_enabled', 'no' ) === 'yes' ) : ?>
                 <label class="oco-check" for="oco-gift-check">
                     <input type="checkbox" id="oco-gift-check">
                     <span class="oco-check-box"></span>
                     <span><strong style="color:#3d3d3d;">Це подарунок</strong> — додамо рукописну листівку та святкову стрічку (безкоштовно)</span>
                 </label>
+                <?php endif; ?>
 
                 <label class="oco-check" for="oco-terms-check">
                     <input type="checkbox" id="oco-terms-check" required>

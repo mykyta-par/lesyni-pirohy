@@ -1156,27 +1156,30 @@ add_action( 'admin_enqueue_scripts', function( $hook ) {
 /* -----------------------------------------------------------------------
    Admin: Dashboard widget — time slot management
 ----------------------------------------------------------------------- */
-define( 'LESYNI_ALL_SLOTS', [
-    'Якнайшвидше',
-    '09:00–10:00', '10:00–11:00', '11:00–12:00', '12:00–13:00',
-    '13:00–14:00', '14:00–15:00', '15:00–16:00', '16:00–17:00',
-    '17:00–18:00', '18:00–19:00',
-] );
+function lesyni_all_slots() {
+    return [
+        'Якнайшвидше',
+        '09:00–10:00', '10:00–11:00', '11:00–12:00', '12:00–13:00',
+        '13:00–14:00', '14:00–15:00', '15:00–16:00', '16:00–17:00',
+        '17:00–18:00', '18:00–19:00',
+    ];
+}
 
-// Handle form submission via admin-post.php
-add_action( 'admin_post_lesyni_save_slots', function () {
-    check_admin_referer( 'lesyni_save_slots', 'lesyni_slots_nonce' );
-    if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Forbidden' );
+// AJAX save handler
+add_action( 'wp_ajax_lesyni_save_slots', function () {
+    check_ajax_referer( 'lesyni_save_slots', 'nonce' );
+    if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'forbidden' );
 
+    $slots      = lesyni_all_slots();
+    $post_slots = isset( $_POST['slots'] ) ? (array) $_POST['slots'] : [];
     $new_disabled = [];
-    foreach ( LESYNI_ALL_SLOTS as $i => $slot ) {
-        if ( ! isset( $_POST[ 'slot_' . $i ] ) ) {
+    foreach ( $slots as $slot ) {
+        if ( ! in_array( $slot, $post_slots, true ) ) {
             $new_disabled[] = $slot;
         }
     }
     update_option( 'lesyni_disabled_slots', $new_disabled );
-    wp_redirect( admin_url( 'index.php?lesyni_saved=1' ) );
-    exit;
+    wp_send_json_success();
 } );
 
 add_action( 'wp_dashboard_setup', function () {
@@ -1189,36 +1192,73 @@ add_action( 'wp_dashboard_setup', function () {
 
 function lesyni_slots_widget_render() {
     $disabled = (array) get_option( 'lesyni_disabled_slots', [] );
-    $saved    = isset( $_GET['lesyni_saved'] );
-    if ( $saved ) {
-        echo '<div style="color:#3a7230;font-weight:600;margin-bottom:10px;">✓ Збережено</div>';
-    }
+    $nonce    = wp_create_nonce( 'lesyni_save_slots' );
+    $ajax_url = admin_url( 'admin-ajax.php' );
     ?>
-    <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-        <input type="hidden" name="action" value="lesyni_save_slots">
-        <?php wp_nonce_field( 'lesyni_save_slots', 'lesyni_slots_nonce' ); ?>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-        <?php foreach ( LESYNI_ALL_SLOTS as $i => $slot ) :
-            $active = ! in_array( $slot, $disabled, true );
-            $bg     = $active ? '#edf7ed' : '#fce8e8';
-            $border = $active ? '#b5d6b5' : '#f5b8b8';
-            $color  = $active ? '#2d6a2d' : '#b84040';
-            ?>
-            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;
-                          padding:7px 12px;border-radius:7px;font-size:13px;font-weight:500;
-                          background:<?php echo $bg; ?>;border:1.5px solid <?php echo $border; ?>;
-                          color:<?php echo $color; ?>;">
-                <input type="checkbox" name="slot_<?php echo $i; ?>" value="1"
-                       <?php checked( $active ); ?> style="margin:0;cursor:pointer;">
-                <?php echo esc_html( $slot ); ?>
-            </label>
-        <?php endforeach; ?>
-        </div>
-        <p style="color:#999;font-size:12px;margin:0 0 10px;">
-            ✓ відмічено = доступний · знято = прихований для клієнта
-        </p>
-        <?php submit_button( 'Зберегти', 'primary', 'submit', false ); ?>
-    </form>
+    <div id="lesyni-slots-msg" style="display:none;font-weight:600;margin-bottom:10px;"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;" id="lesyni-slots-wrap">
+    <?php foreach ( lesyni_all_slots() as $slot ) :
+        $active = ! in_array( $slot, $disabled, true );
+        $bg     = $active ? '#edf7ed' : '#fce8e8';
+        $border = $active ? '#b5d6b5' : '#f5b8b8';
+        $color  = $active ? '#2d6a2d' : '#b84040';
+        ?>
+        <label data-slot="<?php echo esc_attr( $slot ); ?>"
+               style="display:flex;align-items:center;gap:5px;cursor:pointer;
+                      padding:7px 12px;border-radius:7px;font-size:13px;font-weight:500;
+                      background:<?php echo $bg; ?>;border:1.5px solid <?php echo $border; ?>;
+                      color:<?php echo $color; ?>;">
+            <input type="checkbox" value="<?php echo esc_attr( $slot ); ?>"
+                   <?php checked( $active ); ?> style="margin:0;cursor:pointer;">
+            <?php echo esc_html( $slot ); ?>
+        </label>
+    <?php endforeach; ?>
+    </div>
+    <p style="color:#999;font-size:12px;margin:0 0 10px;">
+        ✓ відмічено = доступний · знято = прихований для клієнта
+    </p>
+    <button id="lesyni-slots-save" class="button button-primary">Зберегти</button>
+    <script>
+    (function(){
+        var wrap = document.getElementById('lesyni-slots-wrap');
+        var msg  = document.getElementById('lesyni-slots-msg');
+
+        // Update label colours when toggling
+        wrap.addEventListener('change', function(e){
+            if (e.target.type !== 'checkbox') return;
+            var lbl    = e.target.closest('label');
+            var active = e.target.checked;
+            lbl.style.background   = active ? '#edf7ed' : '#fce8e8';
+            lbl.style.borderColor  = active ? '#b5d6b5' : '#f5b8b8';
+            lbl.style.color        = active ? '#2d6a2d' : '#b84040';
+        });
+
+        document.getElementById('lesyni-slots-save').addEventListener('click', function(){
+            var active = [];
+            wrap.querySelectorAll('input[type=checkbox]:checked').forEach(function(cb){
+                active.push(cb.value);
+            });
+            var body = new URLSearchParams({
+                action: 'lesyni_save_slots',
+                nonce:  '<?php echo $nonce; ?>',
+            });
+            active.forEach(function(s){ body.append('slots[]', s); });
+
+            fetch('<?php echo esc_url( $ajax_url ); ?>', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: body.toString(),
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(r){
+                msg.textContent   = r.success ? '✓ Збережено' : '✗ Помилка';
+                msg.style.color   = r.success ? '#3a7230' : '#b84040';
+                msg.style.display = 'block';
+                setTimeout(function(){ msg.style.display = 'none'; }, 3000);
+            });
+        });
+    }());
+    </script>
     <?php
 }
 

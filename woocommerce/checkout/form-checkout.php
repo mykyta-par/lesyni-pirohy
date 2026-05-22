@@ -143,7 +143,7 @@ $chosen_methods = WC()->session ? (array) WC()->session->get( 'chosen_shipping_m
                 </div>
                 <div class="co-row">
                     <?php lesyni_co_field( 'billing_phone', 'Телефон', [ 'required' => true, 'type' => 'tel', 'placeholder' => '+38 (___) ___-__-__', 'autocomplete' => 'tel' ] ); ?>
-                    <?php lesyni_co_field( 'billing_email', 'E-mail', [ 'type' => 'email', 'placeholder' => 'olena@gmail.com', 'hint' => 'Надішлемо чек і статус замовлення', 'autocomplete' => 'email' ] ); ?>
+                    <?php lesyni_co_field( 'billing_email', 'E-mail', [ 'type' => 'email', 'placeholder' => 'lesya@gmail.com', 'hint' => 'Надішлемо чек і статус замовлення', 'autocomplete' => 'email' ] ); ?>
                 </div>
             </div>
 
@@ -239,7 +239,7 @@ $chosen_methods = WC()->session ? (array) WC()->session->get( 'chosen_shipping_m
                         <?php lesyni_co_field( 'billing_state', 'Район / Область', [ 'placeholder' => 'Шевченківський', 'autocomplete' => 'address-level1' ] ); ?>
                     </div>
                     <div class="co-row">
-                        <?php lesyni_co_field( 'billing_address_1', 'Вулиця', [ 'required' => true, 'placeholder' => 'вул. Хрещатик', 'autocomplete' => 'address-line1' ] ); ?>
+                        <?php lesyni_co_field( 'billing_address_1', 'Вулиця', [ 'required' => true, 'placeholder' => 'вул. Яворницького', 'autocomplete' => 'address-line1' ] ); ?>
                         <?php lesyni_co_field( 'billing_address_2', 'Квартира / Офіс', [ 'placeholder' => '45', 'autocomplete' => 'address-line2' ] ); ?>
                     </div>
                     <input type="hidden" name="billing_country" value="UA">

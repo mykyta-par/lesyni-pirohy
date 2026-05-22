@@ -447,7 +447,7 @@ else   $count_str = $n . ' позицій';
                         <div class="oco-opt-icon">🏠</div>
                         <div class="oco-opt-info">
                             <div class="oco-opt-name">Самовивіз</div>
-                            <div class="oco-opt-desc">Щодня 10:00–18:30 · безкоштовно</div>
+                            <div class="oco-opt-desc">Щодня · безкоштовно</div>
                         </div>
                     </div>
 

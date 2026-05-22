@@ -1156,6 +1156,29 @@ add_action( 'admin_enqueue_scripts', function( $hook ) {
 /* -----------------------------------------------------------------------
    Admin: Dashboard widget — time slot management
 ----------------------------------------------------------------------- */
+define( 'LESYNI_ALL_SLOTS', [
+    'Якнайшвидше',
+    '09:00–10:00', '10:00–11:00', '11:00–12:00', '12:00–13:00',
+    '13:00–14:00', '14:00–15:00', '15:00–16:00', '16:00–17:00',
+    '17:00–18:00', '18:00–19:00',
+] );
+
+// Handle form submission via admin-post.php
+add_action( 'admin_post_lesyni_save_slots', function () {
+    check_admin_referer( 'lesyni_save_slots', 'lesyni_slots_nonce' );
+    if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Forbidden' );
+
+    $new_disabled = [];
+    foreach ( LESYNI_ALL_SLOTS as $i => $slot ) {
+        if ( ! isset( $_POST[ 'slot_' . $i ] ) ) {
+            $new_disabled[] = $slot;
+        }
+    }
+    update_option( 'lesyni_disabled_slots', $new_disabled );
+    wp_redirect( admin_url( 'index.php?lesyni_saved=1' ) );
+    exit;
+} );
+
 add_action( 'wp_dashboard_setup', function () {
     wp_add_dashboard_widget(
         'lesyni_slots_widget',
@@ -1165,38 +1188,17 @@ add_action( 'wp_dashboard_setup', function () {
 } );
 
 function lesyni_slots_widget_render() {
-    $all_slots = [
-        'Якнайшвидше',
-        '09:00–10:00',
-        '10:00–11:00',
-        '11:00–12:00',
-        '12:00–13:00',
-        '13:00–14:00',
-        '14:00–15:00',
-        '15:00–16:00',
-        '16:00–17:00',
-        '17:00–18:00',
-        '18:00–19:00',
-    ];
     $disabled = (array) get_option( 'lesyni_disabled_slots', [] );
-
-    if ( isset( $_POST['lesyni_slots_nonce'] ) && wp_verify_nonce( $_POST['lesyni_slots_nonce'], 'lesyni_save_slots' ) ) {
-        $new_disabled = [];
-        foreach ( $all_slots as $slot ) {
-            if ( ! isset( $_POST[ 'slot_' . sanitize_key( $slot ) ] ) ) {
-                $new_disabled[] = $slot;
-            }
-        }
-        update_option( 'lesyni_disabled_slots', $new_disabled );
-        $disabled = $new_disabled;
+    $saved    = isset( $_GET['lesyni_saved'] );
+    if ( $saved ) {
         echo '<div style="color:#3a7230;font-weight:600;margin-bottom:10px;">✓ Збережено</div>';
     }
     ?>
-    <form method="post">
+    <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+        <input type="hidden" name="action" value="lesyni_save_slots">
         <?php wp_nonce_field( 'lesyni_save_slots', 'lesyni_slots_nonce' ); ?>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-        <?php foreach ( $all_slots as $slot ) :
-            $key    = 'slot_' . sanitize_key( $slot );
+        <?php foreach ( LESYNI_ALL_SLOTS as $i => $slot ) :
             $active = ! in_array( $slot, $disabled, true );
             $bg     = $active ? '#edf7ed' : '#fce8e8';
             $border = $active ? '#b5d6b5' : '#f5b8b8';
@@ -1206,7 +1208,7 @@ function lesyni_slots_widget_render() {
                           padding:7px 12px;border-radius:7px;font-size:13px;font-weight:500;
                           background:<?php echo $bg; ?>;border:1.5px solid <?php echo $border; ?>;
                           color:<?php echo $color; ?>;">
-                <input type="checkbox" name="<?php echo esc_attr( $key ); ?>" value="1"
+                <input type="checkbox" name="slot_<?php echo $i; ?>" value="1"
                        <?php checked( $active ); ?> style="margin:0;cursor:pointer;">
                 <?php echo esc_html( $slot ); ?>
             </label>

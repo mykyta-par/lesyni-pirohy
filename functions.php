@@ -1154,6 +1154,73 @@ add_action( 'admin_enqueue_scripts', function( $hook ) {
 } );
 
 /* -----------------------------------------------------------------------
+   Admin: Dashboard widget — time slot management
+----------------------------------------------------------------------- */
+add_action( 'wp_dashboard_setup', function () {
+    wp_add_dashboard_widget(
+        'lesyni_slots_widget',
+        '⏰ Слоти доставки',
+        'lesyni_slots_widget_render'
+    );
+} );
+
+function lesyni_slots_widget_render() {
+    $all_slots = [
+        'Якнайшвидше',
+        '09:00–10:00',
+        '10:00–11:00',
+        '11:00–12:00',
+        '12:00–13:00',
+        '13:00–14:00',
+        '14:00–15:00',
+        '15:00–16:00',
+        '16:00–17:00',
+        '17:00–18:00',
+        '18:00–19:00',
+    ];
+    $disabled = (array) get_option( 'lesyni_disabled_slots', [] );
+
+    if ( isset( $_POST['lesyni_slots_nonce'] ) && wp_verify_nonce( $_POST['lesyni_slots_nonce'], 'lesyni_save_slots' ) ) {
+        $new_disabled = [];
+        foreach ( $all_slots as $slot ) {
+            if ( ! isset( $_POST[ 'slot_' . sanitize_key( $slot ) ] ) ) {
+                $new_disabled[] = $slot;
+            }
+        }
+        update_option( 'lesyni_disabled_slots', $new_disabled );
+        $disabled = $new_disabled;
+        echo '<div style="color:#3a7230;font-weight:600;margin-bottom:10px;">✓ Збережено</div>';
+    }
+    ?>
+    <form method="post">
+        <?php wp_nonce_field( 'lesyni_save_slots', 'lesyni_slots_nonce' ); ?>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <?php foreach ( $all_slots as $slot ) :
+            $key    = 'slot_' . sanitize_key( $slot );
+            $active = ! in_array( $slot, $disabled, true );
+            $bg     = $active ? '#edf7ed' : '#fce8e8';
+            $border = $active ? '#b5d6b5' : '#f5b8b8';
+            $color  = $active ? '#2d6a2d' : '#b84040';
+            ?>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;
+                          padding:7px 12px;border-radius:7px;font-size:13px;font-weight:500;
+                          background:<?php echo $bg; ?>;border:1.5px solid <?php echo $border; ?>;
+                          color:<?php echo $color; ?>;">
+                <input type="checkbox" name="<?php echo esc_attr( $key ); ?>" value="1"
+                       <?php checked( $active ); ?> style="margin:0;cursor:pointer;">
+                <?php echo esc_html( $slot ); ?>
+            </label>
+        <?php endforeach; ?>
+        </div>
+        <p style="color:#999;font-size:12px;margin:0 0 10px;">
+            ✓ відмічено = доступний · знято = прихований для клієнта
+        </p>
+        <?php submit_button( 'Зберегти', 'primary', 'submit', false ); ?>
+    </form>
+    <?php
+}
+
+/* -----------------------------------------------------------------------
    Helper: map product category slug → pie visual CSS class
 ----------------------------------------------------------------------- */
 function lesyni_pie_visual_class( $product ) {

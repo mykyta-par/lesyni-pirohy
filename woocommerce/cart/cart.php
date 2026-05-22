@@ -494,18 +494,26 @@ else   $count_str = $n . ' позицій';
                 <div class="oco-date-picker" id="oco-date-picker"></div>
 
                 <p class="oco-subhead" style="margin-top:24px;">Оберіть час</p>
+                <?php
+                $_disabled_slots = (array) get_option( 'lesyni_disabled_slots', [] );
+                $_all_slots = [
+                    'Якнайшвидше',
+                    '09:00–10:00', '10:00–11:00', '11:00–12:00', '12:00–13:00',
+                    '13:00–14:00', '14:00–15:00', '15:00–16:00', '16:00–17:00',
+                    '17:00–18:00', '18:00–19:00',
+                ];
+                ?>
                 <div class="oco-time-grid">
-                    <button type="button" class="oco-time-slot" data-time="Якнайшвидше">Якнайшвидше</button>
-                    <button type="button" class="oco-time-slot" data-time="09:00–10:00">09:00–10:00</button>
-                    <button type="button" class="oco-time-slot" data-time="10:00–11:00">10:00–11:00</button>
-                    <button type="button" class="oco-time-slot" data-time="11:00–12:00">11:00–12:00</button>
-                    <button type="button" class="oco-time-slot" data-time="12:00–13:00">12:00–13:00</button>
-                    <button type="button" class="oco-time-slot" data-time="13:00–14:00">13:00–14:00</button>
-                    <button type="button" class="oco-time-slot" data-time="14:00–15:00">14:00–15:00</button>
-                    <button type="button" class="oco-time-slot" data-time="15:00–16:00">15:00–16:00</button>
-                    <button type="button" class="oco-time-slot" data-time="16:00–17:00">16:00–17:00</button>
-                    <button type="button" class="oco-time-slot" data-time="17:00–18:00">17:00–18:00</button>
-                    <button type="button" class="oco-time-slot" data-time="18:00–19:00">18:00–19:00</button>
+                    <?php foreach ( $_all_slots as $_slot ) :
+                        $_is_disabled = in_array( $_slot, $_disabled_slots, true );
+                    ?>
+                    <button type="button"
+                            class="oco-time-slot<?php echo $_is_disabled ? ' oco-time-slot--disabled' : ''; ?>"
+                            data-time="<?php echo esc_attr( $_slot ); ?>"
+                            <?php echo $_is_disabled ? 'disabled' : ''; ?>>
+                        <?php echo esc_html( $_slot ); ?>
+                    </button>
+                    <?php endforeach; ?>
                 </div>
             </div>
 

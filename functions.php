@@ -1299,3 +1299,191 @@ function lesyni_pie_visual_class( $product ) {
 
 // Disable WooCommerce shipping debug notices
 add_filter( 'option_woocommerce_shipping_debug_mode', '__return_zero' );
+
+/* -----------------------------------------------------------------------
+   Delivery page: meta box
+----------------------------------------------------------------------- */
+add_action( 'add_meta_boxes', function () {
+    add_meta_box(
+        'lesyni_delivery_meta',
+        'Налаштування сторінки доставки',
+        'lesyni_delivery_meta_box_html',
+        'page',
+        'normal',
+        'high'
+    );
+} );
+
+function lesyni_delivery_meta_box_html( $post ) {
+    if ( get_page_template_slug( $post->ID ) !== 'page-delivery.php' ) {
+        echo '<p style="color:#888;font-style:italic">Застосовується лише до сторінок із шаблоном <strong>Доставка та оплата</strong>.</p>';
+        return;
+    }
+    wp_nonce_field( 'lesyni_delivery_save', 'lesyni_delivery_nonce' );
+
+    $f = [
+        'phone'          => get_post_meta( $post->ID, '_del_phone', true )          ?: '+38 063 253 26 96',
+        'order_hours'    => get_post_meta( $post->ID, '_del_order_hours', true )    ?: '9:00 – 18:30',
+        'delivery_hours' => get_post_meta( $post->ID, '_del_delivery_hours', true ) ?: '9:30 – 19:30',
+        'address'        => get_post_meta( $post->ID, '_del_address', true )        ?: 'вул. Воскресенська, 41',
+        'maps_url'       => get_post_meta( $post->ID, '_del_maps_url', true )       ?: 'https://www.google.com/maps/d/u/0/embed?mid=1zXrpRXH2YNa7LDv6pq-footc-xzq8Ic&ehbc=2E312F&noprof=1',
+        'green_free'     => get_post_meta( $post->ID, '_del_green_free', true )     ?: '600',
+        'green_cost'     => get_post_meta( $post->ID, '_del_green_cost', true )     ?: '100',
+        'yellow_free'    => get_post_meta( $post->ID, '_del_yellow_free', true )    ?: '800',
+        'yellow_cost'    => get_post_meta( $post->ID, '_del_yellow_cost', true )    ?: '150',
+    ];
+
+    $faq_raw = get_post_meta( $post->ID, '_del_faq', true );
+    $faq     = $faq_raw ? json_decode( $faq_raw, true ) : [
+        [ 'q' => 'Як довго їде замовлення?',                     'a' => 'Зазвичай ми доставляємо протягом 2х годин.' ],
+        [ 'q' => 'Чи можна замовити з вечора на завтра?',       'a' => 'Так, можна замовити заздалегідь.' ],
+        [ 'q' => 'Як зрозуміти, в якій зоні моя адреса?',      'a' => 'Подивіться на карту вище.' ],
+        [ 'q' => 'Як оплатити замовлення?',                      'a' => 'Готівкою або карткою онлайн.' ],
+        [ 'q' => 'Що робити, якщо моєї адреси немає на карті?', 'a' => 'Зателефонуйте нам — обговоримо індивідуально.' ],
+        [ 'q' => 'Як швидко ви приймаєте онлайн-замовлення?',   'a' => 'Оператор передзвонює протягом 5–15 хвилин.' ],
+    ];
+    ?>
+    <style>
+    #lesyni_delivery_meta .dlv-mb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    #lesyni_delivery_meta .dlv-mb-field { display: flex; flex-direction: column; gap: 5px; }
+    #lesyni_delivery_meta .dlv-mb-field label { font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: #555; }
+    #lesyni_delivery_meta .dlv-mb-field input, #lesyni_delivery_meta .dlv-mb-field textarea { width: 100%; padding: 7px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+    #lesyni_delivery_meta .dlv-mb-field input[type=number] { max-width: 140px; }
+    #lesyni_delivery_meta .dlv-mb-section { margin-bottom: 24px; }
+    #lesyni_delivery_meta .dlv-mb-section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #e07a3f; border-bottom: 2px solid #e07a3f; padding-bottom: 6px; margin-bottom: 14px; }
+    #lesyni_delivery_meta .dlv-mb-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    #lesyni_delivery_meta .dlv-mb-zone { background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 14px; }
+    #lesyni_delivery_meta .dlv-mb-zone-title { font-weight: 700; font-size: 12px; text-transform: uppercase; margin-bottom: 10px; }
+    #lesyni_delivery_meta .dlv-mb-zone-title--green { color: #4a8f3a; }
+    #lesyni_delivery_meta .dlv-mb-zone-title--yellow { color: #b07a10; }
+    #lesyni_delivery_meta .faq-item { background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 12px; margin-bottom: 10px; position: relative; }
+    #lesyni_delivery_meta .faq-item__remove { position: absolute; top: 8px; right: 8px; background: #c0392b; color: white; border: none; border-radius: 3px; padding: 2px 8px; font-size: 11px; cursor: pointer; }
+    #lesyni_delivery_meta .faq-item__q { width: 100%; margin-bottom: 6px; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; font-weight: 600; }
+    #lesyni_delivery_meta .faq-item__a { width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; resize: vertical; min-height: 60px; }
+    #lesyni_delivery_meta #dlv-faq-add { margin-top: 6px; background: #e07a3f; color: white; border: none; border-radius: 4px; padding: 8px 16px; cursor: pointer; font-size: 13px; font-weight: 600; }
+    </style>
+
+    <div class="dlv-mb-section">
+        <div class="dlv-mb-section-title">Контакти та години</div>
+        <div class="dlv-mb-grid">
+            <div class="dlv-mb-field">
+                <label>Телефон</label>
+                <input type="text" name="del_phone" value="<?php echo esc_attr( $f['phone'] ); ?>" placeholder="+38 063 253 26 96">
+            </div>
+            <div class="dlv-mb-field">
+                <label>Адреса пекарні</label>
+                <input type="text" name="del_address" value="<?php echo esc_attr( $f['address'] ); ?>">
+            </div>
+            <div class="dlv-mb-field">
+                <label>Години прийому замовлень</label>
+                <input type="text" name="del_order_hours" value="<?php echo esc_attr( $f['order_hours'] ); ?>" placeholder="9:00 – 18:30">
+            </div>
+            <div class="dlv-mb-field">
+                <label>Години доставки</label>
+                <input type="text" name="del_delivery_hours" value="<?php echo esc_attr( $f['delivery_hours'] ); ?>" placeholder="9:30 – 19:30">
+            </div>
+        </div>
+    </div>
+
+    <div class="dlv-mb-section">
+        <div class="dlv-mb-section-title">Зони доставки</div>
+        <div class="dlv-mb-zones">
+            <div class="dlv-mb-zone">
+                <div class="dlv-mb-zone-title dlv-mb-zone-title--green">🟢 Зелена зона</div>
+                <div class="dlv-mb-field" style="margin-bottom:10px">
+                    <label>Безкоштовно від (грн)</label>
+                    <input type="number" name="del_green_free" value="<?php echo esc_attr( $f['green_free'] ); ?>" min="0" step="50">
+                </div>
+                <div class="dlv-mb-field">
+                    <label>Вартість доставки до порогу (грн)</label>
+                    <input type="number" name="del_green_cost" value="<?php echo esc_attr( $f['green_cost'] ); ?>" min="0" step="10">
+                </div>
+            </div>
+            <div class="dlv-mb-zone">
+                <div class="dlv-mb-zone-title dlv-mb-zone-title--yellow">🟡 Жовта зона</div>
+                <div class="dlv-mb-field" style="margin-bottom:10px">
+                    <label>Безкоштовно від (грн)</label>
+                    <input type="number" name="del_yellow_free" value="<?php echo esc_attr( $f['yellow_free'] ); ?>" min="0" step="50">
+                </div>
+                <div class="dlv-mb-field">
+                    <label>Вартість доставки до порогу (грн)</label>
+                    <input type="number" name="del_yellow_cost" value="<?php echo esc_attr( $f['yellow_cost'] ); ?>" min="0" step="10">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dlv-mb-section">
+        <div class="dlv-mb-section-title">Карта (Google Maps Embed URL)</div>
+        <div class="dlv-mb-field">
+            <label>URL для вбудованої карти</label>
+            <textarea name="del_maps_url" rows="2" style="width:100%;font-size:12px;padding:7px;border:1px solid #ddd;border-radius:4px"><?php echo esc_textarea( $f['maps_url'] ); ?></textarea>
+        </div>
+    </div>
+
+    <div class="dlv-mb-section">
+        <div class="dlv-mb-section-title">Часті запитання (FAQ)</div>
+        <div id="dlv-faq-list">
+            <?php foreach ( $faq as $i => $item ) : ?>
+            <div class="faq-item">
+                <button type="button" class="faq-item__remove" onclick="this.closest('.faq-item').remove()">✕ Видалити</button>
+                <input type="text" class="faq-item__q" name="del_faq[<?php echo $i; ?>][q]" value="<?php echo esc_attr( $item['q'] ?? '' ); ?>" placeholder="Запитання">
+                <textarea class="faq-item__a" name="del_faq[<?php echo $i; ?>][a]" placeholder="Відповідь"><?php echo esc_textarea( $item['a'] ?? '' ); ?></textarea>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <button type="button" id="dlv-faq-add">+ Додати запитання</button>
+    </div>
+
+    <script>
+    (function() {
+        document.getElementById('dlv-faq-add').addEventListener('click', function() {
+            var list = document.getElementById('dlv-faq-list');
+            var idx  = list.querySelectorAll('.faq-item').length;
+            var div  = document.createElement('div');
+            div.className = 'faq-item';
+            div.innerHTML = '<button type="button" class="faq-item__remove" onclick="this.closest(\'.faq-item\').remove()">✕ Видалити</button>'
+                + '<input type="text" class="faq-item__q" name="del_faq[' + idx + '][q]" placeholder="Запитання">'
+                + '<textarea class="faq-item__a" name="del_faq[' + idx + '][a]" placeholder="Відповідь"></textarea>';
+            list.appendChild(div);
+        });
+    })();
+    </script>
+    <?php
+}
+
+add_action( 'save_post_page', function ( $post_id ) {
+    if ( ! isset( $_POST['lesyni_delivery_nonce'] ) ) return;
+    if ( ! wp_verify_nonce( $_POST['lesyni_delivery_nonce'], 'lesyni_delivery_save' ) ) return;
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+    if ( ! current_user_can( 'edit_post', $post_id ) ) return;
+
+    $text_fields = [ 'del_phone', 'del_order_hours', 'del_delivery_hours', 'del_address' ];
+    foreach ( $text_fields as $key ) {
+        if ( isset( $_POST[ $key ] ) ) {
+            update_post_meta( $post_id, '_' . $key, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
+        }
+    }
+
+    if ( isset( $_POST['del_maps_url'] ) ) {
+        update_post_meta( $post_id, '_del_maps_url', esc_url_raw( wp_unslash( $_POST['del_maps_url'] ) ) );
+    }
+
+    foreach ( [ 'del_green_free', 'del_green_cost', 'del_yellow_free', 'del_yellow_cost' ] as $key ) {
+        if ( isset( $_POST[ $key ] ) ) {
+            update_post_meta( $post_id, '_' . $key, absint( $_POST[ $key ] ) );
+        }
+    }
+
+    if ( isset( $_POST['del_faq'] ) && is_array( $_POST['del_faq'] ) ) {
+        $clean = [];
+        foreach ( $_POST['del_faq'] as $item ) {
+            $q = sanitize_text_field( wp_unslash( $item['q'] ?? '' ) );
+            $a = sanitize_textarea_field( wp_unslash( $item['a'] ?? '' ) );
+            if ( $q ) {
+                $clean[] = [ 'q' => $q, 'a' => $a ];
+            }
+        }
+        update_post_meta( $post_id, '_del_faq', wp_json_encode( $clean, JSON_UNESCAPED_UNICODE ) );
+    }
+} );

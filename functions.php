@@ -957,9 +957,8 @@ add_action( 'woocommerce_settings_tabs_lesyni_zones', function () {
     woocommerce_admin_fields( lesyni_zone_settings_fields() );
 } );
 
-add_action( 'woocommerce_update_settings_lesyni_zones', function () {
+add_action( 'woocommerce_update_options_lesyni_zones', function () {
     woocommerce_update_options( lesyni_zone_settings_fields() );
-    // Checkbox fields absent from POST when unchecked — handle explicitly
     update_option( 'lesyni_gift_enabled', isset( $_POST['lesyni_gift_enabled'] ) ? 'yes' : 'no' );
 } );
 

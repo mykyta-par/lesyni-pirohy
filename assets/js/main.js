@@ -1227,6 +1227,37 @@
     if (streetInput) streetInput.addEventListener('input', scheduleZoneCheck);
     if (houseInput)  houseInput.addEventListener('input',  scheduleZoneCheck);
 
+    /* ── Google Places Autocomplete ─────────────────────────────── */
+    if (streetInput && window.google && window.google.maps && window.google.maps.places) {
+        var dniproBounds = new google.maps.LatLngBounds(
+            new google.maps.LatLng(47.90, 34.75),
+            new google.maps.LatLng(48.60, 35.35)
+        );
+        var gAutocomplete = new google.maps.places.Autocomplete(streetInput, {
+            types:                ['address'],
+            componentRestrictions: { country: 'ua' },
+            bounds:               dniproBounds,
+            strictBounds:         true,
+            fields:               ['address_components'],
+        });
+        gAutocomplete.addListener('place_changed', function () {
+            var place = gAutocomplete.getPlace();
+            if (!place || !place.address_components) return;
+            var street = '', houseNum = '';
+            place.address_components.forEach(function (c) {
+                if (c.types.indexOf('route') !== -1)         street   = c.long_name;
+                if (c.types.indexOf('street_number') !== -1) houseNum = c.long_name;
+            });
+            if (street) streetInput.value = street;
+            if (houseNum && houseInput && !houseInput.value) houseInput.value = houseNum;
+            // Trigger zone detection immediately (no debounce needed — user made explicit selection)
+            clearTimeout(zoneCheckTimer);
+            var fullAddr = streetInput.value + (houseNum ? ', ' + houseNum : '');
+            showZoneIndicator('checking', '🔍 Визначаємо зону доставки…');
+            checkZone(fullAddr);
+        });
+    }
+
     // Auto-run zone check on page load if address fields are already prefilled
     function autoCheckZoneIfPrefilled() {
         var street = streetInput ? streetInput.value.trim() : '';

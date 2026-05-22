@@ -380,7 +380,7 @@ else   $count_str = $n . ' позицій';
                         <input type="text" id="oco-street" class="oco-input"
                                placeholder="напр. Хрещатик"
                                value="<?php echo esc_attr( $_a_street ); ?>"
-                               autocomplete="address-line1">
+                               autocomplete="off">
                     </div>
                 </div>
                 <div class="oco-form-row oco-form-row--addr">

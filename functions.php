@@ -2,6 +2,8 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+define( 'LESYNI_GMAPS_KEY', 'AIzaSyBfHzeh5KhIQ-yIipIPCdtj5BZTNwO2T3M' );
+
 /* -----------------------------------------------------------------------
    Helpers
 ----------------------------------------------------------------------- */
@@ -355,7 +357,7 @@ function lesyni_enqueue_assets() {
 		null
 	);
 
-	// Leaflet map — тільки на сторінці кошика
+	// Leaflet + Google Places — тільки на сторінці кошика
 	if ( is_cart() ) {
 		wp_enqueue_style(
 			'leaflet',
@@ -370,6 +372,13 @@ function lesyni_enqueue_assets() {
 			'1.9.4',
 			true
 		);
+		wp_enqueue_script(
+			'google-places',
+			'https://maps.googleapis.com/maps/api/js?key=' . LESYNI_GMAPS_KEY . '&libraries=places&language=uk',
+			[],
+			null,
+			true
+		);
 	}
 
 	// Main stylesheet
@@ -380,8 +389,8 @@ function lesyni_enqueue_assets() {
 		filemtime( get_template_directory() . '/assets/css/main.css' )
 	);
 
-	// Main script (depends on Leaflet when on cart page)
-	$script_deps = is_cart() ? [ 'leaflet' ] : [];
+	// Main script (depends on Leaflet + Google Places when on cart page)
+	$script_deps = is_cart() ? [ 'leaflet', 'google-places' ] : [];
 	wp_enqueue_script(
 		'lesyni-main',
 		get_template_directory_uri() . '/assets/js/main.js',

@@ -4,6 +4,16 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 define( 'LESYNI_GMAPS_KEY', 'AIzaSyBfHzeh5KhIQ-yIipIPCdtj5BZTNwO2T3M' );
 
+// Flush rewrite rules once after each deploy (WP Pusher updates functions.php mtime).
+// Prevents WooCommerce archive pages from returning empty product loops after deploy.
+add_action( 'init', function () {
+    $ver = filemtime( __FILE__ );
+    if ( get_option( 'lesyni_rewrite_ver' ) !== $ver ) {
+        flush_rewrite_rules( false );
+        update_option( 'lesyni_rewrite_ver', $ver );
+    }
+} );
+
 /* -----------------------------------------------------------------------
    Helpers
 ----------------------------------------------------------------------- */

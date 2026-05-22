@@ -554,6 +554,8 @@
     }
 
     /* ── Time slots ─────────────────────────────────────────────── */
+    var adminDisabledSlots = (window.lesyniData && lesyniData.disabledSlots) ? lesyniData.disabledSlots : [];
+
     function initTimeSlots() {
         var now = new Date();
         var cur = now.getHours() * 60 + now.getMinutes();
@@ -566,17 +568,19 @@
 
         document.querySelectorAll('.oco-time-slot').forEach(function (slot) {
             var time = slot.dataset.time || '';
-            var disabled = false;
+            var disabled = adminDisabledSlots.indexOf(time) !== -1;
 
-            if (time === 'Якнайшвидше') {
-                asapSlot = slot;
-                disabled = cur < WORK_START || cur > ASAP_CUTOFF;
-            } else {
-                // Parse start hour from "HH:MM–HH:MM"
-                var m = time.match(/^(\d+):(\d+)/);
-                if (m) {
-                    var slotStart = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
-                    disabled = cur >= slotStart;
+            if (!disabled) {
+                if (time === 'Якнайшвидше') {
+                    asapSlot = slot;
+                    disabled = cur < WORK_START || cur > ASAP_CUTOFF;
+                } else {
+                    // Parse start hour from "HH:MM–HH:MM"
+                    var m = time.match(/^(\d+):(\d+)/);
+                    if (m) {
+                        var slotStart = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+                        disabled = cur >= slotStart;
+                    }
                 }
             }
 

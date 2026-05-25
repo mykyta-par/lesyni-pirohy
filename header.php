@@ -13,9 +13,9 @@
     <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-logo">
         <img
             src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo.png' ); ?>"
-            alt="<?php bloginfo( 'name' ); ?>"
+            alt="Лесині Пироги"
         >
-        <span><?php bloginfo( 'name' ); ?></span>
+        <span><?php echo esc_html( get_bloginfo( 'name' ) ?: 'Лесині Пироги' ); ?></span>
     </a>
 
     <button class="nav-toggle" aria-label="Відкрити меню" aria-expanded="false">

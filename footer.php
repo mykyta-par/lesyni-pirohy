@@ -12,7 +12,7 @@
                     >
                 </a>
                 <div class="site-footer__brand-name">
-                    <?php bloginfo( 'name' ); ?>
+                    <?php echo esc_html( get_bloginfo( 'name' ) ?: 'Лесині Пироги' ); ?>
                     <small>з любов'ю до 2009 року</small>
                 </div>
             </div>

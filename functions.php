@@ -1319,6 +1319,36 @@ add_filter( 'option_woocommerce_shipping_debug_mode', '__return_zero' );
 ----------------------------------------------------------------------- */
 add_action( 'customize_register', function ( WP_Customize_Manager $wp_customize ) {
 
+    // ── Panel: Homepage sections ─────────────────────────────────────
+    $wp_customize->add_panel( 'lesyni_homepage_panel', [
+        'title'    => 'Головна сторінка',
+        'priority' => 150,
+    ] );
+
+    $wp_customize->add_section( 'lesyni_homepage_sections', [
+        'title' => 'Розділи',
+        'panel' => 'lesyni_homepage_panel',
+    ] );
+
+    $section_toggles = [
+        'homepage_show_reviews'    => 'Показувати розділ «Відгуки»',
+        'homepage_show_calculator' => 'Показувати розділ «Скільки пирогів замовити?»',
+        'homepage_show_contact'    => 'Показувати розділ «Як замовити?»',
+    ];
+    foreach ( $section_toggles as $key => $label ) {
+        $wp_customize->add_setting( $key, [
+            'default'           => true,
+            'sanitize_callback' => function ( $val ) { return (bool) $val; },
+            'transport'         => 'refresh',
+        ] );
+        $wp_customize->add_control( $key, [
+            'label'   => $label,
+            'section' => 'lesyni_homepage_sections',
+            'type'    => 'checkbox',
+        ] );
+    }
+
+    // ── Panel: Footer ────────────────────────────────────────────────
     $wp_customize->add_panel( 'lesyni_footer_panel', [
         'title'    => 'Футер',
         'priority' => 160,

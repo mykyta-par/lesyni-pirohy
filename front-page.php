@@ -181,6 +181,7 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
 <!-- ======================================================================
    REVIEWS
 ====================================================================== -->
+<?php if ( get_theme_mod( 'homepage_show_reviews', true ) ) : ?>
 <section class="reviews-section" id="reviews">
     <p class="section__eyebrow">Що кажуть клієнти</p>
     <h2 class="section__title">Відгуки</h2>
@@ -221,10 +222,12 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
     <?php endif; ?>
 
 </section>
+<?php endif; ?>
 
 <!-- ======================================================================
    CALCULATOR
 ====================================================================== -->
+<?php if ( get_theme_mod( 'homepage_show_calculator', true ) ) : ?>
 <?php
 $calc_shop_url = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : home_url( '/shop/' );
 ?>
@@ -294,10 +297,12 @@ $calc_shop_url = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_pag
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- ======================================================================
    CONTACT
 ====================================================================== -->
+<?php if ( get_theme_mod( 'homepage_show_contact', true ) ) : ?>
 <section class="contact-section" id="contact">
     <div class="contact-section__info">
         <h2 class="contact-section__title">Як замовити?</h2>
@@ -338,5 +343,6 @@ $calc_shop_url = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_pag
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <?php get_footer(); ?>

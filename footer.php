@@ -4,18 +4,17 @@
     <div class="site-footer__main">
         <!-- Brand -->
         <div class="site-footer__brand">
-            <div class="site-footer__brand-row">
-                <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-logo site-logo--footer">
-                    <img
-                        src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo.png' ); ?>"
-                        alt="<?php bloginfo( 'name' ); ?>"
-                    >
-                </a>
+            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-footer__brand-row">
+                <img
+                    src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo.png' ); ?>"
+                    alt="Лесині Пироги"
+                    class="site-footer__brand-img"
+                >
                 <div class="site-footer__brand-name">
                     <?php echo esc_html( get_bloginfo( 'name' ) ?: 'Лесині Пироги' ); ?>
                     <small>з любов'ю до 2009 року</small>
                 </div>
-            </div>
+            </a>
             <p>Сімейна пекарня в серці Дніпра. Готуємо смачні пироги за домашніми рецептами щодня.</p>
             <div class="site-footer__socials">
                 <a href="https://www.facebook.com/lesyni.pyrogy" target="_blank" rel="noopener noreferrer" class="site-footer__social" aria-label="Facebook">

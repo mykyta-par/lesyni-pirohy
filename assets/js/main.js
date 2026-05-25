@@ -1805,13 +1805,8 @@
         if (totalSlices > 0) {
             if (state.size === 'large') {
                 large = Math.ceil(totalSlices / LARGE_SLICES);
-            } else if (state.size === 'small') {
-                small = Math.ceil(totalSlices / SMALL_SLICES);
             } else {
-                large = Math.floor(totalSlices / LARGE_SLICES);
-                var remainder = totalSlices - large * LARGE_SLICES;
-                if (remainder > 0) small = Math.ceil(remainder / SMALL_SLICES);
-                if (large === 0 && small === 0) small = 1;
+                small = Math.ceil(totalSlices / SMALL_SLICES);
             }
         }
 

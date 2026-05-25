@@ -267,9 +267,8 @@ $calc_shop_url = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_pag
                 <div>
                     <div class="lp-calc-label">Розмір пирогів</div>
                     <div class="lp-calc-opts" data-group="size">
-                        <button class="lp-calc-opt is-active" data-value="large">Лише великі</button>
-                        <button class="lp-calc-opt" data-value="mixed">Великі + маленькі</button>
-                        <button class="lp-calc-opt" data-value="small">Лише маленькі</button>
+                        <button class="lp-calc-opt is-active" data-value="large">Великі пироги</button>
+                        <button class="lp-calc-opt" data-value="small">Маленькі пироги</button>
                     </div>
                 </div>
             </div>

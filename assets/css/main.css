@@ -205,7 +205,7 @@ ul, ol   { list-style: none; }
     text-decoration: none;
 }
 .site-logo img { height: 38px; width: auto; }
-.site-logo span { white-space: nowrap; color: var(--color-text); font-family: var(--font-serif); font-size: 17px; font-weight: 700; }
+.site-logo span { white-space: nowrap; color: var(--color-text); font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800; }
 
 /* Nav */
 .site-nav {
@@ -751,7 +751,7 @@ a.contact-item__value:hover { color: var(--color-primary); }
 .site-footer__brand-row { display: flex; align-items: center; gap: 12px; }
 .site-footer__brand-row .site-logo--footer { color: var(--color-text); }
 .site-footer__brand-row .site-logo--footer img { height: 46px; filter: none; }
-.site-footer__brand-name { font-family: var(--font-serif); font-size: 18px; font-weight: 700; color: var(--color-text); line-height: 1.1; }
+.site-footer__brand-name { font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 800; color: var(--color-text); line-height: 1.1; }
 .site-footer__brand-name small { display: block; font-size: 11px; color: var(--color-primary); font-weight: 600; margin-top: 3px; letter-spacing: .3px; font-family: var(--font-sans); }
 .site-footer__brand > p { font-size: 13px; line-height: 1.7; color: #6b5848; max-width: 300px; }
 

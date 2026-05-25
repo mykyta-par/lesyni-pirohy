@@ -1427,6 +1427,7 @@ ul.products {
 
 @media (max-width: 768px) {
     .site-header { height: 64px; gap: 16px; }
+    .site-logo span { display: none; }
 
     .site-nav {
         display: none;

@@ -708,70 +708,112 @@ a.contact-item__value:hover { color: var(--color-primary); }
    12. Site Footer
    -------------------------------------------------------------------------- */
 .site-footer {
-    background: #2c2c2c;
-    color: rgba(255,255,255,.8);
-    padding: 0;
+    background: linear-gradient(135deg, var(--color-bg-hero) 0%, #ffe4c4 100%);
+    color: #5c4b3a;
+    position: relative;
+    overflow: hidden;
+}
+.site-footer::before {
+    content: '';
+    position: absolute;
+    top: -120px; right: -120px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(224,122,63,.16) 0%, transparent 65%);
+    border-radius: 50%;
+    pointer-events: none;
 }
 
-.site-footer__inner {
+.site-footer__strip {
+    height: 7px;
+    background: repeating-linear-gradient(
+        45deg,
+        var(--color-primary),
+        var(--color-primary) 14px,
+        #f0a070 14px,
+        #f0a070 28px
+    );
+    position: relative; z-index: 1;
+}
+
+.site-footer__main {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr;
+    grid-template-columns: 1.2fr 1fr 1.2fr;
     gap: 48px;
-    padding: clamp(40px, 6vw, 64px) var(--px);
+    padding: clamp(36px, 5vw, 56px) var(--px) clamp(28px, 4vw, 40px);
     max-width: var(--max-w);
     margin: 0 auto;
+    align-items: start;
+    position: relative; z-index: 1;
 }
 
-.site-footer .site-logo { color: #fff; margin-bottom: 12px; }
-.site-footer__tagline   { font-size: 13px; color: rgba(255,255,255,.55); line-height: 1.5; }
+/* Brand column */
+.site-footer__brand { display: flex; flex-direction: column; gap: 16px; }
+.site-footer__brand-row { display: flex; align-items: center; gap: 12px; }
+.site-footer__brand-row .site-logo--footer { color: var(--color-text); }
+.site-footer__brand-row .site-logo--footer img { height: 46px; filter: none; }
+.site-footer__brand-name { font-family: var(--font-serif); font-size: 18px; font-weight: 700; color: var(--color-text); line-height: 1.1; }
+.site-footer__brand-name small { display: block; font-size: 11px; color: var(--color-primary); font-weight: 600; margin-top: 3px; letter-spacing: .3px; font-family: var(--font-sans); }
+.site-footer__brand > p { font-size: 13px; line-height: 1.7; color: #6b5848; max-width: 300px; }
 
-.site-footer__links h4,
-.site-footer__contact h4 {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.45);
-    margin-bottom: 16px;
+/* Socials */
+.site-footer__socials { display: flex; gap: 8px; }
+.site-footer__social {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: white;
+    color: var(--color-primary);
+    display: flex; align-items: center; justify-content: center;
+    transition: all .25s;
+    box-shadow: 0 3px 8px rgba(224,122,63,.14);
+    text-decoration: none;
 }
+.site-footer__social:hover { background: var(--color-primary); color: white; transform: translateY(-2px); }
 
-.site-footer__links nav {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.site-footer__links a,
-.site-footer__contact a {
-    font-size: 13px;
-    color: rgba(255,255,255,.7);
-    transition: color .2s;
-}
-.site-footer__links a:hover,
-.site-footer__contact a:hover { color: var(--color-primary); }
+/* Nav columns */
+.site-footer__nav { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.site-footer__nav h4 { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--color-text); margin-bottom: 14px; }
+.site-footer__nav nav { display: flex; flex-direction: column; gap: 10px; }
+.site-footer__nav nav a { font-size: 14px; color: #5c4b3a; text-decoration: none; transition: color .2s; }
+.site-footer__nav nav a:hover { color: var(--color-primary); }
 
-.site-footer__contact p { font-size: 13px; line-height: 1.8; }
-
-.site-footer__socials {
-    display: flex;
-    gap: 10px;
-    margin-top: 14px;
+/* Contact cards */
+.site-footer__cards { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.site-footer__card {
+    background: rgba(255,255,255,.6);
+    border: 1px solid rgba(224,122,63,.15);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none; color: inherit;
+    transition: all .25s;
 }
-.site-footer__socials .social-btn {
-    width: 36px;
-    height: 36px;
-    background: rgba(255,255,255,.1);
+.site-footer__card:hover { background: white; border-color: var(--color-primary); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(224,122,63,.14); }
+.site-footer__card-icon {
+    width: 38px; height: 38px; flex-shrink: 0;
+    background: var(--color-primary);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
 }
-.site-footer__socials .social-btn:hover { background: var(--color-primary); }
+.site-footer__card-label { font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: #8a7355; font-weight: 600; margin-bottom: 1px; }
+.site-footer__card-value { font-family: var(--font-serif); font-size: 14px; font-weight: 700; color: var(--color-text); }
 
+/* Bottom bar */
 .site-footer__bottom {
-    border-top: 1px solid rgba(255,255,255,.08);
+    background: rgba(44,44,44,.06);
     padding: 18px var(--px);
-    text-align: center;
-    font-size: 12px;
-    color: rgba(255,255,255,.35);
-    max-width: var(--max-w);
-    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: relative; z-index: 1;
+    max-width: 100%;
 }
+.site-footer__copy { font-size: 12px; color: #6b5848; }
+.site-footer__bottom-links { display: flex; gap: 18px; }
+.site-footer__bottom-links a { font-size: 12px; color: #6b5848; text-decoration: none; transition: color .2s; }
+.site-footer__bottom-links a:hover { color: var(--color-primary); }
 
 /* --------------------------------------------------------------------------
    13. Catalog: Page Hero Banner
@@ -1378,7 +1420,8 @@ ul.products {
 @media (max-width: 900px) {
     .reviews-grid   { grid-template-columns: 1fr; }
     .contact-section { grid-template-columns: 1fr; gap: 32px; }
-    .site-footer__inner { grid-template-columns: 1fr 1fr; }
+    .site-footer__main { grid-template-columns: 1fr 1fr; }
+    .site-footer__brand { grid-column: 1 / -1; }
     .order-cta { grid-template-columns: 1fr; text-align: center; }
     .order-cta__phone { font-size: 26px; }
 }
@@ -1421,7 +1464,9 @@ ul.products {
     .popular-grid  { grid-template-columns: repeat(2, 1fr); }
     .products-grid { grid-template-columns: 1fr; }
 
-    .site-footer__inner { grid-template-columns: 1fr; gap: 28px; }
+    .site-footer__main { grid-template-columns: 1fr; gap: 28px; }
+    .site-footer__brand { grid-column: auto; }
+    .site-footer__bottom { flex-direction: column; align-items: flex-start; }
 
     .catalog-controls { position: static; flex-direction: column; align-items: stretch; gap: 14px; }
     .catalog-sort { margin-left: 0; }

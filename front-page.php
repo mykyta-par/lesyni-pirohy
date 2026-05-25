@@ -223,6 +223,79 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
 </section>
 
 <!-- ======================================================================
+   CALCULATOR
+====================================================================== -->
+<?php
+$calc_shop_url = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : home_url( '/shop/' );
+?>
+<section class="lp-calc" id="calculator">
+    <div class="lp-calc-wrap">
+        <div class="lp-calc-eyebrow">Розрахунок замовлення</div>
+        <h2 class="lp-calc-title">Скільки пирогів замовити?</h2>
+        <p class="lp-calc-sub">Підкажемо рекомендовану кількість для вашого столу</p>
+
+        <div class="lp-calc-card">
+            <div class="lp-calc-form">
+                <div class="lp-calc-counters">
+                    <div>
+                        <div class="lp-calc-label">Дорослих</div>
+                        <div class="lp-calc-counter">
+                            <button class="lp-calc-step" data-step="adults" data-dir="-1" aria-label="Зменшити">−</button>
+                            <div class="lp-calc-value" data-counter="adults">0</div>
+                            <button class="lp-calc-step" data-step="adults" data-dir="1" aria-label="Збільшити">+</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="lp-calc-label">Дітей</div>
+                        <div class="lp-calc-counter">
+                            <button class="lp-calc-step" data-step="children" data-dir="-1" aria-label="Зменшити">−</button>
+                            <div class="lp-calc-value" data-counter="children">0</div>
+                            <button class="lp-calc-step" data-step="children" data-dir="1" aria-label="Збільшити">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="lp-calc-label">Тип події</div>
+                    <div class="lp-calc-opts" data-group="event">
+                        <button class="lp-calc-opt is-active" data-value="table">Стіл лише з пирогами</button>
+                        <button class="lp-calc-opt" data-value="buffet">Фуршет з іншими стравами</button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="lp-calc-label">Розмір пирогів</div>
+                    <div class="lp-calc-opts" data-group="size">
+                        <button class="lp-calc-opt is-active" data-value="large">Лише великі</button>
+                        <button class="lp-calc-opt" data-value="mixed">Великі + маленькі</button>
+                        <button class="lp-calc-opt" data-value="small">Лише маленькі</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lp-calc-summary">
+                <div class="lp-calc-rlabel">Рекомендоване замовлення</div>
+                <div class="lp-calc-results">
+                    <div class="lp-calc-rcard" data-rcard="large">
+                        <div class="lp-calc-rcard-label">Великі пироги</div>
+                        <div><span class="lp-calc-rval" data-result="large">0</span><span class="lp-calc-runit">шт</span></div>
+                    </div>
+                    <div class="lp-calc-rcard is-small" data-rcard="small">
+                        <div class="lp-calc-rcard-label">Маленькі пироги</div>
+                        <div><span class="lp-calc-rval" data-result="small">0</span><span class="lp-calc-runit">шт</span></div>
+                    </div>
+                </div>
+                <div class="lp-calc-info">
+                    <span class="lp-calc-info-icon">i</span>
+                    <span data-info>Вкажіть кількість гостей, щоб побачити рекомендацію</span>
+                </div>
+                <button class="lp-calc-cta" data-cta data-url="<?php echo esc_url( $calc_shop_url ); ?>">Перейти до замовлення</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================
    CONTACT
 ====================================================================== -->
 <section class="contact-section" id="contact">

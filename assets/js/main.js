@@ -1754,3 +1754,110 @@
     });
 
 })();
+
+/* ==========================================================================
+   Pie Calculator
+========================================================================== */
+(function () {
+    var section = document.querySelector('.lp-calc');
+    if (!section) return;
+
+    var LARGE_SLICES = 8;
+    var SMALL_SLICES = 6;
+    var MAX_ADULTS   = 100;
+    var MAX_CHILDREN = 50;
+
+    var EVENT_NORMS = {
+        'table':  { adult: 3, kid: 2, label: '3 шматочки на дорослого, 2 на дитину (стіл лише з пирогами)' },
+        'buffet': { adult: 2, kid: 1, label: '2 шматочки на дорослого, 1 на дитину (фуршет)' }
+    };
+
+    var state = { adults: 0, children: 0, event: 'table', size: 'large' };
+
+    var stepBtns  = section.querySelectorAll('[data-step]');
+    var counters  = section.querySelectorAll('[data-counter]');
+    var groups    = section.querySelectorAll('[data-group]');
+    var rLarge    = section.querySelector('[data-result="large"]');
+    var rSmall    = section.querySelector('[data-result="small"]');
+    var cardLarge = section.querySelector('[data-rcard="large"]');
+    var cardSmall = section.querySelector('[data-rcard="small"]');
+    var info      = section.querySelector('[data-info]');
+    var cta       = section.querySelector('[data-cta]');
+
+    function plural(n, forms) {
+        var last = n % 10, last2 = n % 100;
+        if (last2 >= 11 && last2 <= 14) return forms[2];
+        if (last === 1)                  return forms[0];
+        if (last >= 2 && last <= 4)      return forms[1];
+        return forms[2];
+    }
+
+    function recalc() {
+        var norms       = EVENT_NORMS[state.event];
+        var totalSlices = state.adults * norms.adult + state.children * norms.kid;
+        var large = 0, small = 0;
+
+        if (totalSlices > 0) {
+            if (state.size === 'large') {
+                large = Math.ceil(totalSlices / LARGE_SLICES);
+            } else if (state.size === 'small') {
+                small = Math.ceil(totalSlices / SMALL_SLICES);
+            } else {
+                large = Math.floor(totalSlices / LARGE_SLICES);
+                var remainder = totalSlices - large * LARGE_SLICES;
+                if (remainder > 0) small = Math.ceil(remainder / SMALL_SLICES);
+                if (large === 0 && small === 0) small = 1;
+            }
+        }
+
+        rLarge.textContent = large;
+        rSmall.textContent = small;
+        cardLarge.classList.toggle('has-value', large > 0);
+        cardSmall.classList.toggle('has-value', small > 0);
+
+        var guests    = state.adults + state.children;
+        var totalPies = large + small;
+        if (guests === 0) {
+            info.textContent = 'Вкажіть кількість гостей, щоб побачити рекомендацію';
+        } else {
+            info.textContent = 'На ' + guests + ' ' + plural(guests, ['гостя', 'гостей', 'гостей']) +
+                ' рекомендуємо ' + totalPies + ' ' + plural(totalPies, ['пиріг', 'пироги', 'пирогів']);
+        }
+        cta.classList.toggle('is-active', guests > 0);
+
+        stepBtns.forEach(function (b) {
+            if (b.dataset.dir === '-1') b.disabled = state[b.dataset.step] === 0;
+        });
+    }
+
+    stepBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var key = btn.dataset.step;
+            var dir = parseInt(btn.dataset.dir, 10);
+            var max = key === 'adults' ? MAX_ADULTS : MAX_CHILDREN;
+            state[key] = Math.max(0, Math.min(max, state[key] + dir));
+            counters.forEach(function (c) { if (c.dataset.counter === key) c.textContent = state[key]; });
+            recalc();
+        });
+    });
+
+    groups.forEach(function (group) {
+        var key = group.dataset.group;
+        group.querySelectorAll('.lp-calc-opt').forEach(function (opt) {
+            opt.addEventListener('click', function () {
+                group.querySelectorAll('.lp-calc-opt').forEach(function (o) { o.classList.remove('is-active'); });
+                opt.classList.add('is-active');
+                state[key] = opt.dataset.value;
+                recalc();
+            });
+        });
+    });
+
+    cta.addEventListener('click', function () {
+        if (cta.classList.contains('is-active')) {
+            window.location.href = cta.dataset.url || '/shop/';
+        }
+    });
+
+    recalc();
+})();

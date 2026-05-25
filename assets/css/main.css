@@ -5415,3 +5415,56 @@ ul.products {
     .dlv-payment       { padding: 28px 20px; }
     .dlv-zones         { padding: 24px 18px; }
 }
+
+/* ==========================================================================
+   13. Pie Calculator
+========================================================================== */
+.lp-calc { padding: 70px 24px; background: #faf6f1; }
+.lp-calc * { box-sizing: border-box; }
+.lp-calc-wrap { max-width: 1100px; margin: 0 auto; }
+.lp-calc-eyebrow { text-align: center; color: var(--color-primary); font-size: 13px; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1.4px; }
+.lp-calc-title { font-family: var(--font-serif); font-weight: 700; font-size: clamp(28px,4vw,40px); line-height: 1.1; margin: 0 0 12px; text-align: center; color: var(--color-text); }
+.lp-calc-sub { text-align: center; color: #888; font-size: 16px; margin: 0 0 36px; line-height: 1.6; }
+
+.lp-calc-card { background: #fff; border-radius: 20px; padding: 44px; border: 1px solid rgba(44,44,44,.06); box-shadow: 0 8px 28px rgba(44,44,44,.06); display: grid; grid-template-columns: 1.15fr 1fr; gap: 48px; align-items: stretch; }
+.lp-calc-form { display: flex; flex-direction: column; gap: 26px; }
+.lp-calc-summary { background: #faf6f1; border-radius: 16px; padding: 32px 28px; display: flex; flex-direction: column; }
+
+.lp-calc-label { font-size: 12px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 12px; }
+.lp-calc-counters { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.lp-calc-counter { display: flex; align-items: center; justify-content: space-between; background: #faf6f1; border-radius: 16px; padding: 12px 16px; }
+.lp-calc-step { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid rgba(44,44,44,.15); background: #fff; font-size: 22px; color: var(--color-text); cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+.lp-calc-step:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-primary); }
+.lp-calc-step:disabled { opacity: .3; cursor: not-allowed; }
+.lp-calc-value { font-family: 'Nunito', sans-serif; font-size: 32px; font-weight: 800; color: var(--color-text); min-width: 40px; text-align: center; line-height: 1; }
+
+.lp-calc-opts { display: flex; gap: 10px; flex-wrap: wrap; }
+.lp-calc-opt { flex: 1; min-width: 0; background: #fff; border: 1.5px solid rgba(44,44,44,.12); border-radius: 12px; padding: 14px 18px; font: 500 13px var(--font-sans); color: var(--color-text); cursor: pointer; transition: all .2s; text-align: center; }
+.lp-calc-opt:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.lp-calc-opt.is-active { background: var(--color-text); border-color: var(--color-text); color: #fff; font-weight: 600; }
+
+.lp-calc-rlabel { text-align: center; color: #b8a89a; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.6px; margin: 0 0 18px; }
+.lp-calc-results { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.lp-calc-rcard { border-radius: 14px; padding: 32px 22px; text-align: center; transition: all .3s; background: #fdefe2; }
+.lp-calc-rcard.is-small { background: #fbe7e0; }
+.lp-calc-rcard-label { font-size: 11px; font-weight: 700; color: rgba(44,44,44,.4); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 12px; }
+.lp-calc-rval { font-family: 'Nunito', sans-serif; font-size: 64px; font-weight: 800; color: rgba(44,44,44,.25); line-height: 1; transition: color .3s; }
+.lp-calc-rcard.has-value .lp-calc-rval { color: var(--color-primary); }
+.lp-calc-runit { font-size: 14px; font-weight: 600; color: rgba(44,44,44,.35); margin-left: 4px; }
+.lp-calc-rcard.has-value .lp-calc-runit { color: rgba(44,44,44,.5); }
+
+.lp-calc-info { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 12px; padding: 14px 18px; margin-top: 18px; font-size: 13px; color: #777; line-height: 1.5; }
+.lp-calc-info-icon { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 1.5px solid var(--color-primary); color: var(--color-primary); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; }
+
+.lp-calc-cta { width: 100%; margin-top: auto; padding-top: 18px; padding-bottom: 18px; border: none; border-radius: 12px; background: #d4bca0; color: #fff; font: 700 16px 'Nunito', sans-serif; cursor: not-allowed; transition: all .25s; }
+.lp-calc-cta.is-active { background: var(--color-primary); cursor: pointer; }
+.lp-calc-cta.is-active:hover { background: var(--color-primary-dk, #d4672d); transform: translateY(-2px); box-shadow: 0 8px 18px rgba(224,122,63,.3); }
+
+@media (max-width: 860px) {
+    .lp-calc { padding: 48px 16px; }
+    .lp-calc-card { padding: 24px 20px; grid-template-columns: 1fr; gap: 28px; }
+    .lp-calc-summary { padding: 24px 20px; }
+    .lp-calc-counters { gap: 14px; }
+    .lp-calc-opts { flex-direction: column; }
+    .lp-calc-rval { font-size: 48px; }
+}

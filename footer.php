@@ -12,7 +12,7 @@
                 >
                 <div class="site-footer__brand-name">
                     <?php echo esc_html( get_bloginfo( 'name' ) ?: 'Лесині Пироги' ); ?>
-                    <small>з любов'ю до 2009 року</small>
+                    <small>з 2019 року</small>
                 </div>
             </a>
             <p>Сімейна пекарня в серці Дніпра. Готуємо смачні пироги за домашніми рецептами щодня.</p>

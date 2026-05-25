@@ -153,10 +153,24 @@ function lesyni_setup() {
 	add_theme_support( 'wc-product-gallery-slider' );
 
 	register_nav_menus( [
-		'primary' => __( 'Головне меню', 'lesyni-pirohy' ),
+		'primary'        => __( 'Головне меню', 'lesyni-pirohy' ),
+		'footer-catalog' => __( 'Футер — Каталог', 'lesyni-pirohy' ),
+		'footer-info'    => __( 'Футер — Інформація', 'lesyni-pirohy' ),
 	] );
 }
 add_action( 'after_setup_theme', 'lesyni_setup' );
+
+class Lesyni_Footer_Nav_Walker extends Walker_Nav_Menu {
+    public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
+        $url = $item->url ?: '#';
+        $output .= '<a href="' . esc_url( $url ) . '"' .
+            ( $item->target ? ' target="' . esc_attr( $item->target ) . '" rel="noopener noreferrer"' : '' ) .
+            '>' . esc_html( $item->title ) . '</a>';
+    }
+    public function end_el( &$output, $item, $depth = 0, $args = null ) {}
+    public function start_lvl( &$output, $depth = 0, $args = null ) {}
+    public function end_lvl( &$output, $depth = 0, $args = null ) {}
+}
 
 function lesyni_nav_fallback() {
     $shop = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : '';

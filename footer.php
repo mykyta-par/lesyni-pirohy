@@ -39,30 +39,51 @@
         <div class="site-footer__nav">
             <div>
                 <h4>Каталог</h4>
-                <nav>
-                    <?php if ( $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : '' ) : ?>
-                        <a href="<?php echo esc_url( $shop_url ); ?>">Солоні пироги</a>
-                        <a href="<?php echo esc_url( $shop_url ); ?>">Солодкі пироги</a>
-                        <a href="<?php echo esc_url( $shop_url ); ?>">Набори</a>
-                    <?php endif; ?>
-                    <a href="<?php echo esc_url( home_url( '/#promos' ) ); ?>">Акції</a>
-                </nav>
+                <?php if ( has_nav_menu( 'footer-catalog' ) ) : ?>
+                    <?php wp_nav_menu( [
+                        'theme_location' => 'footer-catalog',
+                        'container'      => 'nav',
+                        'items_wrap'     => '%3$s',
+                        'depth'          => 1,
+                        'walker'         => new Lesyni_Footer_Nav_Walker(),
+                    ] ); ?>
+                <?php else : ?>
+                    <nav>
+                        <?php $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : ''; ?>
+                        <?php if ( $shop_url ) : ?>
+                            <a href="<?php echo esc_url( $shop_url ); ?>">Солоні пироги</a>
+                            <a href="<?php echo esc_url( $shop_url ); ?>">Солодкі пироги</a>
+                            <a href="<?php echo esc_url( $shop_url ); ?>">Набори</a>
+                        <?php endif; ?>
+                        <a href="<?php echo esc_url( home_url( '/#promos' ) ); ?>">Акції</a>
+                    </nav>
+                <?php endif; ?>
             </div>
             <div>
                 <h4>Інформація</h4>
-                <nav>
-                    <a href="<?php echo esc_url( home_url( '/#reviews' ) ); ?>">Відгуки</a>
-                    <?php
-                    $delivery_page = get_page_by_path( 'delivery' );
-                    if ( ! $delivery_page ) {
-                        $pages = get_pages( [ 'meta_key' => '_wp_page_template', 'meta_value' => 'page-delivery.php' ] );
-                        $delivery_page = $pages ? $pages[0] : null;
-                    }
-                    if ( $delivery_page ) : ?>
-                        <a href="<?php echo esc_url( get_permalink( $delivery_page->ID ) ); ?>">Доставка та оплата</a>
-                    <?php endif; ?>
-                    <a href="<?php echo esc_url( home_url( '/#contact' ) ); ?>">Контакти</a>
-                </nav>
+                <?php if ( has_nav_menu( 'footer-info' ) ) : ?>
+                    <?php wp_nav_menu( [
+                        'theme_location' => 'footer-info',
+                        'container'      => 'nav',
+                        'items_wrap'     => '%3$s',
+                        'depth'          => 1,
+                        'walker'         => new Lesyni_Footer_Nav_Walker(),
+                    ] ); ?>
+                <?php else : ?>
+                    <nav>
+                        <a href="<?php echo esc_url( home_url( '/#reviews' ) ); ?>">Відгуки</a>
+                        <?php
+                        $delivery_page = get_page_by_path( 'delivery' );
+                        if ( ! $delivery_page ) {
+                            $pages = get_pages( [ 'meta_key' => '_wp_page_template', 'meta_value' => 'page-delivery.php' ] );
+                            $delivery_page = $pages ? $pages[0] : null;
+                        }
+                        if ( $delivery_page ) : ?>
+                            <a href="<?php echo esc_url( get_permalink( $delivery_page->ID ) ); ?>">Доставка та оплата</a>
+                        <?php endif; ?>
+                        <a href="<?php echo esc_url( home_url( '/#contact' ) ); ?>">Контакти</a>
+                    </nav>
+                <?php endif; ?>
             </div>
         </div>
 

@@ -1301,6 +1301,65 @@ function lesyni_pie_visual_class( $product ) {
 add_filter( 'option_woocommerce_shipping_debug_mode', '__return_zero' );
 
 /* -----------------------------------------------------------------------
+   Theme Customizer: Footer settings
+----------------------------------------------------------------------- */
+add_action( 'customize_register', function ( WP_Customize_Manager $wp_customize ) {
+
+    $wp_customize->add_panel( 'lesyni_footer_panel', [
+        'title'    => 'Футер',
+        'priority' => 160,
+    ] );
+
+    // ── Section: Brand ──────────────────────────────────────────────
+    $wp_customize->add_section( 'lesyni_footer_brand', [
+        'title' => 'Бренд',
+        'panel' => 'lesyni_footer_panel',
+    ] );
+
+    $brand_fields = [
+        'footer_tagline'     => [ 'default' => 'з 2019 року',                                                                  'label' => 'Підзаголовок під назвою',   'type' => 'text' ],
+        'footer_description' => [ 'default' => 'Сімейна пекарня в серці Дніпра. Готуємо смачні пироги за домашніми рецептами щодня.', 'label' => 'Короткий опис',            'type' => 'textarea' ],
+    ];
+    foreach ( $brand_fields as $key => $args ) {
+        $wp_customize->add_setting( $key, [ 'default' => $args['default'], 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'postMessage' ] );
+        $wp_customize->add_control( $key, [ 'label' => $args['label'], 'section' => 'lesyni_footer_brand', 'type' => $args['type'] ] );
+    }
+
+    // ── Section: Contacts ────────────────────────────────────────────
+    $wp_customize->add_section( 'lesyni_footer_contacts', [
+        'title' => 'Контакти',
+        'panel' => 'lesyni_footer_panel',
+    ] );
+
+    $contact_fields = [
+        'footer_phone'   => [ 'default' => '+38 063 253 26 96',      'label' => 'Телефон (для відображення)'  ],
+        'footer_email'   => [ 'default' => 'info@lesynpie.com.ua',   'label' => 'Email'                       ],
+        'footer_address' => [ 'default' => 'вул. Воскресенська, 41', 'label' => 'Адреса'                      ],
+        'footer_hours'   => [ 'default' => 'Щодня 9:00 — 18:30',     'label' => 'Графік роботи'               ],
+    ];
+    foreach ( $contact_fields as $key => $args ) {
+        $wp_customize->add_setting( $key, [ 'default' => $args['default'], 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'postMessage' ] );
+        $wp_customize->add_control( $key, [ 'label' => $args['label'], 'section' => 'lesyni_footer_contacts', 'type' => 'text' ] );
+    }
+
+    // ── Section: Social links ────────────────────────────────────────
+    $wp_customize->add_section( 'lesyni_footer_socials', [
+        'title' => 'Соціальні мережі',
+        'panel' => 'lesyni_footer_panel',
+    ] );
+
+    $social_fields = [
+        'footer_facebook'  => [ 'default' => 'https://www.facebook.com/lesyni.pyrogy',   'label' => 'Facebook URL'  ],
+        'footer_instagram' => [ 'default' => 'https://www.instagram.com/lesyni_pyrogy/', 'label' => 'Instagram URL' ],
+        'footer_tiktok'    => [ 'default' => '',                                          'label' => 'TikTok URL (порожньо — приховати)' ],
+    ];
+    foreach ( $social_fields as $key => $args ) {
+        $wp_customize->add_setting( $key, [ 'default' => $args['default'], 'sanitize_callback' => 'esc_url_raw', 'transport' => 'refresh' ] );
+        $wp_customize->add_control( $key, [ 'label' => $args['label'], 'section' => 'lesyni_footer_socials', 'type' => 'url' ] );
+    }
+} );
+
+/* -----------------------------------------------------------------------
    Delivery page: meta box
 ----------------------------------------------------------------------- */
 add_action( 'add_meta_boxes', function () {

@@ -12,20 +12,26 @@
                 >
                 <div class="site-footer__brand-name">
                     <?php echo esc_html( get_bloginfo( 'name' ) ?: 'Лесині Пироги' ); ?>
-                    <small>з 2019 року</small>
+                    <small><?php echo esc_html( get_theme_mod( 'footer_tagline', 'з 2019 року' ) ); ?></small>
                 </div>
             </a>
-            <p>Сімейна пекарня в серці Дніпра. Готуємо смачні пироги за домашніми рецептами щодня.</p>
+            <p><?php echo esc_html( get_theme_mod( 'footer_description', 'Сімейна пекарня в серці Дніпра. Готуємо смачні пироги за домашніми рецептами щодня.' ) ); ?></p>
             <div class="site-footer__socials">
-                <a href="https://www.facebook.com/lesyni.pyrogy" target="_blank" rel="noopener noreferrer" class="site-footer__social" aria-label="Facebook">
+                <?php $fb_url = get_theme_mod( 'footer_facebook', 'https://www.facebook.com/lesyni.pyrogy' ); if ( $fb_url ) : ?>
+                <a href="<?php echo esc_url( $fb_url ); ?>" target="_blank" rel="noopener noreferrer" class="site-footer__social" aria-label="Facebook">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 21V13.5H7V10.5H9.5V8.25C9.5 5.85 10.95 4.5 13.1 4.5C14.13 4.5 15.21 4.68 15.21 4.68V7.25H13.91C12.63 7.25 12.25 8.02 12.25 8.82V10.5H15.09L14.65 13.5H12.25V21H9.5Z"/></svg>
                 </a>
-                <a href="https://www.instagram.com/lesyni_pyrogy/" target="_blank" rel="noopener noreferrer" class="site-footer__social" aria-label="Instagram">
+                <?php endif; ?>
+                <?php $ig_url = get_theme_mod( 'footer_instagram', 'https://www.instagram.com/lesyni_pyrogy/' ); if ( $ig_url ) : ?>
+                <a href="<?php echo esc_url( $ig_url ); ?>" target="_blank" rel="noopener noreferrer" class="site-footer__social" aria-label="Instagram">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
                 </a>
-                <a href="#" class="site-footer__social" aria-label="TikTok">
+                <?php endif; ?>
+                <?php $tt_url = get_theme_mod( 'footer_tiktok', '' ); if ( $tt_url ) : ?>
+                <a href="<?php echo esc_url( $tt_url ); ?>" target="_blank" rel="noopener noreferrer" class="site-footer__social" aria-label="TikTok">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.24 8.24 0 0 0 4.84 1.55V6.79a4.85 4.85 0 0 1-1.07-.1z"/></svg>
                 </a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -61,33 +67,40 @@
         </div>
 
         <!-- Contact cards -->
+        <?php
+        $ft_phone   = get_theme_mod( 'footer_phone',   '+38 063 253 26 96' );
+        $ft_email   = get_theme_mod( 'footer_email',   'info@lesynpie.com.ua' );
+        $ft_address = get_theme_mod( 'footer_address', 'вул. Воскресенська, 41' );
+        $ft_hours   = get_theme_mod( 'footer_hours',   'Щодня 9:00 — 18:30' );
+        $ft_phone_href = 'tel:+' . preg_replace( '/[^0-9]/', '', $ft_phone );
+        ?>
         <div class="site-footer__cards">
-            <a href="tel:+380632532696" class="site-footer__card">
+            <a href="<?php echo esc_attr( $ft_phone_href ); ?>" class="site-footer__card">
                 <div class="site-footer__card-icon">📞</div>
                 <div>
                     <div class="site-footer__card-label">Замовити по телефону</div>
-                    <div class="site-footer__card-value">+38 063 253 26 96</div>
+                    <div class="site-footer__card-value"><?php echo esc_html( $ft_phone ); ?></div>
                 </div>
             </a>
-            <a href="mailto:info@lesynpie.com.ua" class="site-footer__card">
+            <a href="mailto:<?php echo esc_attr( $ft_email ); ?>" class="site-footer__card">
                 <div class="site-footer__card-icon">✉️</div>
                 <div>
                     <div class="site-footer__card-label">Написати листа</div>
-                    <div class="site-footer__card-value">info@lesynpie.com.ua</div>
+                    <div class="site-footer__card-value"><?php echo esc_html( $ft_email ); ?></div>
                 </div>
             </a>
-            <a href="https://maps.google.com/?q=вул.+Воскресенська,+41,+Дніпро" target="_blank" rel="noopener noreferrer" class="site-footer__card">
+            <a href="https://maps.google.com/?q=<?php echo urlencode( $ft_address . ', Дніпро' ); ?>" target="_blank" rel="noopener noreferrer" class="site-footer__card">
                 <div class="site-footer__card-icon">📍</div>
                 <div>
                     <div class="site-footer__card-label">Знайти на карті</div>
-                    <div class="site-footer__card-value">вул. Воскресенська, 41</div>
+                    <div class="site-footer__card-value"><?php echo esc_html( $ft_address ); ?></div>
                 </div>
             </a>
             <div class="site-footer__card">
                 <div class="site-footer__card-icon">🕘</div>
                 <div>
                     <div class="site-footer__card-label">Графік роботи</div>
-                    <div class="site-footer__card-value">Щодня 9:00 — 18:30</div>
+                    <div class="site-footer__card-value"><?php echo esc_html( $ft_hours ); ?></div>
                 </div>
             </div>
         </div>

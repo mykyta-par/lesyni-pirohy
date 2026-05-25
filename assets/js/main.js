@@ -1774,15 +1774,20 @@
 
     var state = { adults: 0, children: 0, event: 'table', size: 'large' };
 
-    var stepBtns  = section.querySelectorAll('[data-step]');
-    var counters  = section.querySelectorAll('[data-counter]');
-    var groups    = section.querySelectorAll('[data-group]');
-    var rLarge    = section.querySelector('[data-result="large"]');
-    var rSmall    = section.querySelector('[data-result="small"]');
-    var cardLarge = section.querySelector('[data-rcard="large"]');
-    var cardSmall = section.querySelector('[data-rcard="small"]');
-    var info      = section.querySelector('[data-info]');
-    var cta       = section.querySelector('[data-cta]');
+    var rangeInputs = section.querySelectorAll('[data-range]');
+    var counters    = section.querySelectorAll('[data-counter]');
+    var groups      = section.querySelectorAll('[data-group]');
+    var rLarge      = section.querySelector('[data-result="large"]');
+    var rSmall      = section.querySelector('[data-result="small"]');
+    var cardLarge   = section.querySelector('[data-rcard="large"]');
+    var cardSmall   = section.querySelector('[data-rcard="small"]');
+    var info        = section.querySelector('[data-info]');
+    var cta         = section.querySelector('[data-cta]');
+
+    function updateRangeTrack(el) {
+        var pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+        el.style.setProperty('--pct', pct + '%');
+    }
 
     function plural(n, forms) {
         var last = n % 10, last2 = n % 100;
@@ -1824,19 +1829,15 @@
                 ' рекомендуємо ' + totalPies + ' ' + plural(totalPies, ['пиріг', 'пироги', 'пирогів']);
         }
         cta.classList.toggle('is-active', guests > 0);
-
-        stepBtns.forEach(function (b) {
-            if (b.dataset.dir === '-1') b.disabled = state[b.dataset.step] === 0;
-        });
     }
 
-    stepBtns.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var key = btn.dataset.step;
-            var dir = parseInt(btn.dataset.dir, 10);
-            var max = key === 'adults' ? MAX_ADULTS : MAX_CHILDREN;
-            state[key] = Math.max(0, Math.min(max, state[key] + dir));
+    rangeInputs.forEach(function (range) {
+        updateRangeTrack(range);
+        range.addEventListener('input', function () {
+            var key = range.dataset.range;
+            state[key] = parseInt(range.value, 10);
             counters.forEach(function (c) { if (c.dataset.counter === key) c.textContent = state[key]; });
+            updateRangeTrack(range);
             recalc();
         });
     });

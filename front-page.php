@@ -239,22 +239,20 @@ $calc_shop_url = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_pag
 
         <div class="lp-calc-card">
             <div class="lp-calc-form">
-                <div class="lp-calc-counters">
-                    <div>
-                        <div class="lp-calc-label">Дорослих</div>
-                        <div class="lp-calc-counter">
-                            <button class="lp-calc-step" data-step="adults" data-dir="-1" aria-label="Зменшити">−</button>
-                            <div class="lp-calc-value" data-counter="adults">0</div>
-                            <button class="lp-calc-step" data-step="adults" data-dir="1" aria-label="Збільшити">+</button>
+                <div class="lp-calc-sliders">
+                    <div class="lp-calc-slider-field">
+                        <div class="lp-calc-slider-head">
+                            <span class="lp-calc-label">Дорослих</span>
+                            <span class="lp-calc-value" data-counter="adults">0</span>
                         </div>
+                        <input type="range" class="lp-calc-range" data-range="adults" min="0" max="50" value="0" aria-label="Кількість дорослих">
                     </div>
-                    <div>
-                        <div class="lp-calc-label">Дітей</div>
-                        <div class="lp-calc-counter">
-                            <button class="lp-calc-step" data-step="children" data-dir="-1" aria-label="Зменшити">−</button>
-                            <div class="lp-calc-value" data-counter="children">0</div>
-                            <button class="lp-calc-step" data-step="children" data-dir="1" aria-label="Збільшити">+</button>
+                    <div class="lp-calc-slider-field">
+                        <div class="lp-calc-slider-head">
+                            <span class="lp-calc-label">Дітей</span>
+                            <span class="lp-calc-value" data-counter="children">0</span>
                         </div>
+                        <input type="range" class="lp-calc-range" data-range="children" min="0" max="30" value="0" aria-label="Кількість дітей">
                     </div>
                 </div>
 

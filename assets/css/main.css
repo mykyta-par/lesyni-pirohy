@@ -1336,14 +1336,14 @@ ul.products {
 }
 
 .woocommerce-pagination ul.page-numbers .page-numbers:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-    background: #faf5f0;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: #fff8f3;
 }
 
 .woocommerce-pagination ul.page-numbers .page-numbers.current {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: #fff;
     cursor: default;
 }
@@ -1385,7 +1385,7 @@ ul.products {
     right: -8%;
     width: 380px;
     aspect-ratio: 1;
-    background: radial-gradient(circle, rgba(196,132,90,.22) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(224,122,63,.25) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
 }
@@ -1410,12 +1410,12 @@ ul.products {
     font-family: var(--font-serif);
     font-size: clamp(24px, 3vw, 36px);
     font-weight: 800;
-    color: #d4a574;
+    color: var(--color-primary);
     position: relative;
     text-decoration: none;
     transition: color .2s;
 }
-.order-cta__phone:hover { color: #e8c080; }
+.order-cta__phone:hover { color: #f09060; }
 
 .order-cta__actions {
     position: relative;
@@ -1426,7 +1426,7 @@ ul.products {
 
 .order-cta__btn {
     padding: 15px 30px;
-    background: var(--color-accent);
+    background: var(--color-primary);
     color: #fff;
     border: none;
     border-radius: var(--radius-md);
@@ -1439,9 +1439,9 @@ ul.products {
     white-space: nowrap;
 }
 .order-cta__btn:hover {
-    background: #d4a574;
+    background: var(--color-primary-dk);
     transform: translateY(-3px);
-    box-shadow: 0 12px 24px rgba(212,165,116,.4);
+    box-shadow: 0 12px 24px rgba(224,122,63,.4);
 }
 
 /* --------------------------------------------------------------------------

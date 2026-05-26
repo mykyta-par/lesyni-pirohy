@@ -31,7 +31,7 @@ if ( $is_on_sale ) {
 } elseif ( $is_featured ) {
     $badge_text  = 'Хіт';
     $badge_class = 'product-badge--hit';
-} elseif ( has_term( 'новинка', 'product_tag', $product->get_id() ) ||
+} elseif ( get_post_meta( $product->get_id(), '_is_new_product', true ) === 'yes' ||
            ( $product->get_date_created() && ( time() - $product->get_date_created()->getTimestamp() ) < 30 * DAY_IN_SECONDS ) ) {
     $badge_text  = 'Новинка';
     $badge_class = 'product-badge--new';

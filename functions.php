@@ -783,12 +783,23 @@ add_action( 'woocommerce_product_data_panels', function () {
     echo '</div>';
 } );
 
+/* Новинка checkbox in General tab */
+add_action( 'woocommerce_product_options_general_product_data', function () {
+    woocommerce_wp_checkbox( [
+        'id'          => '_is_new_product',
+        'label'       => 'Новинка',
+        'description' => 'Показувати бейдж «Новинка» на цьому товарі',
+    ] );
+} );
+
 add_action( 'woocommerce_process_product_meta', function ( $post_id ) {
     foreach ( [ '_nutrition_calories', '_nutrition_protein', '_nutrition_fat', '_nutrition_carbs' ] as $key ) {
         if ( isset( $_POST[ $key ] ) ) {
             update_post_meta( $post_id, $key, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
         }
     }
+    $is_new = isset( $_POST['_is_new_product'] ) ? 'yes' : 'no';
+    update_post_meta( $post_id, '_is_new_product', $is_new );
 } );
 
 /* -----------------------------------------------------------------------

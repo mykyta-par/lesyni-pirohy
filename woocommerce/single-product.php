@@ -42,14 +42,18 @@ while ( have_posts() ) :
     }
 
     /* badge */
-    $badge = '';
+    $badge       = '';
+    $badge_class = '';
     if ( $product->is_on_sale() ) {
-        $badge = 'Акція';
+        $badge       = 'Акція';
+        $badge_class = 'sp-img-badge--sale';
     } elseif ( $product->is_featured() ) {
-        $badge = 'Хіт продажів';
+        $badge       = 'Хіт продажів';
+        $badge_class = 'sp-img-badge--hit';
     } elseif ( get_post_meta( $product->get_id(), '_is_new_product', true ) === 'yes' ||
                ( $product->get_date_created() && ( time() - $product->get_date_created()->getTimestamp() ) < 30 * DAY_IN_SECONDS ) ) {
-        $badge = 'Новинка';
+        $badge       = 'Новинка';
+        $badge_class = 'sp-img-badge--new';
     }
     ?>
 
@@ -97,7 +101,7 @@ while ( have_posts() ) :
 
                     <div class="sp-gallery__main">
                         <?php if ( $badge ) : ?>
-                            <span class="sp-img-badge"><?php echo esc_html( $badge ); ?></span>
+                            <span class="sp-img-badge <?php echo esc_attr( $badge_class ); ?>"><?php echo esc_html( $badge ); ?></span>
                         <?php endif; ?>
                         <?php echo wp_get_attachment_image(
                             $all_imgs[0], 'large', false,

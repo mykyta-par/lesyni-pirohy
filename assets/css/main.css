@@ -1677,7 +1677,7 @@ ul.products {
     position: absolute;
     top: 20px;
     left: 20px;
-    background: #3d3d3d;
+    background: var(--color-primary);
     color: #fff;
     font-size: 10px;
     font-weight: 700;
@@ -1687,6 +1687,9 @@ ul.products {
     border-radius: 20px;
     z-index: 2;
 }
+.sp-img-badge--hit  { background: linear-gradient(135deg, #ff6b35 0%, #e03e1a 100%); box-shadow: 0 2px 8px rgba(224,62,26,.35); }
+.sp-img-badge--new  { background: #7a9b6e; }
+.sp-img-badge--sale { background: var(--color-primary); }
 
 /* Pie visual sizes */
 .pie-visual--lg { width: 160px !important; height: 160px !important; }

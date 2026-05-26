@@ -86,12 +86,37 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
                 <?php
                 $pid         = $product->get_id();
                 $pie_class   = lesyni_pie_visual_class( $product );
-                $price_html  = $product->get_price_html();
                 $product_url = get_permalink( $pid );
                 $has_image   = has_post_thumbnail( $pid );
-                $is_simple   = $product->is_type( 'simple' ) && $product->is_purchasable() && $product->is_in_stock();
+                $is_variable = $product->is_type( 'variable' );
+
+                // Build variation options (same logic as content-product.php)
+                $variation_options = [];
+                if ( $is_variable ) {
+                    foreach ( $product->get_available_variations() as $var ) {
+                        $attrs    = $var['attributes'];
+                        $attr_key = key( $attrs );
+                        $slug     = reset( $attrs );
+                        if ( ! $slug ) continue;
+                        $taxonomy = str_replace( 'attribute_', '', $attr_key );
+                        $term     = get_term_by( 'slug', urldecode( $slug ), $taxonomy );
+                        $label    = $term ? $term->name : urldecode( $slug );
+                        $w        = (float) $var['weight'];
+                        $wu       = get_option( 'woocommerce_weight_unit', 'kg' );
+                        $weight_g = $w > 0 ? ( $wu === 'kg' ? round( $w * 1000 ) : round( $w ) ) : '';
+                        $variation_options[] = [
+                            'label'        => $label,
+                            'price'        => (float) $var['display_price'],
+                            'weight'       => $weight_g,
+                            'variation_id' => (int) $var['variation_id'],
+                        ];
+                    }
+                }
+                $has_sizes   = $is_variable && count( $variation_options ) >= 2;
+                $first_price = $has_sizes ? $variation_options[0]['price'] : (float) $product->get_price();
+                $purchasable = $product->is_purchasable() && $product->is_in_stock();
                 ?>
-                <div class="popular-card">
+                <div class="popular-card product-card" data-type="<?php echo $is_variable ? 'variable' : 'simple'; ?>">
                     <a href="<?php echo esc_url( $product_url ); ?>" class="popular-card__image <?php echo $has_image ? '' : 'popular-card__image--placeholder'; ?>" tabindex="-1" aria-hidden="true">
                         <?php if ( $has_image ) : ?>
                             <?php echo get_the_post_thumbnail( $pid, 'medium', [ 'alt' => esc_attr( $product->get_name() ) ] ); ?>
@@ -101,15 +126,34 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
                     </a>
                     <div class="popular-card__body">
                         <a href="<?php echo esc_url( $product_url ); ?>" class="popular-card__name"><?php echo esc_html( $product->get_name() ); ?></a>
+
+                        <?php if ( $has_sizes ) : ?>
+                        <div class="size-selector size-selector--pop">
+                            <?php foreach ( $variation_options as $i => $opt ) : ?>
+                                <button class="size-option <?php echo $i === 0 ? 'active' : ''; ?>"
+                                        data-variation-id="<?php echo esc_attr( $opt['variation_id'] ); ?>"
+                                        data-price="<?php echo esc_attr( $opt['price'] ); ?>">
+                                    <?php echo esc_html( $opt['label'] ); ?><?php if ( $opt['weight'] ) : ?><small><?php echo esc_html( $opt['weight'] ); ?>г</small><?php endif; ?>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+
                         <div class="popular-card__footer">
-                            <div class="popular-card__price"><?php echo wp_kses_post( $price_html ); ?></div>
-                            <?php if ( $is_simple ) : ?>
-                                <button class="btn-add-cart btn-add-cart--sm" data-product-id="<?php echo esc_attr( $pid ); ?>" aria-label="Додати до кошика">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                            <div class="product-price">
+                                <span class="price-value"><?php echo number_format( $first_price, 0, '', '' ); ?></span>
+                                <span class="product-price-unit">грн</span>
+                            </div>
+                            <?php if ( $purchasable ) : ?>
+                                <button class="btn-add-cart btn-add-cart--sm"
+                                        data-product-id="<?php echo esc_attr( $pid ); ?>"
+                                        data-type="<?php echo $is_variable ? 'variable' : 'simple'; ?>"
+                                        aria-label="В кошик: <?php echo esc_attr( $product->get_name() ); ?>">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                                     В кошик
                                 </button>
                             <?php else : ?>
-                                <a href="<?php echo esc_url( $product_url ); ?>" class="btn-add-cart btn-add-cart--sm">Обрати →</a>
+                                <span class="btn-add-cart btn-add-cart--sm btn-add-cart--disabled">Немає</span>
                             <?php endif; ?>
                         </div>
                     </div>

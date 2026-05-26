@@ -163,19 +163,19 @@
 
             var isRound = btn.classList.contains('btn-add-cart--round');
             btn.disabled = true;
-            btn.textContent = isRound ? '·' : '...';
+            if (!isRound) btn.textContent = '...';
 
             lesyniAddToCart(itemId, 1, function () {
-                btn.textContent = '✓';
                 btn.classList.add('btn-add-cart--added');
+                if (!isRound) btn.textContent = '✓ Додано';
                 setTimeout(function () {
-                    btn.textContent = isRound ? '+' : 'В кошик';
                     btn.classList.remove('btn-add-cart--added');
                     btn.disabled = false;
+                    if (!isRound) btn.textContent = 'В кошик';
                 }, 2000);
             }, function () {
                 btn.disabled = false;
-                btn.textContent = isRound ? '+' : 'В кошик';
+                if (!isRound) btn.textContent = 'В кошик';
             });
         });
     });

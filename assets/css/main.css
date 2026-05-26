@@ -1291,6 +1291,7 @@ ul.products {
     gap: 0;
     justify-content: center;
 }
+.btn-add-cart--round.btn-add-cart--added { background: #6fb55a !important; }
 
 /* --------------------------------------------------------------------------
    16b. Catalog: Pagination

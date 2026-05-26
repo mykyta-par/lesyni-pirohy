@@ -1287,11 +1287,13 @@ ul.products {
     font-size: 22px;
     font-weight: 400;
     font-family: 'Montserrat', sans-serif;
-    line-height: 1;
+    line-height: 0;
     flex-shrink: 0;
     gap: 0;
     justify-content: center;
+    background: var(--color-primary);
 }
+.btn-add-cart--round:hover { background: var(--color-primary-dk); }
 .btn-add-cart--round.btn-add-cart--added { background: #6fb55a !important; }
 
 /* --------------------------------------------------------------------------

@@ -115,6 +115,8 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
                 $has_sizes   = $is_variable && count( $variation_options ) >= 2;
                 $first_price = $has_sizes ? $variation_options[0]['price'] : (float) $product->get_price();
                 $purchasable = $product->is_purchasable() && $product->is_in_stock();
+                $short_desc  = wp_strip_all_tags( $product->get_short_description() ?: $product->get_description() );
+                $short_desc  = $short_desc ? wp_trim_words( $short_desc, 8, '' ) : '';
                 ?>
                 <div class="popular-card product-card" data-type="<?php echo $is_variable ? 'variable' : 'simple'; ?>">
                     <a href="<?php echo esc_url( $product_url ); ?>" class="popular-card__image <?php echo $has_image ? '' : 'popular-card__image--placeholder'; ?>" tabindex="-1" aria-hidden="true">
@@ -126,6 +128,9 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
                     </a>
                     <div class="popular-card__body">
                         <a href="<?php echo esc_url( $product_url ); ?>" class="popular-card__name"><?php echo esc_html( $product->get_name() ); ?></a>
+                        <?php if ( $short_desc ) : ?>
+                            <p class="popular-card__desc"><?php echo esc_html( $short_desc ); ?></p>
+                        <?php endif; ?>
 
                         <?php if ( $has_sizes ) : ?>
                         <div class="size-selector size-selector--pop">
@@ -133,27 +138,24 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
                                 <button class="size-option <?php echo $i === 0 ? 'active' : ''; ?>"
                                         data-variation-id="<?php echo esc_attr( $opt['variation_id'] ); ?>"
                                         data-price="<?php echo esc_attr( $opt['price'] ); ?>">
-                                    <?php echo esc_html( $opt['label'] ); ?><?php if ( $opt['weight'] ) : ?><small><?php echo esc_html( $opt['weight'] ); ?>г</small><?php endif; ?>
+                                    <?php echo esc_html( $opt['label'] ); ?>
+                                    <?php if ( $opt['weight'] ) : ?><small><?php echo esc_html( $opt['weight'] ); ?> г</small><?php endif; ?>
                                 </button>
                             <?php endforeach; ?>
                         </div>
                         <?php endif; ?>
 
                         <div class="popular-card__footer">
-                            <div class="product-price">
-                                <span class="price-value"><?php echo number_format( $first_price, 0, '', '' ); ?></span>
-                                <span class="product-price-unit">грн</span>
+                            <div class="popular-card__price">
+                                <span class="price-value"><?php echo number_format( $first_price, 0, '', '' ); ?></span><small>грн</small>
                             </div>
                             <?php if ( $purchasable ) : ?>
-                                <button class="btn-add-cart btn-add-cart--sm"
+                                <button class="btn-add-cart btn-add-cart--round"
                                         data-product-id="<?php echo esc_attr( $pid ); ?>"
                                         data-type="<?php echo $is_variable ? 'variable' : 'simple'; ?>"
-                                        aria-label="В кошик: <?php echo esc_attr( $product->get_name() ); ?>">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                                    В кошик
-                                </button>
+                                        aria-label="В кошик: <?php echo esc_attr( $product->get_name() ); ?>">+</button>
                             <?php else : ?>
-                                <span class="btn-add-cart btn-add-cart--sm btn-add-cart--disabled">Немає</span>
+                                <button class="btn-add-cart btn-add-cart--round btn-add-cart--disabled" disabled>×</button>
                             <?php endif; ?>
                         </div>
                     </div>

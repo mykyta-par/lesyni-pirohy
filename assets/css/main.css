@@ -404,18 +404,18 @@ ul, ol   { list-style: none; }
 
 .popular-card {
     background: var(--color-surface);
-    border-radius: var(--radius-lg);
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid rgba(232,213,196,.5);
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+    border: 1px solid rgba(44,44,44,.04);
     transition: all .3s ease;
     display: flex;
     flex-direction: column;
 }
 .popular-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 16px 32px rgba(224,122,63,.18);
-    border-color: var(--color-primary);
+    box-shadow: 0 14px 32px rgba(224,122,63,.18);
+    border-color: rgba(224,122,63,.2);
 }
 
 .popular-card__image {
@@ -426,6 +426,7 @@ ul, ol   { list-style: none; }
     justify-content: center;
     overflow: hidden;
     flex-shrink: 0;
+    position: relative;
 }
 .popular-card__image img {
     width: 100%;
@@ -435,26 +436,77 @@ ul, ol   { list-style: none; }
 }
 .popular-card:hover .popular-card__image img { transform: scale(1.04); }
 .popular-card__image--placeholder {
-    background: linear-gradient(135deg, #faf5f0 0%, #f5e5d3 100%);
+    background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%);
 }
 
 .popular-card__body {
-    padding: 16px 18px 18px;
+    padding: 14px 14px 16px;
     display: flex;
     flex-direction: column;
     flex: 1;
+    gap: 10px;
 }
 .popular-card__name {
-    font-size: 15px;
-    font-weight: 600;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
     color: var(--color-text);
     text-decoration: none;
-    line-height: 1.35;
-    margin-bottom: 12px;
-    flex: 1;
+    line-height: 1.2;
     display: block;
 }
 .popular-card__name:hover { color: var(--color-primary); }
+.popular-card__desc {
+    font-size: 11px;
+    color: #999;
+    line-height: 1.4;
+    margin-top: -4px;
+}
+
+/* Size tabs — v2 style */
+.size-selector--pop {
+    display: flex;
+    background: #faf6f1;
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+    border: none;
+    margin-bottom: 0;
+}
+.size-selector--pop .size-option {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 8px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    line-height: 1.2;
+    text-align: center;
+}
+.size-selector--pop .size-option small {
+    display: block;
+    font-size: 9px;
+    font-weight: 500;
+    color: #b8a89a;
+    margin-top: 1px;
+    letter-spacing: .2px;
+}
+.size-selector--pop .size-option:hover { color: var(--color-primary); }
+.size-selector--pop .size-option.active {
+    background: #fff;
+    color: var(--color-text);
+    box-shadow: 0 2px 6px rgba(44,44,44,.08);
+}
+.size-selector--pop .size-option.active small { color: #999; }
+
 .popular-card__footer {
     display: flex;
     align-items: center;
@@ -462,52 +514,32 @@ ul, ol   { list-style: none; }
     gap: 8px;
     margin-top: auto;
 }
-.popular-card__price { font-size: 16px; font-weight: 700; color: var(--color-primary); }
-.btn-add-cart--sm { padding: 9px 14px; font-size: 12px; flex-shrink: 0; }
-
-/* Compact size pills inside popular cards */
-.size-selector--pop {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 12px;
-    background: none;
-    border: none;
-    padding: 0;
-}
-.size-selector--pop .size-option {
-    flex: 1;
-    padding: 5px 8px;
-    font-size: 11px;
-    font-weight: 600;
-    border-radius: 8px;
-    border: 1.5px solid rgba(44,44,44,.12);
-    background: #faf5f0;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: all .18s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1px;
-    line-height: 1.2;
-}
-.size-selector--pop .size-option small {
-    font-size: 9px;
-    font-weight: 500;
-    color: #bbb;
-    letter-spacing: .2px;
-}
-.size-selector--pop .size-option:hover {
-    border-color: var(--color-primary);
+.popular-card__price {
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
     color: var(--color-primary);
+    line-height: 1;
 }
-.size-selector--pop .size-option.active {
-    background: var(--color-text);
-    border-color: var(--color-text);
-    color: #fff;
-    box-shadow: none;
+.popular-card__price small {
+    font-size: 11px;
+    font-weight: 500;
+    color: #999;
+    margin-left: 2px;
 }
-.size-selector--pop .size-option.active small { color: rgba(255,255,255,.55); }
+
+/* Round + button */
+.btn-add-cart--round {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    padding: 0;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1;
+    flex-shrink: 0;
+}
+.btn-add-cart--round.btn-add-cart--added { font-size: 16px; }
 
 /* --------------------------------------------------------------------------
    8. Pie Visual CSS Illustrations (placeholder when no image is set)

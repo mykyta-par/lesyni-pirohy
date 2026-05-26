@@ -1114,7 +1114,7 @@ ul.products {
     border-radius: 18px;
     z-index: 2;
 }
-.product-badge--hit  { background: #3d3d3d; }
+.product-badge--hit  { background: linear-gradient(135deg, #ff6b35 0%, #e03e1a 100%); box-shadow: 0 2px 8px rgba(224,62,26,.35); }
 .product-badge--new  { background: #7a9b6e; }
 .product-badge--sale { background: var(--color-primary); }
 

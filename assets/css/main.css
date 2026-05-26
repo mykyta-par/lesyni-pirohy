@@ -2174,7 +2174,7 @@ ul.products {
 }
 
 /* ── Review form (.review-form-wrap → #review_form_wrapper) ─── */
-.sp-tabs-wrap #review_form_wrapper {
+.sp-tabs-wrap .review_form_wrapper, .sp-tabs-wrap #review_form_wrapper {
     margin-top: 36px;
     background: white;
     border: 1px solid rgba(224, 122, 63, 0.12);

@@ -47,8 +47,8 @@ while ( have_posts() ) :
         $badge = 'Акція';
     } elseif ( $product->is_featured() ) {
         $badge = 'Хіт продажів';
-    } elseif ( $product->get_date_created() &&
-               ( time() - $product->get_date_created()->getTimestamp() ) < 30 * DAY_IN_SECONDS ) {
+    } elseif ( has_term( 'новинка', 'product_tag', $product->get_id() ) ||
+               ( $product->get_date_created() && ( time() - $product->get_date_created()->getTimestamp() ) < 30 * DAY_IN_SECONDS ) ) {
         $badge = 'Новинка';
     }
     ?>

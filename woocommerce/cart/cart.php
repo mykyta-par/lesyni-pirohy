@@ -592,7 +592,7 @@ else   $count_str = $n . ' позицій';
                 <label class="oco-check" for="oco-terms-check">
                     <input type="checkbox" id="oco-terms-check" required>
                     <span class="oco-check-box"></span>
-                    <span>Я погоджуюся з <a href="<?php echo esc_url( wc_get_page_permalink( 'terms' ) ); ?>">умовами обслуговування</a> та <a href="<?php echo esc_url( get_privacy_policy_url() ); ?>">політикою конфіденційності</a> <span style="color:#c4845a;">*</span></span>
+                    <span>Я погоджуюся з <a href="<?php echo esc_url( wc_get_page_permalink( 'terms' ) ); ?>">умовами обслуговування</a> та <a href="<?php echo esc_url( get_privacy_policy_url() ); ?>">політикою конфіденційності</a> <span style="color:var(--color-primary);">*</span></span>
                 </label>
             </div>
 

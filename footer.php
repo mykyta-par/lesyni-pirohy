@@ -132,7 +132,7 @@
             © <?php echo date( 'Y' ); ?> <?php bloginfo( 'name' ); ?> · Зроблено з <span aria-hidden="true" style="color:var(--color-primary)">♥</span> в Дніпрі
         </div>
         <div class="site-footer__bottom-links">
-            <a href="#">Конфіденційність</a>
+            <a href="<?php echo esc_url( get_privacy_policy_url() ); ?>">Конфіденційність</a>
             <a href="#">Умови</a>
         </div>
     </div>

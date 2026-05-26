@@ -184,8 +184,11 @@ h1.hero-title{font-family:'Nunito',Helvetica,Arial,sans-serif;font-weight:800;fo
                                 <small>з любов'ю до вашого столу</small>
                             </div>
                         </td>
-                        <td align="right" style="font-family:'Nunito',Helvetica,Arial,sans-serif;font-size:36px;line-height:1;color:#ffffff;">
-                            🥧
+                        <td align="right" style="vertical-align:middle;">
+                            <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo.png' ); ?>"
+                                 alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"
+                                 width="64" height="64"
+                                 style="display:block;width:64px;height:64px;object-fit:contain;filter:brightness(0) invert(1);">
                         </td>
                     </tr>
                 </table>

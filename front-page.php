@@ -84,24 +84,36 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
         <?php if ( ! empty( $popular_products ) ) : ?>
             <?php foreach ( $popular_products as $product ) : ?>
                 <?php
+                $pid         = $product->get_id();
                 $pie_class   = lesyni_pie_visual_class( $product );
                 $price_html  = $product->get_price_html();
-                $product_url = get_permalink( $product->get_id() );
-                $has_image   = has_post_thumbnail( $product->get_id() );
+                $product_url = get_permalink( $pid );
+                $has_image   = has_post_thumbnail( $pid );
+                $is_simple   = $product->is_type( 'simple' ) && $product->is_purchasable() && $product->is_in_stock();
                 ?>
-                <a href="<?php echo esc_url( $product_url ); ?>" class="popular-card">
-                    <div class="popular-card__image <?php echo $has_image ? '' : 'popular-card__image--placeholder'; ?>">
+                <div class="popular-card">
+                    <a href="<?php echo esc_url( $product_url ); ?>" class="popular-card__image <?php echo $has_image ? '' : 'popular-card__image--placeholder'; ?>" tabindex="-1" aria-hidden="true">
                         <?php if ( $has_image ) : ?>
-                            <?php echo get_the_post_thumbnail( $product->get_id(), 'medium', [ 'alt' => esc_attr( $product->get_name() ) ] ); ?>
+                            <?php echo get_the_post_thumbnail( $pid, 'medium', [ 'alt' => esc_attr( $product->get_name() ) ] ); ?>
                         <?php else : ?>
                             <span class="pie-visual <?php echo esc_attr( $pie_class ); ?>"></span>
                         <?php endif; ?>
-                    </div>
+                    </a>
                     <div class="popular-card__body">
-                        <p class="popular-card__name"><?php echo esc_html( $product->get_name() ); ?></p>
-                        <p class="popular-card__price"><?php echo wp_kses_post( $price_html ); ?></p>
+                        <a href="<?php echo esc_url( $product_url ); ?>" class="popular-card__name"><?php echo esc_html( $product->get_name() ); ?></a>
+                        <div class="popular-card__footer">
+                            <div class="popular-card__price"><?php echo wp_kses_post( $price_html ); ?></div>
+                            <?php if ( $is_simple ) : ?>
+                                <button class="btn-add-cart btn-add-cart--sm" data-product-id="<?php echo esc_attr( $pid ); ?>" aria-label="Додати до кошика">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                    В кошик
+                                </button>
+                            <?php else : ?>
+                                <a href="<?php echo esc_url( $product_url ); ?>" class="btn-add-cart btn-add-cart--sm">Обрати →</a>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                </a>
+                </div>
             <?php endforeach; ?>
         <?php else : ?>
             <!-- Fallback cards when WooCommerce has no products yet -->

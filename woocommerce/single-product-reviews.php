@@ -75,15 +75,15 @@ if ( ! comments_open() ) {
 				'title_reply_before'   => '<span id="reply-title" class="comment-reply-title">',
 				'title_reply_after'    => '</span>',
 				'comment_notes_before' => '',
-				'comment_notes_after'  => '',
+				'comment_notes_after'  => '<div class="comment-form-rating"><label for="rating">Ваша оцінка&nbsp;<span class="required">*</span></label><p class="stars"><span><a class="star-1" href="#">1</a><a class="star-2" href="#">2</a><a class="star-3" href="#">3</a><a class="star-4" href="#">4</a><a class="star-5" href="#">5</a></span></p></div>',
 				'fields'               => array(
-					'author' => '<p class="comment-form-author"><label for="author">' . esc_html__( 'Name', 'woocommerce' ) . '&nbsp;<span class="required">*</span></label> <input id="author" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" size="30" aria-required="true" required /></p>',
-					'email'  => '<p class="comment-form-email"><label for="email">' . esc_html__( 'Email', 'woocommerce' ) . '&nbsp;<span class="required">*</span></label> <input id="email" name="email" type="email" value="' . esc_attr( $commenter['comment_author_email'] ) . '" size="30" aria-required="true" required /></p>',
-					'cookies' => '<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"' . ( empty( $commenter['comment_author_email'] ) ? '' : ' checked="checked"' ) . ' /> <label for="wp-comment-cookies-consent">' . esc_html__( 'Save my name, email, and website in this browser for the next time I comment.', 'woocommerce' ) . '</label></p>',
+					'author' => '<p class="comment-form-author"><label for="author">Ім\'я&nbsp;<span class="required">*</span></label> <input id="author" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" size="30" aria-required="true" required /></p>',
+					'email'  => '<p class="comment-form-email"><label for="email">Email&nbsp;<span class="required">*</span></label> <input id="email" name="email" type="email" value="' . esc_attr( $commenter['comment_author_email'] ) . '" size="30" aria-required="true" required /></p>',
+					'cookies' => '<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"' . ( empty( $commenter['comment_author_email'] ) ? '' : ' checked="checked"' ) . ' /> <label for="wp-comment-cookies-consent">Зберегти моє ім\'я та email для наступних відгуків</label></p>',
 				),
 				'label_submit'  => esc_html__( 'Submit', 'woocommerce' ),
 				'logged_in_as'  => '',
-				'comment_field' => '<p class="comment-form-comment"><label for="comment">' . esc_html__( 'Your review', 'woocommerce' ) . '&nbsp;<span class="required">*</span></label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true" required></textarea></p>',
+				'comment_field' => '<p class="comment-form-comment"><label for="comment">Ваш відгук&nbsp;<span class="required">*</span></label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true" required></textarea></p>',
 			);
 
 			comment_form( apply_filters( 'woocommerce_product_review_comment_form_args', $comment_form ) );

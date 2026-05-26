@@ -2174,7 +2174,7 @@ ul.products {
 }
 
 /* ── Review form (.review-form-wrap → #review_form_wrapper) ─── */
-.sp-tabs-wrap .review_form_wrapper, .sp-tabs-wrap #review_form_wrapper {
+.sp-tabs-wrap .review_form_wrapper, .sp-tabs-wrap #commentform_wrapper {
     margin-top: 36px;
     background: white;
     border: 1px solid rgba(224, 122, 63, 0.12);
@@ -2202,14 +2202,14 @@ ul.products {
 }
 
 /* Labels */
-.sp-tabs-wrap #review_form label {
+.sp-tabs-wrap #commentform label {
     display: block;
     font-size: 13px;
     font-weight: 700;
     color: #2c2c2c;
     margin-bottom: 10px;
 }
-.sp-tabs-wrap #review_form .required { color: #e07a3f; margin-left: 2px; }
+.sp-tabs-wrap #commentform .required { color: #e07a3f; margin-left: 2px; }
 
 /* .rating-input → WC .comment-form-rating .stars */
 .sp-tabs-wrap .comment-form-rating { margin-bottom: 20px; }
@@ -2231,9 +2231,9 @@ ul.products {
 .sp-tabs-wrap .comment-form-rating .stars a:hover { transform: scale(1.1); }
 
 /* .form-input / .form-textarea → WC inputs */
-.sp-tabs-wrap #review_form input[type="text"],
-.sp-tabs-wrap #review_form input[type="email"],
-.sp-tabs-wrap #review_form textarea {
+.sp-tabs-wrap #commentform input[type="text"],
+.sp-tabs-wrap #commentform input[type="email"],
+.sp-tabs-wrap #commentform textarea {
     width: 100%;
     background: white;
     border: 1.5px solid rgba(224, 122, 63, 0.18);
@@ -2246,24 +2246,24 @@ ul.products {
     outline: none;
     margin-bottom: 0;
 }
-.sp-tabs-wrap #review_form input[type="text"]::placeholder,
-.sp-tabs-wrap #review_form input[type="email"]::placeholder,
-.sp-tabs-wrap #review_form textarea::placeholder { color: #b8a89a; }
-.sp-tabs-wrap #review_form input[type="text"]:focus,
-.sp-tabs-wrap #review_form input[type="email"]:focus,
-.sp-tabs-wrap #review_form textarea:focus {
+.sp-tabs-wrap #commentform input[type="text"]::placeholder,
+.sp-tabs-wrap #commentform input[type="email"]::placeholder,
+.sp-tabs-wrap #commentform textarea::placeholder { color: #b8a89a; }
+.sp-tabs-wrap #commentform input[type="text"]:focus,
+.sp-tabs-wrap #commentform input[type="email"]:focus,
+.sp-tabs-wrap #commentform textarea:focus {
     border-color: #e07a3f;
     box-shadow: 0 0 0 3px rgba(224, 122, 63, 0.12);
 }
-.sp-tabs-wrap #review_form textarea {
+.sp-tabs-wrap #commentform textarea {
     min-height: 120px;
     resize: vertical;
     line-height: 1.6;
 }
-.sp-tabs-wrap #review_form p { margin-bottom: 16px; }
+.sp-tabs-wrap #commentform p { margin-bottom: 16px; }
 
 /* checkbox */
-.sp-tabs-wrap #review_form input[type="checkbox"] {
+.sp-tabs-wrap #commentform input[type="checkbox"] {
     width: 18px;
     height: 18px;
     accent-color: #e07a3f;
@@ -2273,8 +2273,8 @@ ul.products {
 }
 
 /* .btn-submit → WC .form-submit input[type="submit"] */
-.sp-tabs-wrap #review_form .form-submit { margin: 4px 0 0; }
-.sp-tabs-wrap #review_form .form-submit input[type="submit"] {
+.sp-tabs-wrap #commentform .form-submit { margin: 4px 0 0; }
+.sp-tabs-wrap #commentform .form-submit input[type="submit"] {
     width: auto;
     background: #e07a3f;
     color: white;
@@ -2291,7 +2291,7 @@ ul.products {
     gap: 8px;
     margin-bottom: 0;
 }
-.sp-tabs-wrap #review_form .form-submit input[type="submit"]:hover {
+.sp-tabs-wrap #commentform .form-submit input[type="submit"]:hover {
     background: #d4672d;
     transform: translateY(-2px);
     box-shadow: 0 8px 18px rgba(224, 122, 63, 0.3);

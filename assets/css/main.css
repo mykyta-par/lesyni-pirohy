@@ -1286,6 +1286,7 @@ ul.products {
     padding: 0;
     font-size: 22px;
     font-weight: 400;
+    font-family: 'Montserrat', sans-serif;
     line-height: 1;
     flex-shrink: 0;
     gap: 0;

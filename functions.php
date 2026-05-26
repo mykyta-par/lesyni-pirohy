@@ -783,8 +783,8 @@ add_action( 'woocommerce_product_data_panels', function () {
     echo '</div>';
 } );
 
-/* Новинка checkbox in General tab */
-add_action( 'woocommerce_product_options_general_product_data', function () {
+/* Новинка checkbox in Inventory tab (visible for all product types) */
+add_action( 'woocommerce_product_options_inventory_product_data', function () {
     woocommerce_wp_checkbox( [
         'id'          => '_is_new_product',
         'label'       => 'Новинка',

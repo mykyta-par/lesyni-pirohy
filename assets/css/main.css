@@ -2039,14 +2039,22 @@ ul.products {
     align-items: flex-start;
 }
 
-/* .comment-avatar → WC img.avatar */
-.sp-tabs-wrap .avatar {
+/* .comment-avatar → custom .review-avatar-initial div */
+.sp-tabs-wrap .review-avatar-initial {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
     background: linear-gradient(135deg, #ffe0b2 0%, #e07a3f 100%);
+    color: white;
+    font-family: var(--font-serif);
+    font-weight: 800;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    line-height: 1;
 }
 
 /* .comment-body → WC .comment-text */

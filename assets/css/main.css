@@ -904,8 +904,8 @@ a.contact-item__value:hover { color: var(--color-primary); }
    13. Catalog: Page Hero Banner
    -------------------------------------------------------------------------- */
 .catalog-hero {
-    background: linear-gradient(120deg, #faf5f0 0%, #f5e5d3 100%);
-    padding: clamp(40px, 7vw, 70px) var(--px);
+    background: linear-gradient(120deg, #fff8e1 0%, #ffecb3 50%, #ffe0b2 100%);
+    padding: clamp(48px, 8vw, 80px) var(--px);
     position: relative;
     overflow: hidden;
 }
@@ -917,7 +917,7 @@ a.contact-item__value:hover { color: var(--color-primary); }
     top: 0;
     width: 4px;
     height: 100%;
-    background: linear-gradient(180deg, var(--color-accent) 0%, var(--color-border) 100%);
+    background: linear-gradient(180deg, #e07a3f 0%, #f0a070 100%);
 }
 
 .catalog-hero__breadcrumbs {
@@ -927,7 +927,7 @@ a.contact-item__value:hover { color: var(--color-primary); }
     letter-spacing: .4px;
 }
 .catalog-hero__breadcrumbs a  { color: #6b6b6b; text-decoration: none; transition: color .2s; }
-.catalog-hero__breadcrumbs a:hover { color: var(--color-accent); }
+.catalog-hero__breadcrumbs a:hover { color: var(--color-primary); }
 .catalog-hero__breadcrumbs .sep { margin: 0 8px; color: #c4b5a3; }
 
 .catalog-hero__title {
@@ -954,8 +954,8 @@ a.contact-item__value:hover { color: var(--color-primary); }
     gap: 20px;
     align-items: center;
     padding: 24px var(--px);
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-bg);
+    border-bottom: 1px solid rgba(224,122,63,.18);
+    background: rgba(255,255,255,.92);
     position: sticky;
     top: 72px;
     z-index: 100;

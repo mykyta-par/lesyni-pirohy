@@ -43,9 +43,13 @@ get_header();
         ?>
     </h1>
 
-    <?php if ( is_product_category() && term_description() ) : ?>
-    <p class="catalog-hero__subtitle"><?php echo wp_kses_post( term_description() ); ?></p>
-    <?php endif; ?>
+    <p class="catalog-hero__subtitle">
+        <?php if ( is_product_category() && term_description() ) : ?>
+            <?php echo wp_kses_post( term_description() ); ?>
+        <?php else : ?>
+            Оберіть улюблений смак — ми приготуємо його з душею і доставимо теплим до вашого столу.
+        <?php endif; ?>
+    </p>
 </div>
 
 <!-- ======================================================================

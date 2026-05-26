@@ -45,7 +45,7 @@ while ( have_posts() ) :
     $badge = '';
     if ( $product->is_on_sale() ) {
         $badge = 'Акція';
-    } elseif ( $product->get_total_sales() > 20 ) {
+    } elseif ( $product->is_featured() ) {
         $badge = 'Хіт продажів';
     } elseif ( $product->get_date_created() &&
                ( time() - $product->get_date_created()->getTimestamp() ) < 30 * DAY_IN_SECONDS ) {

@@ -2020,6 +2020,10 @@ ul.products {
     margin-bottom: 24px;
     line-height: 1.2;
 }
+.sp-tabs-wrap .woocommerce-Reviews-title strong {
+    color: #e07a3f;
+    font-weight: 800;
+}
 
 /* ── Review list ─ */
 .sp-tabs-wrap .commentlist {

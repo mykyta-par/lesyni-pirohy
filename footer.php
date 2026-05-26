@@ -133,7 +133,8 @@
         </div>
         <div class="site-footer__bottom-links">
             <a href="<?php echo esc_url( get_privacy_policy_url() ); ?>">Конфіденційність</a>
-            <a href="#">Умови</a>
+            <?php $terms_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'terms' ) : ''; ?>
+            <?php if ( $terms_url ) : ?><a href="<?php echo esc_url( $terms_url ); ?>">Умови</a><?php endif; ?>
         </div>
     </div>
 </footer>

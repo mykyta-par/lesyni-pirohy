@@ -128,10 +128,6 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
                     </a>
                     <div class="popular-card__body">
                         <a href="<?php echo esc_url( $product_url ); ?>" class="popular-card__name"><?php echo esc_html( $product->get_name() ); ?></a>
-                        <?php if ( $short_desc ) : ?>
-                            <p class="popular-card__desc"><?php echo esc_html( $short_desc ); ?></p>
-                        <?php endif; ?>
-
                         <?php if ( $has_sizes ) : ?>
                         <div class="size-selector size-selector--pop">
                             <?php foreach ( $variation_options as $i => $opt ) : ?>

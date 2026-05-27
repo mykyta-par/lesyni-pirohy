@@ -1178,8 +1178,10 @@ function lesyni_hero_meta_box_html( $post ) {
             <p style="font-size:12px;color:#888;margin:0 0 12px;">В заголовку використовуй <code>{текст}</code> для помаранчевого виділення.</p>
             <?php foreach ( $slide_defaults as $n => $def ) :
                 $sr = function( $key ) use ( $n, $post, $def ) {
-                    $saved = get_post_meta( $post->ID, '_hero_slide_' . $n . '_' . $key, true );
-                    return $saved !== '' ? $saved : $def[ $key ];
+                    $meta_key = '_hero_slide_' . $n . '_' . $key;
+                    return metadata_exists( 'post', $post->ID, $meta_key )
+                        ? get_post_meta( $post->ID, $meta_key, true )
+                        : $def[ $key ];
                 };
             ?>
             <div class="slide-panel">

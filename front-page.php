@@ -115,8 +115,10 @@ $_hs_slides = [];
 foreach ( $_slide_defs as $n => $def ) {
     $slide = [];
     foreach ( $def as $key => $default ) {
-        $saved = get_post_meta( $_front_id, '_hero_slide_' . $n . '_' . $key, true );
-        $slide[ $key ] = ( $saved !== '' ) ? $saved : $default;
+        $meta_key    = '_hero_slide_' . $n . '_' . $key;
+        $slide[$key] = metadata_exists( 'post', $_front_id, $meta_key )
+            ? get_post_meta( $_front_id, $meta_key, true )
+            : $default;
     }
     $bg_att_id           = (int) get_post_meta( $_front_id, '_hero_slide_' . $n . '_bg_id', true );
     $slide['bg_url']     = $bg_att_id ? wp_get_attachment_image_url( $bg_att_id, 'full' ) : '';
@@ -181,6 +183,8 @@ foreach ( $_hs_slides as $i => $slide ) {
             </div>
         </div>
         <div class="hs-visual">
+            <?php $has_pie = $slide['visual_url'] || $slide['emoji']; ?>
+            <?php if ( $has_pie ) : ?>
             <div class="hs-pie">
                 <?php if ( $slide['visual_url'] ) : ?>
                 <img src="<?php echo esc_url( $slide['visual_url'] ); ?>" alt="">
@@ -188,6 +192,7 @@ foreach ( $_hs_slides as $i => $slide ) {
                 <?php echo esc_html( html_entity_decode( $slide['emoji'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ); ?>
                 <?php endif; ?>
             </div>
+            <?php endif; ?>
             <?php if ( $slide['chip1'] ) : $c = $chip1; ?>
             <div class="hs-chip top">
                 <span class="ic"><?php echo esc_html( $c['ic'] ); ?></span>

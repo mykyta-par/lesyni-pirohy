@@ -141,13 +141,8 @@ ul, ol   { list-style: none; }
 
 .section--alt {
     max-width: 100%;
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dk) 100%);
+    background: var(--color-bg);
     padding: clamp(48px, 8vw, 80px) var(--px);
-}
-
-.section--alt .section__eyebrow,
-.section--alt .section__title {
-    color: #fff;
 }
 
 .section__eyebrow {
@@ -575,37 +570,36 @@ ul, ol   { list-style: none; }
 }
 
 .promo-card {
-    border: 2px solid rgba(255,255,255,.35);
+    border: 1px solid rgba(44,44,44,.04);
     border-radius: var(--radius-lg);
     padding: clamp(28px, 4vw, 48px);
     text-align: center;
-    background: rgba(255,255,255,.12);
-    backdrop-filter: blur(6px);
+    background: var(--color-surface);
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
     transition: all .3s ease;
 }
 .promo-card:hover {
     transform: translateY(-5px);
-    background: rgba(255,255,255,.2);
-    box-shadow: 0 20px 40px rgba(0,0,0,.12);
+    box-shadow: 0 20px 40px rgba(0,0,0,.1);
 }
 
 .promo-card__icon {
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: rgba(255,255,255,.25);
+    background: linear-gradient(135deg, rgba(224,122,63,.15) 0%, rgba(212,103,45,.25) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 18px;
-    color: #fff;
+    color: var(--color-primary);
 }
 .promo-card__icon--emoji {
     font-size: 36px;
     line-height: 1;
 }
 .promo-card__icon--image {
-    background: rgba(255,255,255,.15);
+    background: var(--color-bg);
     padding: 0;
     overflow: hidden;
 }
@@ -621,13 +615,13 @@ ul, ol   { list-style: none; }
     font-family: var(--font-serif);
     font-size: 22px;
     font-weight: 800;
-    color: #fff;
+    color: var(--color-text);
     margin-bottom: 10px;
 }
 
 .promo-card__desc {
     font-size: 14px;
-    color: rgba(255,255,255,.9);
+    color: var(--color-text-muted);
     line-height: 1.6;
     margin-bottom: 22px;
 }

@@ -118,6 +118,10 @@ foreach ( $_slide_defs as $n => $def ) {
         $saved = get_post_meta( $_front_id, '_hero_slide_' . $n . '_' . $key, true );
         $slide[ $key ] = ( $saved !== '' ) ? $saved : $default;
     }
+    $bg_att_id           = (int) get_post_meta( $_front_id, '_hero_slide_' . $n . '_bg_id', true );
+    $slide['bg_url']     = $bg_att_id  ? wp_get_attachment_image_url( $bg_att_id,  'full' ) : '';
+    $vis_att_id          = (int) get_post_meta( $_front_id, '_hero_slide_' . $n . '_visual_id', true );
+    $slide['visual_url'] = $vis_att_id ? wp_get_attachment_image_url( $vis_att_id, 'full' ) : '';
     $_hs_slides[] = $slide;
 }
 
@@ -145,7 +149,7 @@ $_hs_total = count( $_hs_slides );
         $chip1    = $_hs_chip( $slide['chip1'] );
         $chip2    = $_hs_chip( $slide['chip2'] );
     ?>
-    <div class="hs-slide<?php echo $i === 0 ? ' active' : ''; ?>" data-bg="<?php echo esc_attr( $slide['bg'] ); ?>">
+    <div class="hs-slide<?php echo $i === 0 ? ' active' : ''; ?>" data-bg="<?php echo esc_attr( $slide['bg'] ); ?>"<?php if ( $slide['bg_url'] ) : ?> style="background-image:url('<?php echo esc_url( $slide['bg_url'] ); ?>');background-size:cover;background-position:center;"<?php endif; ?>>
         <div class="hs-content">
             <div class="hs-eyebrow"><?php echo esc_html( $slide['eyebrow'] ); ?></div>
             <h1><?php echo $_hs_title( $slide['title'] ); ?></h1>
@@ -160,7 +164,13 @@ $_hs_total = count( $_hs_slides );
             </div>
         </div>
         <div class="hs-visual">
-            <div class="hs-pie"><?php echo esc_html( $slide['emoji'] ); ?></div>
+            <div class="hs-pie">
+                <?php if ( $slide['visual_url'] ) : ?>
+                <img src="<?php echo esc_url( $slide['visual_url'] ); ?>" alt="">
+                <?php else : ?>
+                <?php echo esc_html( $slide['emoji'] ); ?>
+                <?php endif; ?>
+            </div>
             <?php if ( $slide['chip1'] ) : $c = $chip1; ?>
             <div class="hs-chip top">
                 <span class="ic"><?php echo esc_html( $c['ic'] ); ?></span>

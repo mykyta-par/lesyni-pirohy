@@ -1236,6 +1236,43 @@ function lesyni_hero_meta_box_html( $post ) {
                         <input type="text" name="hero_slide_<?php echo $n; ?>_btn2_url" value="<?php echo esc_attr( $sr('btn2_url') ); ?>">
                     </div>
                 </div>
+
+                <?php
+                $hs_bg_id    = (int) get_post_meta( $post->ID, '_hero_slide_' . $n . '_bg_id', true );
+                $hs_bg_url   = $hs_bg_id  ? wp_get_attachment_image_url( $hs_bg_id,  'medium' ) : '';
+                $hs_vis_id   = (int) get_post_meta( $post->ID, '_hero_slide_' . $n . '_visual_id', true );
+                $hs_vis_url  = $hs_vis_id ? wp_get_attachment_image_url( $hs_vis_id, 'thumbnail' ) : '';
+                ?>
+                <div class="hero-mb-row" style="margin-top:4px;">
+                    <div>
+                        <label>Зображення фону слайда</label>
+                        <input type="hidden" id="hs_bg_id_<?php echo $n; ?>" name="hero_slide_<?php echo $n; ?>_bg_id" value="<?php echo esc_attr( $hs_bg_id ?: '' ); ?>">
+                        <button type="button" class="button hs-media-pick"
+                                data-target="hs_bg_id_<?php echo $n; ?>"
+                                data-preview="hs_bg_prev_<?php echo $n; ?>"
+                                data-remove="hs_bg_rm_<?php echo $n; ?>"
+                                data-title="Фон слайда <?php echo $n; ?>">Вибрати фон</button>
+                        <button type="button" id="hs_bg_rm_<?php echo $n; ?>" class="button hs-media-remove"
+                                data-target="hs_bg_id_<?php echo $n; ?>"
+                                data-preview="hs_bg_prev_<?php echo $n; ?>"
+                                style="<?php echo $hs_bg_url ? '' : 'display:none;'; ?>">Видалити</button>
+                        <img id="hs_bg_prev_<?php echo $n; ?>" src="<?php echo esc_url( $hs_bg_url ); ?>" style="display:<?php echo $hs_bg_url ? 'block' : 'none'; ?>;max-width:100%;border-radius:6px;margin-top:6px;">
+                    </div>
+                    <div>
+                        <label>Зображення замість emoji</label>
+                        <input type="hidden" id="hs_vis_id_<?php echo $n; ?>" name="hero_slide_<?php echo $n; ?>_visual_id" value="<?php echo esc_attr( $hs_vis_id ?: '' ); ?>">
+                        <button type="button" class="button hs-media-pick"
+                                data-target="hs_vis_id_<?php echo $n; ?>"
+                                data-preview="hs_vis_prev_<?php echo $n; ?>"
+                                data-remove="hs_vis_rm_<?php echo $n; ?>"
+                                data-title="Зображення слайда <?php echo $n; ?>">Вибрати зображення</button>
+                        <button type="button" id="hs_vis_rm_<?php echo $n; ?>" class="button hs-media-remove"
+                                data-target="hs_vis_id_<?php echo $n; ?>"
+                                data-preview="hs_vis_prev_<?php echo $n; ?>"
+                                style="<?php echo $hs_vis_url ? '' : 'display:none;'; ?>">Видалити</button>
+                        <img id="hs_vis_prev_<?php echo $n; ?>" src="<?php echo esc_url( $hs_vis_url ); ?>" style="display:<?php echo $hs_vis_url ? 'block' : 'none'; ?>;width:80px;height:80px;object-fit:cover;border-radius:50%;margin-top:6px;">
+                    </div>
+                </div>
             </div>
             <?php endforeach; ?>
         </div>
@@ -1267,6 +1304,36 @@ function lesyni_hero_meta_box_html( $post ) {
             document.getElementById('hero_bg_preview').src = '';
             document.getElementById('hero_bg_preview').style.display = 'none';
             this.style.display = 'none';
+        });
+        document.querySelectorAll('.hs-media-pick').forEach(function(btn) {
+            var frame = null;
+            btn.addEventListener('click', function() {
+                if (!frame) {
+                    frame = wp.media({
+                        title: btn.dataset.title || 'Вибрати зображення',
+                        multiple: false,
+                        library: { type: 'image' },
+                        button: { text: 'Вибрати' }
+                    });
+                    frame.on('select', function() {
+                        var att = frame.state().get('selection').first().toJSON();
+                        var url = (att.sizes && att.sizes.medium) ? att.sizes.medium.url : att.url;
+                        document.getElementById(btn.dataset.target).value = att.id;
+                        document.getElementById(btn.dataset.preview).src = url;
+                        document.getElementById(btn.dataset.preview).style.display = 'block';
+                        document.getElementById(btn.dataset.remove).style.display = '';
+                    });
+                }
+                frame.open();
+            });
+        });
+        document.querySelectorAll('.hs-media-remove').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.getElementById(btn.dataset.target).value = '';
+                document.getElementById(btn.dataset.preview).src = '';
+                document.getElementById(btn.dataset.preview).style.display = 'none';
+                this.style.display = 'none';
+            });
         });
     }());
     </script>
@@ -1300,6 +1367,15 @@ function lesyni_hero_save_meta( $post_id ) {
             $post_key = 'hero_slide_' . $n . '_' . $key;
             if ( isset( $_POST[ $post_key ] ) ) {
                 update_post_meta( $post_id, '_hero_slide_' . $n . '_' . $key, sanitize_textarea_field( $_POST[ $post_key ] ) );
+            }
+        }
+        foreach ( [ 'bg_id', 'visual_id' ] as $img_key ) {
+            $post_key = 'hero_slide_' . $n . '_' . $img_key;
+            $img_id   = isset( $_POST[ $post_key ] ) ? (int) $_POST[ $post_key ] : 0;
+            if ( $img_id ) {
+                update_post_meta( $post_id, '_hero_slide_' . $n . '_' . $img_key, $img_id );
+            } else {
+                delete_post_meta( $post_id, '_hero_slide_' . $n . '_' . $img_key );
             }
         }
     }

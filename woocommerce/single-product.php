@@ -287,39 +287,75 @@ while ( have_posts() ) :
                 <?php while ( $rel_q->have_posts() ) : $rel_q->the_post();
                     $rel = wc_get_product( get_the_ID() );
                     if ( ! $rel ) continue;
-                    $rel_img_id   = $rel->get_image_id();
-                    $rel_price    = (float) $rel->get_price();
-                    $rel_rating   = $rel->get_average_rating();
-                    $rel_cats     = wc_get_product_term_ids( $rel->get_id(), 'product_cat' );
-                    $rel_cat_name = '';
-                    if ( ! empty( $rel_cats ) ) {
-                        $rc = get_term( $rel_cats[0], 'product_cat' );
-                        if ( $rc && ! is_wp_error( $rc ) ) $rel_cat_name = $rc->name;
+
+                    $rpid        = $rel->get_id();
+                    $pie_class   = lesyni_pie_visual_class( $rel );
+                    $product_url = get_permalink( $rpid );
+                    $has_image   = has_post_thumbnail( $rpid );
+                    $is_variable = $rel->is_type( 'variable' );
+                    $purchasable = $rel->is_purchasable() && $rel->is_in_stock();
+
+                    $variation_options = [];
+                    if ( $is_variable ) {
+                        foreach ( $rel->get_available_variations() as $var ) {
+                            $attrs    = $var['attributes'];
+                            $attr_key = key( $attrs );
+                            $slug     = reset( $attrs );
+                            if ( ! $slug ) continue;
+                            $taxonomy = str_replace( 'attribute_', '', $attr_key );
+                            $term     = get_term_by( 'slug', urldecode( $slug ), $taxonomy );
+                            $label    = $term ? $term->name : urldecode( $slug );
+                            $w        = (float) $var['weight'];
+                            $wu       = get_option( 'woocommerce_weight_unit', 'kg' );
+                            $weight_g = $w > 0 ? ( $wu === 'kg' ? round( $w * 1000 ) : round( $w ) ) : '';
+                            $variation_options[] = [
+                                'label'        => $label,
+                                'price'        => (float) $var['display_price'],
+                                'weight'       => $weight_g,
+                                'variation_id' => (int) $var['variation_id'],
+                            ];
+                        }
                     }
+                    $has_sizes   = $is_variable && count( $variation_options ) >= 2;
+                    $first_price = $has_sizes ? $variation_options[0]['price'] : (float) $rel->get_price();
                 ?>
-                <a href="<?php the_permalink(); ?>" class="sp-related-card">
-                    <div class="sp-related-img">
-                        <?php if ( $rel_img_id ) : ?>
-                            <?php echo wp_get_attachment_image( $rel_img_id, 'medium', false, [ 'class' => 'sp-related-photo' ] ); ?>
+                <div class="popular-card product-card" data-type="<?php echo $is_variable ? 'variable' : 'simple'; ?>">
+                    <a href="<?php echo esc_url( $product_url ); ?>" class="popular-card__image <?php echo $has_image ? '' : 'popular-card__image--placeholder'; ?>" tabindex="-1" aria-hidden="true">
+                        <?php if ( $has_image ) : ?>
+                            <?php echo get_the_post_thumbnail( $rpid, 'medium', [ 'alt' => esc_attr( $rel->get_name() ) ] ); ?>
                         <?php else : ?>
-                            <span class="pie-visual pie-visual--md <?php echo esc_attr( lesyni_pie_visual_class( $rel ) ); ?>"></span>
+                            <span class="pie-visual <?php echo esc_attr( $pie_class ); ?>"></span>
                         <?php endif; ?>
-                    </div>
-                    <div class="sp-related-body">
-                        <?php if ( $rel_cat_name ) : ?>
-                            <div class="sp-related-cat"><?php echo esc_html( $rel_cat_name ); ?></div>
+                    </a>
+                    <div class="popular-card__body">
+                        <a href="<?php echo esc_url( $product_url ); ?>" class="popular-card__name"><?php echo esc_html( $rel->get_name() ); ?></a>
+                        <?php if ( $has_sizes ) : ?>
+                        <div class="size-selector size-selector--pop">
+                            <?php foreach ( $variation_options as $i => $opt ) : ?>
+                                <button class="size-option <?php echo $i === 0 ? 'active' : ''; ?>"
+                                        data-variation-id="<?php echo esc_attr( $opt['variation_id'] ); ?>"
+                                        data-price="<?php echo esc_attr( $opt['price'] ); ?>">
+                                    <?php echo esc_html( $opt['label'] ); ?>
+                                    <?php if ( $opt['weight'] ) : ?><small><?php echo esc_html( $opt['weight'] ); ?> г</small><?php endif; ?>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
                         <?php endif; ?>
-                        <div class="sp-related-name"><?php the_title(); ?></div>
-                        <div class="sp-related-foot">
-                            <div class="sp-related-price">
-                                <?php echo (int) round( $rel_price ); ?><span class="sp-related-price-unit">грн</span>
+                        <div class="popular-card__footer">
+                            <div class="popular-card__price">
+                                <span class="price-value"><?php echo number_format( $first_price, 0, '', '' ); ?></span><small>грн</small>
                             </div>
-                            <?php if ( $rel_rating > 0 ) : ?>
-                                <div class="sp-related-rating">★ <?php echo number_format( $rel_rating, 1 ); ?></div>
+                            <?php if ( $purchasable ) : ?>
+                                <button class="btn-add-cart btn-add-cart--round"
+                                        data-product-id="<?php echo esc_attr( $rpid ); ?>"
+                                        data-type="<?php echo $is_variable ? 'variable' : 'simple'; ?>"
+                                        aria-label="В кошик: <?php echo esc_attr( $rel->get_name() ); ?>">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                </button>
                             <?php endif; ?>
                         </div>
                     </div>
-                </a>
+                </div>
                 <?php endwhile; wp_reset_postdata(); ?>
             </div>
         </div>

@@ -185,7 +185,7 @@ foreach ( $_hs_slides as $i => $slide ) {
                 <?php if ( $slide['visual_url'] ) : ?>
                 <img src="<?php echo esc_url( $slide['visual_url'] ); ?>" alt="">
                 <?php else : ?>
-                <?php echo esc_html( $slide['emoji'] ); ?>
+                <?php echo esc_html( html_entity_decode( $slide['emoji'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ); ?>
                 <?php endif; ?>
             </div>
             <?php if ( $slide['chip1'] ) : $c = $chip1; ?>

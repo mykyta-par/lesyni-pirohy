@@ -1205,7 +1205,7 @@ function lesyni_hero_meta_box_html( $post ) {
                     </div>
                     <div>
                         <label>Emoji</label>
-                        <input type="text" name="hero_slide_<?php echo $n; ?>_emoji" value="<?php echo esc_attr( $sr('emoji') ); ?>">
+                        <input type="text" name="hero_slide_<?php echo $n; ?>_emoji" value="<?php echo esc_attr( html_entity_decode( $sr('emoji'), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ); ?>">
                     </div>
                 </div>
 
@@ -1388,12 +1388,11 @@ function lesyni_hero_save_meta( $post_id ) {
                 update_post_meta( $post_id, '_hero_slide_' . $n . '_' . $key, sanitize_textarea_field( $_POST[ $post_key ] ) );
             }
         }
-        // sanitize_textarea_field strips 4-byte UTF-8 (emoji) — use wp_strip_all_tags instead
+        // Emoji: encode to HTML entities — survives utf8 (non-utf8mb4) databases
         $emoji_key = 'hero_slide_' . $n . '_emoji';
         if ( isset( $_POST[ $emoji_key ] ) ) {
-            update_post_meta( $post_id, '_hero_slide_' . $n . '_emoji',
-                trim( wp_strip_all_tags( wp_unslash( $_POST[ $emoji_key ] ) ) )
-            );
+            $raw = trim( wp_strip_all_tags( wp_unslash( $_POST[ $emoji_key ] ) ) );
+            update_post_meta( $post_id, '_hero_slide_' . $n . '_emoji', wp_encode_emoji( $raw ) );
         }
         foreach ( [ 'bg_id', 'bg_mobile_id', 'visual_id' ] as $img_key ) {
             $post_key = 'hero_slide_' . $n . '_' . $img_key;

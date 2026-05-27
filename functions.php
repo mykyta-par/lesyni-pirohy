@@ -1248,6 +1248,7 @@ function lesyni_hero_meta_box_html( $post ) {
                 <div class="hero-mb-row" style="margin-top:4px;">
                     <div>
                         <label>Фон десктоп</label>
+                        <small style="color:#999;font-size:11px;display:block;margin:-10px 0 6px;">Рекомендовано: 1920 × 600 пкс</small>
                         <input type="hidden" id="hs_bg_id_<?php echo $n; ?>" name="hero_slide_<?php echo $n; ?>_bg_id" value="<?php echo esc_attr( $hs_bg_id ?: '' ); ?>">
                         <button type="button" class="button hs-media-pick"
                                 data-target="hs_bg_id_<?php echo $n; ?>"
@@ -1262,6 +1263,7 @@ function lesyni_hero_meta_box_html( $post ) {
                     </div>
                     <div>
                         <label>Фон мобільний <span style="font-weight:400;color:#999;">(порожньо = десктопний)</span></label>
+                        <small style="color:#999;font-size:11px;display:block;margin:-10px 0 6px;">Рекомендовано: 768 × 960 пкс</small>
                         <input type="hidden" id="hs_bg_mob_id_<?php echo $n; ?>" name="hero_slide_<?php echo $n; ?>_bg_mobile_id" value="<?php echo esc_attr( $hs_bg_mob_id ?: '' ); ?>">
                         <button type="button" class="button hs-media-pick"
                                 data-target="hs_bg_mob_id_<?php echo $n; ?>"
@@ -1277,6 +1279,7 @@ function lesyni_hero_meta_box_html( $post ) {
                 </div>
                 <div style="margin-top:8px;">
                     <label>Зображення замість emoji</label>
+                    <small style="color:#999;font-size:11px;display:block;margin:-10px 0 6px;">Рекомендовано: 500 × 500 пкс (квадрат)</small>
                     <input type="hidden" id="hs_vis_id_<?php echo $n; ?>" name="hero_slide_<?php echo $n; ?>_visual_id" value="<?php echo esc_attr( $hs_vis_id ?: '' ); ?>">
                     <button type="button" class="button hs-media-pick"
                             data-target="hs_vis_id_<?php echo $n; ?>"

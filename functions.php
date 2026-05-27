@@ -1238,20 +1238,22 @@ function lesyni_hero_meta_box_html( $post ) {
                 </div>
 
                 <?php
-                $hs_bg_id    = (int) get_post_meta( $post->ID, '_hero_slide_' . $n . '_bg_id', true );
-                $hs_bg_url   = $hs_bg_id  ? wp_get_attachment_image_url( $hs_bg_id,  'medium' ) : '';
-                $hs_vis_id   = (int) get_post_meta( $post->ID, '_hero_slide_' . $n . '_visual_id', true );
-                $hs_vis_url  = $hs_vis_id ? wp_get_attachment_image_url( $hs_vis_id, 'thumbnail' ) : '';
+                $hs_bg_id      = (int) get_post_meta( $post->ID, '_hero_slide_' . $n . '_bg_id', true );
+                $hs_bg_url     = $hs_bg_id     ? wp_get_attachment_image_url( $hs_bg_id,     'medium' ) : '';
+                $hs_bg_mob_id  = (int) get_post_meta( $post->ID, '_hero_slide_' . $n . '_bg_mobile_id', true );
+                $hs_bg_mob_url = $hs_bg_mob_id ? wp_get_attachment_image_url( $hs_bg_mob_id, 'medium' ) : '';
+                $hs_vis_id     = (int) get_post_meta( $post->ID, '_hero_slide_' . $n . '_visual_id', true );
+                $hs_vis_url    = $hs_vis_id    ? wp_get_attachment_image_url( $hs_vis_id,    'thumbnail' ) : '';
                 ?>
                 <div class="hero-mb-row" style="margin-top:4px;">
                     <div>
-                        <label>Зображення фону слайда</label>
+                        <label>Фон десктоп</label>
                         <input type="hidden" id="hs_bg_id_<?php echo $n; ?>" name="hero_slide_<?php echo $n; ?>_bg_id" value="<?php echo esc_attr( $hs_bg_id ?: '' ); ?>">
                         <button type="button" class="button hs-media-pick"
                                 data-target="hs_bg_id_<?php echo $n; ?>"
                                 data-preview="hs_bg_prev_<?php echo $n; ?>"
                                 data-remove="hs_bg_rm_<?php echo $n; ?>"
-                                data-title="Фон слайда <?php echo $n; ?>">Вибрати фон</button>
+                                data-title="Фон десктоп — слайд <?php echo $n; ?>">Вибрати</button>
                         <button type="button" id="hs_bg_rm_<?php echo $n; ?>" class="button hs-media-remove"
                                 data-target="hs_bg_id_<?php echo $n; ?>"
                                 data-preview="hs_bg_prev_<?php echo $n; ?>"
@@ -1259,19 +1261,33 @@ function lesyni_hero_meta_box_html( $post ) {
                         <img id="hs_bg_prev_<?php echo $n; ?>" src="<?php echo esc_url( $hs_bg_url ); ?>" style="display:<?php echo $hs_bg_url ? 'block' : 'none'; ?>;max-width:100%;border-radius:6px;margin-top:6px;">
                     </div>
                     <div>
-                        <label>Зображення замість emoji</label>
-                        <input type="hidden" id="hs_vis_id_<?php echo $n; ?>" name="hero_slide_<?php echo $n; ?>_visual_id" value="<?php echo esc_attr( $hs_vis_id ?: '' ); ?>">
+                        <label>Фон мобільний <span style="font-weight:400;color:#999;">(порожньо = десктопний)</span></label>
+                        <input type="hidden" id="hs_bg_mob_id_<?php echo $n; ?>" name="hero_slide_<?php echo $n; ?>_bg_mobile_id" value="<?php echo esc_attr( $hs_bg_mob_id ?: '' ); ?>">
                         <button type="button" class="button hs-media-pick"
-                                data-target="hs_vis_id_<?php echo $n; ?>"
-                                data-preview="hs_vis_prev_<?php echo $n; ?>"
-                                data-remove="hs_vis_rm_<?php echo $n; ?>"
-                                data-title="Зображення слайда <?php echo $n; ?>">Вибрати зображення</button>
-                        <button type="button" id="hs_vis_rm_<?php echo $n; ?>" class="button hs-media-remove"
-                                data-target="hs_vis_id_<?php echo $n; ?>"
-                                data-preview="hs_vis_prev_<?php echo $n; ?>"
-                                style="<?php echo $hs_vis_url ? '' : 'display:none;'; ?>">Видалити</button>
-                        <img id="hs_vis_prev_<?php echo $n; ?>" src="<?php echo esc_url( $hs_vis_url ); ?>" style="display:<?php echo $hs_vis_url ? 'block' : 'none'; ?>;width:80px;height:80px;object-fit:cover;border-radius:50%;margin-top:6px;">
+                                data-target="hs_bg_mob_id_<?php echo $n; ?>"
+                                data-preview="hs_bg_mob_prev_<?php echo $n; ?>"
+                                data-remove="hs_bg_mob_rm_<?php echo $n; ?>"
+                                data-title="Фон мобільний — слайд <?php echo $n; ?>">Вибрати</button>
+                        <button type="button" id="hs_bg_mob_rm_<?php echo $n; ?>" class="button hs-media-remove"
+                                data-target="hs_bg_mob_id_<?php echo $n; ?>"
+                                data-preview="hs_bg_mob_prev_<?php echo $n; ?>"
+                                style="<?php echo $hs_bg_mob_url ? '' : 'display:none;'; ?>">Видалити</button>
+                        <img id="hs_bg_mob_prev_<?php echo $n; ?>" src="<?php echo esc_url( $hs_bg_mob_url ); ?>" style="display:<?php echo $hs_bg_mob_url ? 'block' : 'none'; ?>;max-width:100%;border-radius:6px;margin-top:6px;">
                     </div>
+                </div>
+                <div style="margin-top:8px;">
+                    <label>Зображення замість emoji</label>
+                    <input type="hidden" id="hs_vis_id_<?php echo $n; ?>" name="hero_slide_<?php echo $n; ?>_visual_id" value="<?php echo esc_attr( $hs_vis_id ?: '' ); ?>">
+                    <button type="button" class="button hs-media-pick"
+                            data-target="hs_vis_id_<?php echo $n; ?>"
+                            data-preview="hs_vis_prev_<?php echo $n; ?>"
+                            data-remove="hs_vis_rm_<?php echo $n; ?>"
+                            data-title="Зображення слайда <?php echo $n; ?>">Вибрати зображення</button>
+                    <button type="button" id="hs_vis_rm_<?php echo $n; ?>" class="button hs-media-remove"
+                            data-target="hs_vis_id_<?php echo $n; ?>"
+                            data-preview="hs_vis_prev_<?php echo $n; ?>"
+                            style="<?php echo $hs_vis_url ? '' : 'display:none;'; ?>">Видалити</button>
+                    <img id="hs_vis_prev_<?php echo $n; ?>" src="<?php echo esc_url( $hs_vis_url ); ?>" style="display:<?php echo $hs_vis_url ? 'block' : 'none'; ?>;width:80px;height:80px;object-fit:cover;border-radius:50%;margin-top:6px;">
                 </div>
             </div>
             <?php endforeach; ?>
@@ -1369,7 +1385,7 @@ function lesyni_hero_save_meta( $post_id ) {
                 update_post_meta( $post_id, '_hero_slide_' . $n . '_' . $key, sanitize_textarea_field( $_POST[ $post_key ] ) );
             }
         }
-        foreach ( [ 'bg_id', 'visual_id' ] as $img_key ) {
+        foreach ( [ 'bg_id', 'bg_mobile_id', 'visual_id' ] as $img_key ) {
             $post_key = 'hero_slide_' . $n . '_' . $img_key;
             $img_id   = isset( $_POST[ $post_key ] ) ? (int) $_POST[ $post_key ] : 0;
             if ( $img_id ) {

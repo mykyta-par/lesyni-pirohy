@@ -25,14 +25,17 @@ $hero_btn2_url   = $_hf( 'btn2_url',  '' );
 $hero_bg_id     = (int) get_post_meta( $_front_id, '_hero_bg_id', true );
 $hero_bg_url    = $hero_bg_id ? wp_get_attachment_image_url( $hero_bg_id, 'full' ) : '';
 
+$hero_type = get_post_meta( $_front_id, '_hero_type', true ) ?: 'static';
+
 // Build title lines: split on newline for <br> or keep as-is
 $hero_title_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $hero_title ) ) );
 // Build subtitle lines
 $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $hero_subtitle ) ) );
 ?>
 
+<?php if ( $hero_type === 'static' ) : ?>
 <!-- ======================================================================
-   HERO
+   HERO (static banner)
 ====================================================================== -->
 <section class="hero"<?php if ( $hero_bg_url ) : ?> style="background-image:url('<?php echo esc_url( $hero_bg_url ); ?>');background-size:cover;background-position:center;"<?php endif; ?>>
     <div class="hero__decoration"></div>
@@ -60,6 +63,133 @@ $hero_subtitle_html = implode( '<br>', array_map( 'esc_html', explode( "\n", $he
         <?php endif; ?>
     </div>
 </section>
+
+<?php else : ?>
+<!-- ======================================================================
+   HERO (slider)
+====================================================================== -->
+<?php
+$_slide_defs = [
+    1 => [
+        'eyebrow'   => 'Завжди свіже',
+        'title'     => "Пироги — з {любов'ю} до вашого столу",
+        'subtitle'  => 'Кожен пиріг печемо вранці того ж дня. Без консервантів, на справжньому маслі, з начинками від перевірених фермерів.',
+        'bg'        => 'cream',
+        'emoji'     => '🥧',
+        'chip1'     => '⏱/Доставка/за 90 хв',
+        'chip2'     => '⭐/Рейтинг/4.9 / 5',
+        'btn1_text' => 'Замовити зараз',
+        'btn1_url'  => '',
+        'btn2_text' => 'Переглянути меню',
+        'btn2_url'  => '',
+    ],
+    2 => [
+        'eyebrow'   => 'Сезонна пропозиція',
+        'title'     => 'Вишневий — повертається на {2 тижні}',
+        'subtitle'  => 'Соковита вишня, ніжне пісочне тісто, легкий аромат ванілі.',
+        'bg'        => 'rose',
+        'emoji'     => '🍒',
+        'chip1'     => '🔥/Залишилось/14 днів',
+        'chip2'     => '💝/Від/120 грн',
+        'btn1_text' => 'Замовити вишневий',
+        'btn1_url'  => '',
+        'btn2_text' => 'Усі сезонні',
+        'btn2_url'  => '',
+    ],
+    3 => [
+        'eyebrow'   => 'Для великої компанії',
+        'title'     => 'Замов на 10+ людей — {знижка 15%}',
+        'subtitle'  => 'Корпоратив, день народження, родинне свято? Підкажемо скільки і яких пирогів вибрати.',
+        'bg'        => 'sage',
+        'emoji'     => '🎂',
+        'chip1'     => '🎁/Знижка/−15%',
+        'chip2'     => '🚚/Доставка/0 грн',
+        'btn1_text' => 'Розрахувати',
+        'btn1_url'  => '',
+        'btn2_text' => "Зв'язатись",
+        'btn2_url'  => '',
+    ],
+];
+
+$_hs_slides = [];
+foreach ( $_slide_defs as $n => $def ) {
+    $slide = [];
+    foreach ( $def as $key => $default ) {
+        $saved = get_post_meta( $_front_id, '_hero_slide_' . $n . '_' . $key, true );
+        $slide[ $key ] = ( $saved !== '' ) ? $saved : $default;
+    }
+    $_hs_slides[] = $slide;
+}
+
+$_hs_phone    = 'tel:+380632532696';
+$_hs_shop_url = function_exists('wc_get_page_id') ? get_permalink( wc_get_page_id('shop') ) : '';
+
+$_hs_title = function( $raw ) {
+    return preg_replace( '/\{([^}]+)\}/', '<em>$1</em>', esc_html( $raw ) );
+};
+
+$_hs_chip = function( $raw ) {
+    $p = array_map( 'trim', explode( '/', $raw, 3 ) );
+    return [ 'ic' => $p[0] ?? '', 'lbl' => $p[1] ?? '', 'val' => $p[2] ?? '' ];
+};
+
+$_hs_total = count( $_hs_slides );
+?>
+<div class="hs" id="hs">
+    <div class="hs-progress"><div class="hs-progress-bar"></div></div>
+    <div class="hs-counter"><strong id="hs-cur">01</strong><span> / <?php echo str_pad( $_hs_total, 2, '0', STR_PAD_LEFT ); ?></span></div>
+
+    <?php foreach ( $_hs_slides as $i => $slide ) :
+        $btn1_url = $slide['btn1_url'] ?: $_hs_phone;
+        $btn2_url = $slide['btn2_url'] ?: $_hs_shop_url;
+        $chip1    = $_hs_chip( $slide['chip1'] );
+        $chip2    = $_hs_chip( $slide['chip2'] );
+    ?>
+    <div class="hs-slide<?php echo $i === 0 ? ' active' : ''; ?>" data-bg="<?php echo esc_attr( $slide['bg'] ); ?>">
+        <div class="hs-content">
+            <div class="hs-eyebrow"><?php echo esc_html( $slide['eyebrow'] ); ?></div>
+            <h1><?php echo $_hs_title( $slide['title'] ); ?></h1>
+            <p><?php echo esc_html( $slide['subtitle'] ); ?></p>
+            <div class="hs-actions">
+                <?php if ( $btn1_url ) : ?>
+                <a href="<?php echo esc_url( $btn1_url ); ?>" class="hs-btn-primary"><?php echo esc_html( $slide['btn1_text'] ); ?></a>
+                <?php endif; ?>
+                <?php if ( $slide['btn2_text'] && $btn2_url ) : ?>
+                <a href="<?php echo esc_url( $btn2_url ); ?>" class="hs-btn-ghost"><?php echo esc_html( $slide['btn2_text'] ); ?></a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="hs-visual">
+            <div class="hs-pie"><?php echo esc_html( $slide['emoji'] ); ?></div>
+            <?php if ( $slide['chip1'] ) : $c = $chip1; ?>
+            <div class="hs-chip top">
+                <span class="ic"><?php echo esc_html( $c['ic'] ); ?></span>
+                <span><span class="lbl"><?php echo esc_html( $c['lbl'] ); ?></span><span class="val"><?php echo esc_html( $c['val'] ); ?></span></span>
+            </div>
+            <?php endif; ?>
+            <?php if ( $slide['chip2'] ) : $c = $chip2; ?>
+            <div class="hs-chip bot">
+                <span class="ic"><?php echo esc_html( $c['ic'] ); ?></span>
+                <span><span class="lbl"><?php echo esc_html( $c['lbl'] ); ?></span><span class="val"><?php echo esc_html( $c['val'] ); ?></span></span>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endforeach; ?>
+
+    <div class="hs-nav">
+        <div class="hs-dots">
+            <?php for ( $i = 0; $i < $_hs_total; $i++ ) : ?>
+            <button class="hs-dot<?php echo $i === 0 ? ' active' : ''; ?>" aria-label="Слайд <?php echo $i + 1; ?>"></button>
+            <?php endfor; ?>
+        </div>
+    </div>
+    <div class="hs-arrows">
+        <button class="hs-arrow" data-step="-1" aria-label="Попередній">‹</button>
+        <button class="hs-arrow" data-step="1" aria-label="Наступний">›</button>
+    </div>
+</div>
+<?php endif; ?>
 
 <!-- ======================================================================
    POPULAR PIES

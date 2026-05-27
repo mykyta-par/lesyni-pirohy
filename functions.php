@@ -423,6 +423,17 @@ function lesyni_enqueue_assets() {
 		true
 	);
 
+	// Hero slider — front page only (JS exits early if #hs not in DOM)
+	if ( is_front_page() ) {
+		wp_enqueue_script(
+			'lesyni-hero-slider',
+			get_template_directory_uri() . '/assets/js/hero-slider.js',
+			[],
+			filemtime( get_template_directory() . '/assets/js/hero-slider.js' ),
+			true
+		);
+	}
+
 	// Detect the LiqPay gateway ID (handles liqpay, liqpay_woocommerce, woo_liqpay, etc.)
 	$liqpay_id = '';
 	if ( function_exists( 'WC' ) && WC()->payment_gateways ) {
@@ -1084,61 +1095,160 @@ function lesyni_hero_meta_box_html( $post ) {
     $f = function( $key ) use ( $post ) {
         return esc_attr( get_post_meta( $post->ID, '_hero_' . $key, true ) );
     };
-    $bg_id  = (int) get_post_meta( $post->ID, '_hero_bg_id', true );
-    $bg_url = $bg_id ? wp_get_attachment_image_url( $bg_id, 'large' ) : '';
+    $bg_id     = (int) get_post_meta( $post->ID, '_hero_bg_id', true );
+    $bg_url    = $bg_id ? wp_get_attachment_image_url( $bg_id, 'large' ) : '';
+    $hero_type = get_post_meta( $post->ID, '_hero_type', true ) ?: 'static';
+
+    $slide_defaults = [
+        1 => [ 'eyebrow' => 'Завжди свіже', 'title' => "Пироги — з {любов'ю} до вашого столу", 'subtitle' => 'Кожен пиріг печемо вранці того ж дня. Без консервантів, на справжньому маслі.', 'bg' => 'cream', 'emoji' => '🥧', 'chip1' => '⏱/Доставка/за 90 хв', 'chip2' => '⭐/Рейтинг/4.9 / 5', 'btn1_text' => 'Замовити зараз', 'btn1_url' => '', 'btn2_text' => 'Переглянути меню', 'btn2_url' => '' ],
+        2 => [ 'eyebrow' => 'Сезонна пропозиція', 'title' => 'Вишневий — повертається на {2 тижні}', 'subtitle' => 'Соковита вишня, ніжне пісочне тісто, легкий аромат ванілі.', 'bg' => 'rose', 'emoji' => '🍒', 'chip1' => '🔥/Залишилось/14 днів', 'chip2' => '💝/Від/120 грн', 'btn1_text' => 'Замовити вишневий', 'btn1_url' => '', 'btn2_text' => 'Усі сезонні', 'btn2_url' => '' ],
+        3 => [ 'eyebrow' => 'Для великої компанії', 'title' => 'Замов на 10+ людей — {знижка 15%}', 'subtitle' => 'Корпоратив, день народження, родинне свято? Підкажемо скільки і яких пирогів вибрати.', 'bg' => 'sage', 'emoji' => '🎂', 'chip1' => '🎁/Знижка/−15%', 'chip2' => '🚚/Доставка/0 грн', 'btn1_text' => 'Розрахувати', 'btn1_url' => '', 'btn2_text' => "Зв'язатись", 'btn2_url' => '' ],
+    ];
     ?>
     <style>
         .hero-mb label { display:block; font-weight:600; margin:14px 0 4px; font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:#555; }
-        .hero-mb input[type=text], .hero-mb textarea { width:100%; padding:8px 10px; border:1px solid #ddd; border-radius:4px; font-size:14px; }
+        .hero-mb input[type=text], .hero-mb textarea, .hero-mb select { width:100%; padding:8px 10px; border:1px solid #ddd; border-radius:4px; font-size:14px; }
         .hero-mb textarea { height:72px; resize:vertical; }
         .hero-mb .hero-mb-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
         .hero-mb .hero-bg-preview { max-width:200px; border-radius:6px; margin-top:8px; display:<?php echo $bg_url ? 'block' : 'none'; ?>; }
+        .hero-mb .type-toggle { display:flex; margin-bottom:16px; border:1px solid #ddd; border-radius:6px; overflow:hidden; }
+        .hero-mb .type-toggle label { margin:0; padding:10px 20px; cursor:pointer; font-size:13px; text-transform:none; letter-spacing:0; color:#555; font-weight:600; background:#f9f9f9; border-right:1px solid #ddd; flex:1; text-align:center; }
+        .hero-mb .type-toggle label:last-of-type { border-right:none; }
+        .hero-mb .type-toggle input[type=radio] { display:none; }
+        .hero-mb .type-toggle input[type=radio]:checked + label { background:#e07a3f; color:white; }
+        .hero-mb .slide-panel { border:1px solid #e0d5c8; border-radius:8px; padding:14px; margin-bottom:12px; background:#fdf8f4; }
+        .hero-mb .slide-panel h4 { font-size:13px; font-weight:700; color:#2c2c2c; margin:0 0 4px; }
+        .hero-mb .slide-panel label { color:#666; }
     </style>
     <div class="hero-mb">
-        <label>Рядок над заголовком</label>
-        <input type="text" name="hero_eyebrow" value="<?php echo $f('eyebrow'); ?>" placeholder="Домашня пекарня · Дніпро">
 
-        <label>Заголовок</label>
-        <input type="text" name="hero_title" value="<?php echo $f('title'); ?>" placeholder="Від щирого серця до вашого столу">
+        <p style="font-weight:600;margin:0 0 8px;">Тип hero-секції</p>
+        <div class="type-toggle">
+            <input type="radio" name="hero_type" id="hero_type_static" value="static" <?php checked( $hero_type, 'static' ); ?>>
+            <label for="hero_type_static">Статичний банер</label>
+            <input type="radio" name="hero_type" id="hero_type_slider" value="slider" <?php checked( $hero_type, 'slider' ); ?>>
+            <label for="hero_type_slider">Слайдер</label>
+        </div>
 
-        <label>Підзаголовок</label>
-        <textarea name="hero_subtitle" placeholder="Ми команда пекарів, закоханих в свою справу."><?php echo esc_textarea( get_post_meta( $post->ID, '_hero_subtitle', true ) ); ?></textarea>
+        <div id="hero-section-static" <?php echo $hero_type !== 'static' ? 'style="display:none;"' : ''; ?>>
+            <label>Рядок над заголовком</label>
+            <input type="text" name="hero_eyebrow" value="<?php echo $f('eyebrow'); ?>" placeholder="Домашня пекарня · Дніпро">
 
-        <label>Теги (кожен з нового рядка)</label>
-        <textarea name="hero_badges" placeholder="Щодня свіже&#10;Доставка Дніпром&#10;Замовлення з 10:00"><?php echo esc_textarea( get_post_meta( $post->ID, '_hero_badges', true ) ); ?></textarea>
+            <label>Заголовок</label>
+            <input type="text" name="hero_title" value="<?php echo $f('title'); ?>" placeholder="Від щирого серця до вашого столу">
 
-        <div class="hero-mb-row">
-            <div>
-                <label>Кнопка 1 — текст</label>
-                <input type="text" name="hero_btn1_text" value="<?php echo $f('btn1_text'); ?>" placeholder="Замовити">
+            <label>Підзаголовок</label>
+            <textarea name="hero_subtitle" placeholder="Ми команда пекарів, закоханих в свою справу."><?php echo esc_textarea( get_post_meta( $post->ID, '_hero_subtitle', true ) ); ?></textarea>
+
+            <label>Теги (кожен з нового рядка)</label>
+            <textarea name="hero_badges" placeholder="Щодня свіже&#10;Доставка Дніпром&#10;Замовлення з 10:00"><?php echo esc_textarea( get_post_meta( $post->ID, '_hero_badges', true ) ); ?></textarea>
+
+            <div class="hero-mb-row">
+                <div>
+                    <label>Кнопка 1 — текст</label>
+                    <input type="text" name="hero_btn1_text" value="<?php echo $f('btn1_text'); ?>" placeholder="Замовити">
+                </div>
+                <div>
+                    <label>Кнопка 1 — посилання</label>
+                    <input type="text" name="hero_btn1_url" value="<?php echo $f('btn1_url'); ?>" placeholder="tel:+380632532696">
+                </div>
             </div>
+
+            <div class="hero-mb-row">
+                <div>
+                    <label>Кнопка 2 — текст</label>
+                    <input type="text" name="hero_btn2_text" value="<?php echo $f('btn2_text'); ?>" placeholder="Переглянути меню">
+                </div>
+                <div>
+                    <label>Кнопка 2 — посилання (порожньо = каталог)</label>
+                    <input type="text" name="hero_btn2_url" value="<?php echo $f('btn2_url'); ?>" placeholder="">
+                </div>
+            </div>
+
+            <label>Фонове зображення</label>
             <div>
-                <label>Кнопка 1 — посилання</label>
-                <input type="text" name="hero_btn1_url" value="<?php echo $f('btn1_url'); ?>" placeholder="tel:+380632532696">
+                <input type="hidden" name="hero_bg_id" id="hero_bg_id" value="<?php echo esc_attr( $bg_id ?: '' ); ?>">
+                <button type="button" class="button" id="hero_bg_btn">Вибрати зображення</button>
+                <button type="button" class="button" id="hero_bg_remove" style="<?php echo $bg_url ? '' : 'display:none;'; ?>">Видалити</button>
+                <img src="<?php echo esc_url( $bg_url ); ?>" id="hero_bg_preview" class="hero-bg-preview">
             </div>
         </div>
 
-        <div class="hero-mb-row">
-            <div>
-                <label>Кнопка 2 — текст</label>
-                <input type="text" name="hero_btn2_text" value="<?php echo $f('btn2_text'); ?>" placeholder="Переглянути меню">
+        <div id="hero-section-slider" <?php echo $hero_type !== 'slider' ? 'style="display:none;"' : ''; ?>>
+            <p style="font-size:12px;color:#888;margin:0 0 12px;">В заголовку використовуй <code>{текст}</code> для помаранчевого виділення.</p>
+            <?php foreach ( $slide_defaults as $n => $def ) :
+                $sr = function( $key ) use ( $n, $post, $def ) {
+                    $saved = get_post_meta( $post->ID, '_hero_slide_' . $n . '_' . $key, true );
+                    return $saved !== '' ? $saved : $def[ $key ];
+                };
+            ?>
+            <div class="slide-panel">
+                <h4>Слайд <?php echo $n; ?></h4>
+
+                <label>Напис над заголовком</label>
+                <input type="text" name="hero_slide_<?php echo $n; ?>_eyebrow" value="<?php echo esc_attr( $sr('eyebrow') ); ?>">
+
+                <label>Заголовок (<code>{текст}</code> = помаранчевий)</label>
+                <input type="text" name="hero_slide_<?php echo $n; ?>_title" value="<?php echo esc_attr( $sr('title') ); ?>">
+
+                <label>Опис</label>
+                <textarea name="hero_slide_<?php echo $n; ?>_subtitle"><?php echo esc_textarea( $sr('subtitle') ); ?></textarea>
+
+                <div class="hero-mb-row">
+                    <div>
+                        <label>Фон</label>
+                        <select name="hero_slide_<?php echo $n; ?>_bg">
+                            <?php foreach ( [ 'cream' => 'Кремовий', 'rose' => 'Рожевий', 'sage' => 'Сірий' ] as $val => $lbl ) : ?>
+                            <option value="<?php echo $val; ?>" <?php selected( $sr('bg'), $val ); ?>><?php echo $lbl; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Emoji</label>
+                        <input type="text" name="hero_slide_<?php echo $n; ?>_emoji" value="<?php echo esc_attr( $sr('emoji') ); ?>">
+                    </div>
+                </div>
+
+                <label>Чіп 1 (іконка/підпис/значення)</label>
+                <input type="text" name="hero_slide_<?php echo $n; ?>_chip1" value="<?php echo esc_attr( $sr('chip1') ); ?>" placeholder="⏱/Доставка/за 90 хв">
+
+                <label>Чіп 2 (іконка/підпис/значення)</label>
+                <input type="text" name="hero_slide_<?php echo $n; ?>_chip2" value="<?php echo esc_attr( $sr('chip2') ); ?>" placeholder="⭐/Рейтинг/4.9 / 5">
+
+                <div class="hero-mb-row">
+                    <div>
+                        <label>Кнопка 1 — текст</label>
+                        <input type="text" name="hero_slide_<?php echo $n; ?>_btn1_text" value="<?php echo esc_attr( $sr('btn1_text') ); ?>">
+                    </div>
+                    <div>
+                        <label>Кнопка 1 — посилання (порожньо = тел.)</label>
+                        <input type="text" name="hero_slide_<?php echo $n; ?>_btn1_url" value="<?php echo esc_attr( $sr('btn1_url') ); ?>">
+                    </div>
+                </div>
+
+                <div class="hero-mb-row">
+                    <div>
+                        <label>Кнопка 2 — текст</label>
+                        <input type="text" name="hero_slide_<?php echo $n; ?>_btn2_text" value="<?php echo esc_attr( $sr('btn2_text') ); ?>">
+                    </div>
+                    <div>
+                        <label>Кнопка 2 — посилання (порожньо = каталог)</label>
+                        <input type="text" name="hero_slide_<?php echo $n; ?>_btn2_url" value="<?php echo esc_attr( $sr('btn2_url') ); ?>">
+                    </div>
+                </div>
             </div>
-            <div>
-                <label>Кнопка 2 — посилання (порожньо = каталог)</label>
-                <input type="text" name="hero_btn2_url" value="<?php echo $f('btn2_url'); ?>" placeholder="">
-            </div>
+            <?php endforeach; ?>
         </div>
 
-        <label>Фонове зображення</label>
-        <div>
-            <input type="hidden" name="hero_bg_id" id="hero_bg_id" value="<?php echo esc_attr( $bg_id ?: '' ); ?>">
-            <button type="button" class="button" id="hero_bg_btn">Вибрати зображення</button>
-            <button type="button" class="button" id="hero_bg_remove" style="<?php echo $bg_url ? '' : 'display:none;'; ?>">Видалити</button>
-            <img src="<?php echo esc_url( $bg_url ); ?>" id="hero_bg_preview" class="hero-bg-preview">
-        </div>
     </div>
     <script>
     (function(){
+        document.querySelectorAll('input[name="hero_type"]').forEach(function(radio){
+            radio.addEventListener('change', function(){
+                document.getElementById('hero-section-static').style.display = this.value === 'static' ? '' : 'none';
+                document.getElementById('hero-section-slider').style.display = this.value === 'slider' ? '' : 'none';
+            });
+        });
         var frame;
         document.getElementById('hero_bg_btn').addEventListener('click', function(){
             if(frame){ frame.open(); return; }
@@ -1167,6 +1277,10 @@ function lesyni_hero_save_meta( $post_id ) {
     if ( ! isset( $_POST['lesyni_hero_nonce'] ) ) return;
     if ( ! wp_verify_nonce( $_POST['lesyni_hero_nonce'], 'lesyni_hero_save' ) ) return;
     if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+
+    $type = ( isset( $_POST['hero_type'] ) && $_POST['hero_type'] === 'slider' ) ? 'slider' : 'static';
+    update_post_meta( $post_id, '_hero_type', $type );
+
     $fields = [ 'eyebrow', 'title', 'subtitle', 'badges', 'btn1_text', 'btn1_url', 'btn2_text', 'btn2_url' ];
     foreach ( $fields as $key ) {
         if ( isset( $_POST[ 'hero_' . $key ] ) ) {
@@ -1178,6 +1292,16 @@ function lesyni_hero_save_meta( $post_id ) {
         update_post_meta( $post_id, '_hero_bg_id', $bg_id );
     } else {
         delete_post_meta( $post_id, '_hero_bg_id' );
+    }
+
+    $slide_fields = [ 'eyebrow', 'title', 'subtitle', 'bg', 'emoji', 'chip1', 'chip2', 'btn1_text', 'btn1_url', 'btn2_text', 'btn2_url' ];
+    for ( $n = 1; $n <= 3; $n++ ) {
+        foreach ( $slide_fields as $key ) {
+            $post_key = 'hero_slide_' . $n . '_' . $key;
+            if ( isset( $_POST[ $post_key ] ) ) {
+                update_post_meta( $post_id, '_hero_slide_' . $n . '_' . $key, sanitize_textarea_field( $_POST[ $post_key ] ) );
+            }
+        }
     }
 }
 add_action( 'save_post_page', 'lesyni_hero_save_meta' );

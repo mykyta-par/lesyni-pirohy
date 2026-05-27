@@ -393,6 +393,255 @@ ul, ol   { list-style: none; }
 }
 
 /* --------------------------------------------------------------------------
+   6b. Hero Slider (#hs)
+   -------------------------------------------------------------------------- */
+.hs {
+    position: relative;
+    height: 540px;
+    overflow: hidden;
+}
+.hs-slide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    align-items: center;
+    padding: 0 70px;
+    gap: 50px;
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+    pointer-events: none;
+}
+.hs-slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+.hs-slide[data-bg="cream"] { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); }
+.hs-slide[data-bg="rose"]  { background: linear-gradient(135deg, #fbe7e0 0%, #f4c9b8 100%); }
+.hs-slide[data-bg="sage"]  { background: linear-gradient(135deg, #f1ede0 0%, #e0d6bf 100%); }
+
+.hs-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 1.8px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.hs-eyebrow::before {
+    content: '';
+    width: 28px;
+    height: 2px;
+    background: var(--color-primary);
+    flex-shrink: 0;
+}
+.hs-slide h1 {
+    font-family: var(--font-serif);
+    font-weight: 800;
+    font-size: 60px;
+    line-height: 1.05;
+    letter-spacing: -0.8px;
+    color: var(--color-text);
+    margin-bottom: 18px;
+    max-width: 540px;
+}
+.hs-slide h1 em { font-style: normal; color: var(--color-primary); }
+.hs-slide p {
+    font-family: var(--font-sans);
+    font-size: 17px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    max-width: 460px;
+    margin-bottom: 32px;
+}
+.hs-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.hs-btn-primary {
+    padding: 15px 32px;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.2px;
+    text-decoration: none;
+    display: inline-block;
+}
+.hs-btn-primary:hover {
+    background: var(--color-primary-dk);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(224,122,63,0.35);
+    color: white;
+}
+.hs-btn-ghost {
+    padding: 13px 28px;
+    background: transparent;
+    color: var(--color-text);
+    border: 1.5px solid rgba(44,44,44,0.85);
+    border-radius: var(--radius-md);
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+.hs-btn-ghost:hover { background: var(--color-text); color: white; }
+
+.hs-visual {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.hs-pie {
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    background: white;
+    display: grid;
+    place-items: center;
+    font-size: 180px;
+    box-shadow: 0 30px 60px rgba(224,122,63,0.25), inset 0 0 0 18px rgba(255,255,255,0.6);
+    animation: hsfloat 6s ease-in-out infinite;
+}
+@keyframes hsfloat {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50%       { transform: translateY(-14px) rotate(2deg); }
+}
+.hs-chip {
+    position: absolute;
+    background: white;
+    border-radius: 14px;
+    padding: 12px 18px;
+    box-shadow: 0 10px 28px rgba(44,44,44,0.12);
+    font-family: var(--font-serif);
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.hs-chip.top { top: 38px; right: 30px; }
+.hs-chip.bot { bottom: 50px; left: 20px; }
+.hs-chip .ic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff3e0;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+}
+.hs-chip .lbl { font-family: var(--font-sans); font-size: 11px; color: #888; font-weight: 600; display: block; }
+.hs-chip .val { font-size: 15px; color: var(--color-text); display: block; }
+
+.hs-nav {
+    position: absolute;
+    bottom: 32px;
+    left: 70px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 5;
+}
+.hs-dots { display: flex; gap: 10px; }
+.hs-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(44,44,44,0.2);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+.hs-dot.active {
+    background: var(--color-text);
+    width: 32px;
+    border-radius: 6px;
+}
+.hs-arrows {
+    display: flex;
+    gap: 8px;
+    position: absolute;
+    right: 70px;
+    bottom: 32px;
+    z-index: 5;
+}
+.hs-arrow {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: white;
+    border: 1.5px solid rgba(44,44,44,0.12);
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--color-text);
+    transition: all 0.25s ease;
+    display: grid;
+    place-items: center;
+}
+.hs-arrow:hover { background: var(--color-text); color: white; border-color: var(--color-text); }
+.hs-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(44,44,44,0.08);
+    z-index: 5;
+}
+.hs-progress-bar {
+    height: 100%;
+    background: var(--color-primary);
+    width: 0%;
+    transition: width 0.2s linear;
+}
+.hs-counter {
+    position: absolute;
+    top: 28px;
+    right: 70px;
+    font-family: var(--font-serif);
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--color-text);
+    z-index: 5;
+}
+.hs-counter span { color: #999; font-weight: 600; }
+
+@media (max-width: 768px) {
+    .hs { height: auto; }
+    .hs-slide {
+        position: relative;
+        opacity: 1;
+        transform: none;
+        grid-template-columns: 1fr;
+        padding: 40px 25px 90px;
+        display: none;
+    }
+    .hs-slide.active { display: grid; }
+    .hs-slide h1 { font-size: 38px; }
+    .hs-pie { width: 200px; height: 200px; font-size: 110px; }
+    .hs-chip.top { top: 10px; right: 0; padding: 8px 12px; }
+    .hs-chip.bot { bottom: 10px; left: 0; padding: 8px 12px; }
+    .hs-nav, .hs-arrows { bottom: 24px; }
+    .hs-nav { left: 25px; }
+    .hs-arrows { right: 25px; }
+    .hs-counter { right: 25px; top: 18px; }
+}
+
+/* --------------------------------------------------------------------------
    7. Popular Pies Grid (Homepage)
    -------------------------------------------------------------------------- */
 .popular-grid {

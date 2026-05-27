@@ -1380,13 +1380,20 @@ function lesyni_hero_save_meta( $post_id ) {
         delete_post_meta( $post_id, '_hero_bg_id' );
     }
 
-    $slide_fields = [ 'eyebrow', 'title', 'subtitle', 'bg', 'emoji', 'chip1', 'chip2', 'btn1_text', 'btn1_url', 'btn2_text', 'btn2_url' ];
+    $slide_fields = [ 'eyebrow', 'title', 'subtitle', 'bg', 'chip1', 'chip2', 'btn1_text', 'btn1_url', 'btn2_text', 'btn2_url' ];
     for ( $n = 1; $n <= 3; $n++ ) {
         foreach ( $slide_fields as $key ) {
             $post_key = 'hero_slide_' . $n . '_' . $key;
             if ( isset( $_POST[ $post_key ] ) ) {
                 update_post_meta( $post_id, '_hero_slide_' . $n . '_' . $key, sanitize_textarea_field( $_POST[ $post_key ] ) );
             }
+        }
+        // sanitize_textarea_field strips 4-byte UTF-8 (emoji) — use wp_strip_all_tags instead
+        $emoji_key = 'hero_slide_' . $n . '_emoji';
+        if ( isset( $_POST[ $emoji_key ] ) ) {
+            update_post_meta( $post_id, '_hero_slide_' . $n . '_emoji',
+                trim( wp_strip_all_tags( wp_unslash( $_POST[ $emoji_key ] ) ) )
+            );
         }
         foreach ( [ 'bg_id', 'bg_mobile_id', 'visual_id' ] as $img_key ) {
             $post_key = 'hero_slide_' . $n . '_' . $img_key;

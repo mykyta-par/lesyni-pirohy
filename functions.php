@@ -811,6 +811,72 @@ add_action( 'woocommerce_process_product_meta', function ( $post_id ) {
     }
     $is_new = isset( $_POST['_is_new_product'] ) ? 'yes' : 'no';
     update_post_meta( $post_id, '_is_new_product', $is_new );
+
+    foreach ( [ '_desc_quote_text', '_desc_aside_items', '_desc_aside_note' ] as $key ) {
+        if ( isset( $_POST[ $key ] ) ) {
+            update_post_meta( $post_id, $key, sanitize_textarea_field( wp_unslash( $_POST[ $key ] ) ) );
+        }
+    }
+    foreach ( [ '_desc_quote_author', '_desc_aside_title' ] as $key ) {
+        if ( isset( $_POST[ $key ] ) ) {
+            update_post_meta( $post_id, $key, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
+        }
+    }
+} );
+
+/* -----------------------------------------------------------------------
+   WooCommerce: Description tab — admin meta box
+----------------------------------------------------------------------- */
+add_action( 'woocommerce_product_data_panels', function () {
+    global $post;
+    $id           = $post->ID;
+    $quote_text   = get_post_meta( $id, '_desc_quote_text',   true );
+    $quote_author = get_post_meta( $id, '_desc_quote_author', true );
+    $aside_title  = get_post_meta( $id, '_desc_aside_title',  true );
+    $aside_items  = get_post_meta( $id, '_desc_aside_items',  true );
+    $aside_note   = get_post_meta( $id, '_desc_aside_note',   true );
+    ?>
+    <div id="lesyni_desc_data" class="panel woocommerce_options_panel" style="display:none;">
+        <div class="options_group">
+            <p style="padding:12px 12px 0;font-size:13px;color:#555;">
+                Двоколонковий блок вкладки <strong>Опис</strong>: ліва колонка — основний текст товару + цитата, права — картка-список.
+            </p>
+            <p class="form-field">
+                <label style="width:180px;display:inline-block;">Цитата</label>
+                <textarea name="_desc_quote_text" style="width:calc(100% - 200px);height:80px;"><?php echo esc_textarea( $quote_text ); ?></textarea>
+            </p>
+            <p class="form-field">
+                <label style="width:180px;display:inline-block;">Автор цитати</label>
+                <input type="text" name="_desc_quote_author" value="<?php echo esc_attr( $quote_author ); ?>" placeholder="— Леся, засновниця пекарні" style="width:calc(100% - 200px);">
+            </p>
+            <p class="form-field">
+                <label style="width:180px;display:inline-block;">Заголовок картки</label>
+                <input type="text" name="_desc_aside_title" value="<?php echo esc_attr( $aside_title ); ?>" placeholder="Підходить для" style="width:calc(100% - 200px);">
+            </p>
+            <p class="form-field">
+                <label style="width:180px;display:inline-block;vertical-align:top;padding-top:4px;">Пункти картки</label>
+                <span style="display:inline-block;width:calc(100% - 200px);">
+                    <textarea name="_desc_aside_items" style="width:100%;height:130px;"><?php echo esc_textarea( $aside_items ); ?></textarea>
+                    <small style="color:#888;">Кожен рядок: <code>Назва|деталі</code>. Наприклад: <code>Родинна вечеря|4–6 порцій</code></small>
+                </span>
+            </p>
+            <p class="form-field">
+                <label style="width:180px;display:inline-block;vertical-align:top;padding-top:4px;">Підпис до картки</label>
+                <input type="text" name="_desc_aside_note" value="<?php echo esc_attr( $aside_note ); ?>" placeholder="Рекомендуємо подавати з..." style="width:calc(100% - 200px);">
+            </p>
+        </div>
+    </div>
+    <?php
+} );
+
+add_filter( 'woocommerce_product_data_tabs', function ( $tabs ) {
+    $tabs['lesyni_desc'] = [
+        'label'    => 'Опис (доповнення)',
+        'target'   => 'lesyni_desc_data',
+        'class'    => [],
+        'priority' => 15,
+    ];
+    return $tabs;
 } );
 
 /* -----------------------------------------------------------------------

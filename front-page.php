@@ -119,8 +119,7 @@ foreach ( $_slide_defs as $n => $def ) {
         $slide[ $key ] = ( $saved !== '' ) ? $saved : $default;
     }
     $bg_att_id           = (int) get_post_meta( $_front_id, '_hero_slide_' . $n . '_bg_id', true );
-    $slide['bg_url']     = $bg_att_id ? ( wp_get_attachment_image_url( $bg_att_id, 'full'  ) ?: '' ) : '';
-    $slide['bg_url_sm']  = $bg_att_id ? ( wp_get_attachment_image_url( $bg_att_id, 'large' ) ?: $slide['bg_url'] ) : '';
+    $slide['bg_url']     = $bg_att_id  ? wp_get_attachment_image_url( $bg_att_id,  'full' ) : '';
     $vis_att_id          = (int) get_post_meta( $_front_id, '_hero_slide_' . $n . '_visual_id', true );
     $slide['visual_url'] = $vis_att_id ? wp_get_attachment_image_url( $vis_att_id, 'full' ) : '';
     $_hs_slides[] = $slide;
@@ -140,19 +139,7 @@ $_hs_chip = function( $raw ) {
 
 $_hs_total = count( $_hs_slides );
 ?>
-<?php
-$_hs_bg_css = '';
-foreach ( $_hs_slides as $i => $slide ) {
-    if ( ! $slide['bg_url'] ) continue;
-    $n = $i + 1;
-    $_hs_bg_css .= "#hs-slide-{$n}{background-image:url('" . esc_url( $slide['bg_url_sm'] ) . "');background-size:cover;background-position:center}";
-    if ( $slide['bg_url'] !== $slide['bg_url_sm'] ) {
-        $_hs_bg_css .= "@media(min-width:769px){#hs-slide-{$n}{background-image:url('" . esc_url( $slide['bg_url'] ) . "')}}";
-    }
-}
-?>
 <div class="hs" id="hs">
-    <?php if ( $_hs_bg_css ) : ?><style><?php echo $_hs_bg_css; ?></style><?php endif; ?>
     <div class="hs-progress"><div class="hs-progress-bar"></div></div>
     <div class="hs-counter"><strong id="hs-cur">01</strong><span> / <?php echo str_pad( $_hs_total, 2, '0', STR_PAD_LEFT ); ?></span></div>
 
@@ -162,7 +149,7 @@ foreach ( $_hs_slides as $i => $slide ) {
         $chip1    = $_hs_chip( $slide['chip1'] );
         $chip2    = $_hs_chip( $slide['chip2'] );
     ?>
-    <div class="hs-slide<?php echo $i === 0 ? ' active' : ''; ?>" id="hs-slide-<?php echo $i + 1; ?>" data-bg="<?php echo esc_attr( $slide['bg'] ); ?>">
+    <div class="hs-slide<?php echo $i === 0 ? ' active' : ''; ?>" data-bg="<?php echo esc_attr( $slide['bg'] ); ?>"<?php if ( $slide['bg_url'] ) : ?> style="background-image:url('<?php echo esc_url( $slide['bg_url'] ); ?>');background-size:cover;background-position:center;"<?php endif; ?>>
         <div class="hs-content">
             <div class="hs-eyebrow"><?php echo esc_html( $slide['eyebrow'] ); ?></div>
             <h1><?php echo $_hs_title( $slide['title'] ); ?></h1>

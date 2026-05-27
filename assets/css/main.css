@@ -2304,7 +2304,7 @@ ul.products {
     letter-spacing: 1.5px;
 }
 .sp-desc-aside {
-    background: rgb(249, 237, 226);
+    background: #fffaf5;
     border: 1px solid rgba(224,122,63,.15);
     border-radius: 16px;
     padding: 28px;

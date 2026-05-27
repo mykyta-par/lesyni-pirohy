@@ -1371,7 +1371,7 @@ ul.products {
 }
 .product-badge--hit  { background: linear-gradient(135deg, #ff6b35 0%, #e03e1a 100%); box-shadow: 0 2px 8px rgba(224,62,26,.35); }
 .product-badge--new  { background: #7a9b6e; }
-.product-badge--sale { background: var(--color-primary); }
+.product-badge--sale { background: linear-gradient(135deg, #ff4d4d 0%, #d4192d 100%); box-shadow: 0 2px 8px rgba(212,25,45,.4); }
 
 .product-image {
     width: 100%;
@@ -1944,7 +1944,7 @@ ul.products {
 }
 .sp-img-badge--hit  { background: linear-gradient(135deg, #ff6b35 0%, #e03e1a 100%); box-shadow: 0 2px 8px rgba(224,62,26,.35); }
 .sp-img-badge--new  { background: #7a9b6e; }
-.sp-img-badge--sale { background: var(--color-primary); }
+.sp-img-badge--sale { background: linear-gradient(135deg, #ff4d4d 0%, #d4192d 100%); box-shadow: 0 2px 8px rgba(212,25,45,.4); }
 
 /* Pie visual sizes */
 .pie-visual--lg { width: 160px !important; height: 160px !important; }

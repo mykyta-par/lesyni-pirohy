@@ -275,30 +275,30 @@ class Lesyni_Zone_Shipping extends WC_Shipping_Method {
     }
 
     /**
-     * Geocode a Ukrainian address string using Google Geocoding API.
+     * Geocode a Ukrainian address string using Nominatim (OpenStreetMap).
      * Returns ['lat' => float, 'lng' => float] or false on failure.
      */
     public static function geocode( $address ) {
-        $api_key = defined( 'LESYNI_GMAPS_KEY' ) ? LESYNI_GMAPS_KEY : '';
-        if ( ! $api_key ) return false;
-
+        // Append city hint to improve accuracy
         $query = urlencode( $address . ', Дніпро, Україна' );
-        $url   = 'https://maps.googleapis.com/maps/api/geocode/json?address=' . $query
-               . '&key=' . $api_key
-               . '&language=uk'
-               . '&region=UA';
+        $url   = 'https://nominatim.openstreetmap.org/search?q=' . $query
+               . '&format=json&limit=1&addressdetails=0'
+               . '&accept-language=uk';
 
-        $response = wp_remote_get( $url, [ 'timeout' => 8 ] );
+        $response = wp_remote_get( $url, [
+            'timeout'    => 8,
+            'user-agent' => 'LesyniPirohy/1.0 (delivery-zone-check; ' . get_bloginfo( 'url' ) . ')',
+            'headers'    => [ 'Referer' => get_bloginfo( 'url' ) ],
+        ] );
 
         if ( is_wp_error( $response ) ) return false;
 
         $body = json_decode( wp_remote_retrieve_body( $response ), true );
-        if ( empty( $body['results'][0]['geometry']['location'] ) ) return false;
+        if ( empty( $body[0]['lat'] ) ) return false;
 
-        $loc = $body['results'][0]['geometry']['location'];
         return [
-            'lat' => (float) $loc['lat'],
-            'lng' => (float) $loc['lng'],
+            'lat' => (float) $body[0]['lat'],
+            'lng' => (float) $body[0]['lon'],
         ];
     }
 }

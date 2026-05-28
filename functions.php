@@ -1278,10 +1278,10 @@ function lesyni_hero_meta_box_html( $post ) {
                 </div>
 
                 <label>Чіп 1 (іконка/підпис/значення)</label>
-                <input type="text" name="hero_slide_<?php echo $n; ?>_chip1" value="<?php echo esc_attr( $sr('chip1') ); ?>" placeholder="⏱/Доставка/за 90 хв">
+                <input type="text" name="hero_slide_<?php echo $n; ?>_chip1" value="<?php echo esc_attr( html_entity_decode( $sr('chip1'), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ); ?>" placeholder="⏱/Доставка/за 90 хв">
 
                 <label>Чіп 2 (іконка/підпис/значення)</label>
-                <input type="text" name="hero_slide_<?php echo $n; ?>_chip2" value="<?php echo esc_attr( $sr('chip2') ); ?>" placeholder="⭐/Рейтинг/4.9 / 5">
+                <input type="text" name="hero_slide_<?php echo $n; ?>_chip2" value="<?php echo esc_attr( html_entity_decode( $sr('chip2'), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ); ?>" placeholder="⭐/Рейтинг/4.9 / 5">
 
                 <div class="hero-mb-row">
                     <div>
@@ -1453,8 +1453,9 @@ function lesyni_hero_save_meta( $post_id ) {
         delete_post_meta( $post_id, '_hero_bg_id' );
     }
 
-    $slide_fields     = [ 'eyebrow', 'title', 'subtitle', 'bg', 'chip1', 'chip2', 'btn1_text', 'btn2_text' ];
+    $slide_fields     = [ 'eyebrow', 'title', 'subtitle', 'bg', 'btn1_text', 'btn2_text' ];
     $slide_url_fields = [ 'btn1_url', 'btn2_url' ];
+    $slide_chip_fields = [ 'chip1', 'chip2' ];
     for ( $n = 1; $n <= 3; $n++ ) {
         foreach ( $slide_fields as $key ) {
             $post_key = 'hero_slide_' . $n . '_' . $key;
@@ -1466,6 +1467,13 @@ function lesyni_hero_save_meta( $post_id ) {
             $post_key = 'hero_slide_' . $n . '_' . $key;
             if ( isset( $_POST[ $post_key ] ) ) {
                 update_post_meta( $post_id, '_hero_slide_' . $n . '_' . $key, esc_url_raw( wp_unslash( $_POST[ $post_key ] ) ) );
+            }
+        }
+        foreach ( $slide_chip_fields as $key ) {
+            $post_key = 'hero_slide_' . $n . '_' . $key;
+            if ( isset( $_POST[ $post_key ] ) ) {
+                $raw = trim( wp_strip_all_tags( wp_unslash( $_POST[ $post_key ] ) ) );
+                update_post_meta( $post_id, '_hero_slide_' . $n . '_' . $key, wp_encode_emoji( $raw ) );
             }
         }
         // Emoji: encode to HTML entities — survives utf8 (non-utf8mb4) databases

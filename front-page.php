@@ -137,7 +137,8 @@ $_hs_title = function( $raw ) {
 };
 
 $_hs_chip = function( $raw ) {
-    $p = array_map( 'trim', explode( '/', $raw, 3 ) );
+    $decoded = html_entity_decode( $raw, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    $p = array_map( 'trim', explode( '/', $decoded, 3 ) );
     return [ 'ic' => $p[0] ?? '', 'lbl' => $p[1] ?? '', 'val' => $p[2] ?? '' ];
 };
 

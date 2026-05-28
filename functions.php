@@ -563,7 +563,7 @@ add_action( 'wp', function () {
 // Runs at priority 5 so the <div> is in the DOM before footer scripts execute.
 add_action( 'wp_footer', function () {
 	$config = [
-		'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+		'ajaxUrl'        => set_url_scheme( admin_url( 'admin-ajax.php' ), is_ssl() ? 'https' : 'http' ),
 		'nonce'          => wp_create_nonce( 'lesyni_zone_nonce' ),
 		'greenFreeFrom'  => (int) get_option( 'lesyni_green_free_from',  600 ),
 		'greenCost'      => (int) get_option( 'lesyni_green_cost',        100 ),

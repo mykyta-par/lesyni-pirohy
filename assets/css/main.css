@@ -177,6 +177,25 @@ ul, ol   { list-style: none; }
 /* --------------------------------------------------------------------------
    5. Site Header
    -------------------------------------------------------------------------- */
+/* ── Working hours banner ────────────────────────────────────────── */
+.wh-banner {
+    background: #2c2c2c;
+    color: rgba(255,255,255,.9);
+    font-size: 13px;
+    text-align: center;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    line-height: 1.4;
+}
+.wh-banner__icon { font-size: 15px; flex-shrink: 0; }
+.wh-banner__text { max-width: 700px; }
+@media (max-width: 600px) {
+    .wh-banner { font-size: 12px; padding: 8px 16px; }
+}
+
 .site-header {
     position: sticky;
     top: 0;

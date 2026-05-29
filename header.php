@@ -49,3 +49,4 @@
         <?php endif; ?>
     </div>
 </header>
+<?php do_action( 'lesyni_after_header' ); ?>

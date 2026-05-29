@@ -1914,3 +1914,138 @@ add_action( 'save_post_page', function ( $post_id ) {
         update_post_meta( $post_id, '_del_faq', wp_json_encode( $clean, JSON_UNESCAPED_UNICODE ) );
     }
 } );
+
+/* =======================================================================
+   Режим роботи — admin page + frontend banner
+======================================================================= */
+
+/* ── Admin menu ─────────────────────────────────────────────────────── */
+add_action( 'admin_menu', function () {
+    add_menu_page(
+        'Режим роботи',
+        'Режим роботи',
+        'manage_options',
+        'lesyni-working-hours',
+        'lesyni_working_hours_page',
+        'dashicons-clock',
+        59
+    );
+} );
+
+function lesyni_working_hours_page() {
+    if ( ! current_user_can( 'manage_options' ) ) return;
+
+    if ( isset( $_POST['lesyni_wh_save'] ) && check_admin_referer( 'lesyni_wh_save' ) ) {
+        update_option( 'lesyni_wh_days',       isset( $_POST['lesyni_wh_days'] ) ? array_map( 'intval', $_POST['lesyni_wh_days'] ) : [] );
+        update_option( 'lesyni_wh_start',      sanitize_text_field( wp_unslash( $_POST['lesyni_wh_start'] ?? '09:00' ) ) );
+        update_option( 'lesyni_wh_end',        sanitize_text_field( wp_unslash( $_POST['lesyni_wh_end']   ?? '21:00' ) ) );
+        update_option( 'lesyni_wh_auto_msg',   sanitize_textarea_field( wp_unslash( $_POST['lesyni_wh_auto_msg']   ?? '' ) ) );
+        update_option( 'lesyni_wh_manual_on',  isset( $_POST['lesyni_wh_manual_on'] ) ? '1' : '0' );
+        update_option( 'lesyni_wh_manual_msg', sanitize_textarea_field( wp_unslash( $_POST['lesyni_wh_manual_msg'] ?? '' ) ) );
+        echo '<div class="notice notice-success is-dismissible"><p>Збережено.</p></div>';
+    }
+
+    $days       = get_option( 'lesyni_wh_days',       [1,2,3,4,5] );
+    $start      = get_option( 'lesyni_wh_start',      '09:00' );
+    $end        = get_option( 'lesyni_wh_end',        '21:00' );
+    $auto_msg   = get_option( 'lesyni_wh_auto_msg',   'Ми зараз не працюємо — але ви можете залишити замовлення, і ми опрацюємо його у найближчий робочий день.' );
+    $manual_on  = get_option( 'lesyni_wh_manual_on',  '0' );
+    $manual_msg = get_option( 'lesyni_wh_manual_msg', '' );
+
+    $day_names = [ 1 => 'Пн', 2 => 'Вт', 3 => 'Ср', 4 => 'Чт', 5 => 'Пт', 6 => 'Сб', 7 => 'Нд' ];
+    ?>
+    <div class="wrap">
+        <h1>Режим роботи</h1>
+        <form method="post">
+            <?php wp_nonce_field( 'lesyni_wh_save' ); ?>
+
+            <table class="form-table">
+                <tr>
+                    <th>Робочі дні</th>
+                    <td>
+                        <?php foreach ( $day_names as $num => $name ) : ?>
+                            <label style="margin-right:14px;">
+                                <input type="checkbox" name="lesyni_wh_days[]" value="<?php echo $num; ?>" <?php checked( in_array( $num, (array) $days ) ); ?>>
+                                <?php echo $name; ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Робочі години</th>
+                    <td>
+                        від <input type="time" name="lesyni_wh_start" value="<?php echo esc_attr( $start ); ?>" style="margin:0 8px;">
+                        до <input type="time" name="lesyni_wh_end" value="<?php echo esc_attr( $end ); ?>" style="margin-left:8px;">
+                    </td>
+                </tr>
+                <tr>
+                    <th>Повідомлення поза робочим часом</th>
+                    <td>
+                        <textarea name="lesyni_wh_auto_msg" rows="3" style="width:500px;"><?php echo esc_textarea( $auto_msg ); ?></textarea>
+                        <p class="description">Показується автоматично коли сайт відкривають поза робочими годинами.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <h2 style="margin-top:28px;">Ручне повідомлення (вихідні / свята)</h2>
+            <table class="form-table">
+                <tr>
+                    <th>Показати зараз</th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="lesyni_wh_manual_on" value="1" <?php checked( $manual_on, '1' ); ?>>
+                            Увімкнути повідомлення вручну
+                        </label>
+                        <p class="description">Перекриває автоматичний режим — показується незалежно від часу.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Текст повідомлення</th>
+                    <td>
+                        <textarea name="lesyni_wh_manual_msg" rows="3" style="width:500px;" placeholder="Сьогодні ми не працюємо у зв'язку зі святковим днем. Замовлення приймаємо — опрацюємо у понеділок."><?php echo esc_textarea( $manual_msg ); ?></textarea>
+                    </td>
+                </tr>
+            </table>
+
+            <p class="submit">
+                <button type="submit" name="lesyni_wh_save" class="button button-primary">Зберегти</button>
+            </p>
+        </form>
+    </div>
+    <?php
+}
+
+/* ── Helper: check if currently working hours ───────────────────────── */
+function lesyni_is_working_now() {
+    $days  = (array) get_option( 'lesyni_wh_days', [1,2,3,4,5] );
+    $start = get_option( 'lesyni_wh_start', '09:00' );
+    $end   = get_option( 'lesyni_wh_end',   '21:00' );
+
+    $tz      = wp_timezone();
+    $now     = new DateTime( 'now', $tz );
+    $day_num = (int) $now->format( 'N' ); // 1=Mon … 7=Sun
+    $time    = $now->format( 'H:i' );
+
+    return in_array( $day_num, $days, false ) && $time >= $start && $time < $end;
+}
+
+/* ── Frontend banner ─────────────────────────────────────────────────── */
+add_action( 'lesyni_after_header', function () {
+    $manual_on  = get_option( 'lesyni_wh_manual_on', '0' );
+    $manual_msg = get_option( 'lesyni_wh_manual_msg', '' );
+    $auto_msg   = get_option( 'lesyni_wh_auto_msg', 'Ми зараз не працюємо — але ви можете залишити замовлення, і ми опрацюємо його у найближчий робочий день.' );
+
+    if ( $manual_on === '1' && $manual_msg ) {
+        $message = $manual_msg;
+    } elseif ( ! lesyni_is_working_now() ) {
+        $message = $auto_msg;
+    } else {
+        return;
+    }
+    ?>
+    <div class="wh-banner" role="alert">
+        <span class="wh-banner__icon">🕐</span>
+        <span class="wh-banner__text"><?php echo esc_html( $message ); ?></span>
+    </div>
+    <?php
+} );

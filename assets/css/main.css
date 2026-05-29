@@ -179,21 +179,24 @@ ul, ol   { list-style: none; }
    -------------------------------------------------------------------------- */
 /* ── Working hours banner ────────────────────────────────────────── */
 .wh-banner {
-    background: #2c2c2c;
-    color: rgba(255,255,255,.9);
-    font-size: 13px;
+    background: linear-gradient(135deg, #e07a3f 0%, #d4672d 100%);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
     text-align: center;
-    padding: 10px 20px;
+    padding: 13px 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     line-height: 1.4;
+    box-shadow: 0 2px 8px rgba(224,122,63,.35);
+    letter-spacing: 0.1px;
 }
-.wh-banner__icon { font-size: 15px; flex-shrink: 0; }
+.wh-banner__icon { font-size: 17px; flex-shrink: 0; }
 .wh-banner__text { max-width: 700px; }
 @media (max-width: 600px) {
-    .wh-banner { font-size: 12px; padding: 8px 16px; }
+    .wh-banner { font-size: 13px; padding: 10px 16px; }
 }
 
 .site-header {

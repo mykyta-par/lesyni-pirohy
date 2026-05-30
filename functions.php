@@ -472,9 +472,22 @@ function lesyni_ajax_add_to_cart() {
 		wp_send_json_error( [ 'message' => 'Invalid product' ], 400 );
 		return;
 	}
-	// Passing variation_id as first argument works: WC detects it's a
-	// variation and automatically resolves the parent + attributes.
-	$key = WC()->cart->add_to_cart( $item_id, $quantity );
+
+	$product = wc_get_product( $item_id );
+	if ( ! $product ) {
+		wp_send_json_error( [ 'message' => 'Product not found' ], 400 );
+		return;
+	}
+
+	if ( $product->is_type( 'variation' ) ) {
+		$parent_id    = $product->get_parent_id();
+		$variation_id = $item_id;
+		$attributes   = $product->get_variation_attributes(); // e.g. ['attribute_pa_rozmir' => 'malyi']
+		$key = WC()->cart->add_to_cart( $parent_id, $quantity, $variation_id, $attributes );
+	} else {
+		$key = WC()->cart->add_to_cart( $item_id, $quantity );
+	}
+
 	if ( $key ) {
 		wp_send_json_success( [ 'count' => WC()->cart->get_cart_contents_count() ] );
 	} else {

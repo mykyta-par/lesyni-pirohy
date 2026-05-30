@@ -482,8 +482,13 @@ function lesyni_ajax_add_to_cart() {
 	if ( $product->is_type( 'variation' ) ) {
 		$parent_id    = $product->get_parent_id();
 		$variation_id = $item_id;
-		$attributes   = $product->get_variation_attributes(); // e.g. ['attribute_pa_rozmir' => 'malyi']
+		$attributes   = $product->get_variation_attributes(); // ['attribute_pa_rozmir' => 'malyi']
 		$key = WC()->cart->add_to_cart( $parent_id, $quantity, $variation_id, $attributes );
+		if ( ! $key ) {
+			// Fallback: some hosting configs reject attribute validation — add without explicit attrs
+			wc_clear_notices();
+			$key = WC()->cart->add_to_cart( $parent_id, $quantity, $variation_id );
+		}
 	} else {
 		$key = WC()->cart->add_to_cart( $item_id, $quantity );
 	}
@@ -714,36 +719,6 @@ add_action( 'woocommerce_thankyou', function ( $order_id ) {
     echo '</address>';
     echo '</div></section>';
 }, 20 );
-
-/* -----------------------------------------------------------------------
-   WooCommerce REST API — append variation attributes to line item name
-   Poster POS fetches orders via REST API and reads only the "name" field,
-   ignoring "meta_data" where variation attributes are stored separately.
-   This filter appends them so Poster shows e.g. "Пиріг з вишнею (Малий)".
------------------------------------------------------------------------ */
-add_filter( 'woocommerce_rest_prepare_shop_order_object', function ( $response, $object, $request ) {
-    $data = $response->get_data();
-    if ( empty( $data['line_items'] ) ) {
-        return $response;
-    }
-    foreach ( $data['line_items'] as &$item ) {
-        if ( empty( $item['variation_id'] ) || empty( $item['meta_data'] ) ) {
-            continue;
-        }
-        $labels = [];
-        foreach ( $item['meta_data'] as $meta ) {
-            if ( substr( $meta['key'], 0, 1 ) === '_' ) continue; // skip hidden meta
-            if ( ! empty( $meta['display_value'] ) ) {
-                $labels[] = $meta['display_value'];
-            }
-        }
-        if ( ! empty( $labels ) ) {
-            $item['name'] .= ' (' . implode( ', ', $labels ) . ')';
-        }
-    }
-    $response->set_data( $data );
-    return $response;
-}, 10, 3 );
 
 /* -----------------------------------------------------------------------
    WooCommerce: Checkout — save custom order fields (HPOS-compatible)

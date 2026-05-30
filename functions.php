@@ -687,8 +687,10 @@ add_action( 'woocommerce_checkout_process', function () {
    WooCommerce: Thank you page — show NP delivery details
 ----------------------------------------------------------------------- */
 add_action( 'woocommerce_thankyou', function ( $order_id ) {
-    $np_city   = get_post_meta( $order_id, '_np_city',   true );
-    $np_branch = get_post_meta( $order_id, '_np_branch', true );
+    $order     = wc_get_order( $order_id );
+    if ( ! $order ) return;
+    $np_city   = $order->get_meta( '_np_city' );
+    $np_branch = $order->get_meta( '_np_branch' );
     if ( ! $np_city && ! $np_branch ) return;
     echo '<section class="woocommerce-columns woocommerce-columns--2 col2-set addresses">';
     echo '<div class="woocommerce-column woocommerce-column--1">';
@@ -701,9 +703,12 @@ add_action( 'woocommerce_thankyou', function ( $order_id ) {
 }, 20 );
 
 /* -----------------------------------------------------------------------
-   WooCommerce: Checkout — save custom order fields
+   WooCommerce: Checkout — save custom order fields (HPOS-compatible)
 ----------------------------------------------------------------------- */
 add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {
+    $order = wc_get_order( $order_id );
+    if ( ! $order ) return;
+
     $fields = [
         'delivery_time'     => 'Час доставки',
         'delivery_type'     => 'Тип доставки',
@@ -714,25 +719,23 @@ add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {
     ];
     foreach ( $fields as $key => $label ) {
         if ( isset( $_POST[ $key ] ) && $_POST[ $key ] !== '' ) {
-            update_post_meta( $order_id, '_' . $key, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
+            $order->update_meta_data( '_' . $key, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
         }
     }
+    $order->save();
 
     // Add visible order note when gift is requested (only if feature is enabled)
     if ( get_option( 'lesyni_gift_enabled', 'no' ) === 'yes'
         && ! empty( $_POST['lesyni_gift'] ) && $_POST['lesyni_gift'] === '1' ) {
-        $order = wc_get_order( $order_id );
-        if ( $order ) {
-            $order->add_order_note( '🎁 Подарунок: додати рукописну листівку та святкову стрічку' );
-        }
+        $order->add_order_note( '🎁 Подарунок: додати рукописну листівку та святкову стрічку' );
     }
 } );
 
 // Show gift info in order confirmation emails
 add_action( 'woocommerce_email_after_order_table', function ( $order, $sent_to_admin, $plain_text ) {
     // Nova Poshta address block
-    $np_city   = get_post_meta( $order->get_id(), '_np_city',   true );
-    $np_branch = get_post_meta( $order->get_id(), '_np_branch', true );
+    $np_city   = $order->get_meta( '_np_city' );
+    $np_branch = $order->get_meta( '_np_branch' );
     if ( $np_city || $np_branch ) {
         if ( $plain_text ) {
             echo "\n📦 Нова Пошта: м. " . $np_city . ", відділення " . $np_branch . "\n";
@@ -744,7 +747,7 @@ add_action( 'woocommerce_email_after_order_table', function ( $order, $sent_to_a
     }
 
     // Gift block
-    $gift = get_post_meta( $order->get_id(), '_lesyni_gift', true );
+    $gift = $order->get_meta( '_lesyni_gift' );
     if ( $gift !== '1' ) return;
 
     if ( $plain_text ) {
@@ -766,7 +769,7 @@ add_action( 'woocommerce_admin_order_data_after_billing_address', function ( $or
         '_np_branch'     => 'Відділення НП',
     ];
     foreach ( $fields as $key => $label ) {
-        $val = get_post_meta( $order->get_id(), $key, true );
+        $val = $order->get_meta( $key );
         if ( $val ) {
             echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html( $val ) . '</p>';
         }

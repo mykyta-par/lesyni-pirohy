@@ -731,8 +731,20 @@ add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {
     }
 } );
 
-// Show gift info in order confirmation emails
+// Show delivery time, NP address and gift info in order confirmation emails
 add_action( 'woocommerce_email_after_order_table', function ( $order, $sent_to_admin, $plain_text ) {
+    // Delivery date/time block
+    $delivery_time = $order->get_meta( '_delivery_time' );
+    if ( $delivery_time ) {
+        if ( $plain_text ) {
+            echo "\n🕐 Доставка: " . $delivery_time . "\n";
+        } else {
+            echo '<p style="margin:16px 0;padding:12px 16px;background:#fff8e1;border-left:4px solid #e07a3f;font-family:Arial,sans-serif;font-size:14px;">
+                🕐 <strong>Доставка:</strong> ' . esc_html( $delivery_time ) . '
+            </p>';
+        }
+    }
+
     // Nova Poshta address block
     $np_city   = $order->get_meta( '_np_city' );
     $np_branch = $order->get_meta( '_np_branch' );

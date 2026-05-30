@@ -534,8 +534,6 @@
 
     /* ── When label ─────────────────────────────────────────────── */
     function updateWhen() {
-        var whenEl = document.getElementById('oco-when-label');
-        if (!whenEl) return;
         var dateLabel = 'сьогодні';
         if (selectedDate) {
             var dn = selectedDate.querySelector('.oco-date-day-name').textContent.toLowerCase();
@@ -546,13 +544,16 @@
                 dateLabel = dn;
             }
         }
+        // always write hidden input first, regardless of whether the label element exists
+        var dtInput = document.getElementById('oco-delivery-time-val');
+        if (dtInput) dtInput.value = dateLabel + ', ' + selectedTime;
+        var whenEl = document.getElementById('oco-when-label');
+        if (!whenEl) return;
         if (deliveryType === 'pickup') {
             whenEl.textContent = 'самовивіз, ' + dateLabel;
         } else {
             whenEl.textContent = dateLabel + ', ' + selectedTime;
         }
-        var dtInput = document.getElementById('oco-delivery-time-val');
-        if (dtInput) dtInput.value = dateLabel + ', ' + selectedTime;
     }
 
     /* ── Time slots ─────────────────────────────────────────────── */
@@ -1520,6 +1521,7 @@
             var errBox = document.getElementById('oco-checkout-errors');
             if (errBox) errBox.style.display = 'none';
 
+            updateWhen(); // refresh hidden input with latest selected date+time
             var form = document.getElementById('oco-wc-form');
             var formData = new FormData(form);
 

@@ -1556,6 +1556,51 @@
         });
     }
 
+    /* ── Phone mask: +38 (0XX) XXX-XX-XX ───────────────────────── */
+    var phoneInput = document.getElementById('oco-phone');
+    if (phoneInput) {
+        function applyPhoneMask(raw) {
+            var digits = raw.replace(/\D/g, '');
+            // strip leading 38 if pasted with country code
+            if (digits.startsWith('38') && digits.length > 10) digits = digits.slice(2);
+            digits = digits.slice(0, 10); // max 10 local digits
+            var out = '+38 ';
+            if (digits.length === 0) return '+38 ';
+            if (digits.length <= 3)  return out + '(' + digits;
+            out += '(' + digits.slice(0, 3) + ') ';
+            if (digits.length <= 6)  return out + digits.slice(3);
+            out += digits.slice(3, 6) + '-';
+            if (digits.length <= 8)  return out + digits.slice(6);
+            out += digits.slice(6, 8) + '-';
+            return out + digits.slice(8);
+        }
+
+        phoneInput.addEventListener('input', function () {
+            var pos = phoneInput.selectionStart;
+            var old = phoneInput.value;
+            var masked = applyPhoneMask(old);
+            phoneInput.value = masked;
+            // keep cursor near end of newly typed area
+            var diff = masked.length - old.length;
+            phoneInput.setSelectionRange(pos + diff, pos + diff);
+        });
+
+        phoneInput.addEventListener('keydown', function (e) {
+            // prevent deleting the static prefix '+38 '
+            if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.value.length <= 4) {
+                e.preventDefault();
+            }
+        });
+
+        phoneInput.addEventListener('focus', function () {
+            if (!phoneInput.value) phoneInput.value = '+38 ';
+        });
+
+        phoneInput.addEventListener('blur', function () {
+            if (phoneInput.value === '+38 ') phoneInput.value = '';
+        });
+    }
+
     /* ── Init ───────────────────────────────────────────────────── */
     recalc();
     updateWhen();

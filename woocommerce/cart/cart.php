@@ -221,9 +221,6 @@ else   $count_str = $n . ' позицій';
                             <?php if ( $var_meta ) : ?>
                                 <span class="oco-ci-meta"><?php echo $var_meta; ?></span>
                             <?php endif; ?>
-                            <?php if ( $permalink ) : ?>
-                                <a href="<?php echo esc_url( $permalink ); ?>" class="oco-ci-edit">Змінити параметри</a>
-                            <?php endif; ?>
                         </div>
 
                         <div class="oco-ci-qty">

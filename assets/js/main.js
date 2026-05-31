@@ -1559,41 +1559,50 @@
     /* ── Phone mask: +38 (0XX) XXX-XX-XX ───────────────────────── */
     var phoneInput = document.getElementById('oco-phone');
     if (phoneInput) {
-        function applyPhoneMask(raw) {
-            var digits = raw.replace(/\D/g, '');
-            // strip leading 38 if pasted with country code
-            if (digits.startsWith('38') && digits.length > 10) digits = digits.slice(2);
-            digits = digits.slice(0, 10); // max 10 local digits
+        function formatPhone(digits) {
+            // digits = only numeric chars, up to 10 (local UA number)
+            var d = digits.slice(0, 10);
             var out = '+38 ';
-            if (digits.length === 0) return '+38 ';
-            if (digits.length <= 3)  return out + '(' + digits;
-            out += '(' + digits.slice(0, 3) + ') ';
-            if (digits.length <= 6)  return out + digits.slice(3);
-            out += digits.slice(3, 6) + '-';
-            if (digits.length <= 8)  return out + digits.slice(6);
-            out += digits.slice(6, 8) + '-';
-            return out + digits.slice(8);
+            if (d.length === 0)  return out;
+            if (d.length <= 3)   return out + '(' + d;
+            out += '(' + d.slice(0, 3) + ') ';
+            if (d.length <= 6)   return out + d.slice(3);
+            out += d.slice(3, 6) + '-';
+            if (d.length <= 8)   return out + d.slice(6);
+            out += d.slice(6, 8) + '-' + d.slice(8);
+            return out;
+        }
+
+        function getDigits(val) {
+            var digits = val.replace(/\D/g, '');
+            // strip country code 38 when present (pasted as +380... or 380...)
+            if (digits.length > 10 && digits.slice(0, 2) === '38') {
+                digits = digits.slice(2);
+            }
+            return digits;
         }
 
         phoneInput.addEventListener('input', function () {
-            var pos = phoneInput.selectionStart;
-            var old = phoneInput.value;
-            var masked = applyPhoneMask(old);
+            var digits  = getDigits(phoneInput.value);
+            var masked  = formatPhone(digits);
             phoneInput.value = masked;
-            // keep cursor near end of newly typed area
-            var diff = masked.length - old.length;
-            phoneInput.setSelectionRange(pos + diff, pos + diff);
+            // always move cursor to end — simplest reliable behaviour
+            phoneInput.setSelectionRange(masked.length, masked.length);
         });
 
         phoneInput.addEventListener('keydown', function (e) {
-            // prevent deleting the static prefix '+38 '
-            if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.value.length <= 4) {
+            // protect the "+38 " prefix from deletion
+            var atStart = phoneInput.selectionStart <= 4 && phoneInput.selectionEnd <= 4;
+            if (atStart && (e.key === 'Backspace' || e.key === 'Delete')) {
                 e.preventDefault();
             }
         });
 
         phoneInput.addEventListener('focus', function () {
             if (!phoneInput.value) phoneInput.value = '+38 ';
+            // move cursor to end so user starts typing after prefix
+            var len = phoneInput.value.length;
+            phoneInput.setSelectionRange(len, len);
         });
 
         phoneInput.addEventListener('blur', function () {

@@ -524,6 +524,7 @@ function lesyni_ajax_cart_drawer() {
 			foreach ( $item['variation'] as $attr => $val ) {
 				if ( ! $val ) continue;
 				$taxonomy = str_replace( 'attribute_', '', $attr );
+				$val      = urldecode( $val ); // slugs may be URL-encoded for Cyrillic
 				$term     = get_term_by( 'slug', $val, $taxonomy );
 				$parts[]  = $term ? $term->name : $val;
 			}

@@ -519,17 +519,6 @@ function lesyni_ajax_cart_drawer() {
 		$price   = (float) $product->get_price();
 		$thumb   = get_the_post_thumbnail_url( $item['product_id'], 'thumbnail' );
 		$variation_label = '';
-		if ( ! empty( $item['variation'] ) ) {
-			$parts = [];
-			foreach ( $item['variation'] as $attr => $val ) {
-				if ( ! $val ) continue;
-				$taxonomy = str_replace( 'attribute_', '', $attr );
-				$val      = urldecode( $val ); // slugs may be URL-encoded for Cyrillic
-				$term     = get_term_by( 'slug', $val, $taxonomy );
-				$parts[]  = $term ? $term->name : $val;
-			}
-			$variation_label = implode( ', ', $parts );
-		}
 		$items[] = [
 			'key'       => $key,
 			'name'      => $name,

@@ -1559,52 +1559,32 @@
     /* ── Phone mask: +38 (0XX) XXX-XX-XX ───────────────────────── */
     var phoneInput = document.getElementById('oco-phone');
     if (phoneInput) {
-        function formatPhone(digits) {
-            // digits = only numeric chars, up to 10 (local UA number)
-            var d = digits.slice(0, 10);
-            var out = '+38 ';
-            if (d.length === 0)  return out;
-            if (d.length <= 3)   return out + '(' + d;
-            out += '(' + d.slice(0, 3) + ') ';
-            if (d.length <= 6)   return out + d.slice(3);
-            out += d.slice(3, 6) + '-';
-            if (d.length <= 8)   return out + d.slice(6);
-            out += d.slice(6, 8) + '-' + d.slice(8);
-            return out;
+        function phoneDigits(val) {
+            var d = val.replace(/\D/g, '');
+            if (d.slice(0, 2) === '38') d = d.slice(2); // always strip country code
+            return d.slice(0, 10);
         }
-
-        function getDigits(val) {
-            var digits = val.replace(/\D/g, '');
-            // strip country code 38 when present (pasted as +380... or 380...)
-            if (digits.length > 10 && digits.slice(0, 2) === '38') {
-                digits = digits.slice(2);
-            }
-            return digits;
+        function phoneFormat(d) {
+            if (!d) return '';
+            var s = '+38 ';
+            if (d.length <= 3) return s + '(' + d;
+            s += '(' + d.slice(0, 3) + ') ';
+            if (d.length <= 6) return s + d.slice(3);
+            s += d.slice(3, 6) + '-';
+            if (d.length <= 8) return s + d.slice(6);
+            return s + d.slice(6, 8) + '-' + d.slice(8);
         }
-
         phoneInput.addEventListener('input', function () {
-            var digits  = getDigits(phoneInput.value);
-            var masked  = formatPhone(digits);
-            phoneInput.value = masked;
-            // always move cursor to end — simplest reliable behaviour
-            phoneInput.setSelectionRange(masked.length, masked.length);
+            var d = phoneDigits(phoneInput.value);
+            var f = phoneFormat(d);
+            phoneInput.value = f;
+            phoneInput.setSelectionRange(f.length, f.length);
         });
-
-        phoneInput.addEventListener('keydown', function (e) {
-            // protect the "+38 " prefix from deletion
-            var atStart = phoneInput.selectionStart <= 4 && phoneInput.selectionEnd <= 4;
-            if (atStart && (e.key === 'Backspace' || e.key === 'Delete')) {
-                e.preventDefault();
-            }
-        });
-
         phoneInput.addEventListener('focus', function () {
             if (!phoneInput.value) phoneInput.value = '+38 ';
-            // move cursor to end so user starts typing after prefix
-            var len = phoneInput.value.length;
-            phoneInput.setSelectionRange(len, len);
+            var l = phoneInput.value.length;
+            phoneInput.setSelectionRange(l, l);
         });
-
         phoneInput.addEventListener('blur', function () {
             if (phoneInput.value === '+38 ') phoneInput.value = '';
         });

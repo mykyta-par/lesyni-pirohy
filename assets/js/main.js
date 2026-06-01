@@ -565,6 +565,7 @@
         // "Якнайшвидше" available during working hours 09:00–18:30
         var WORK_START   = 9 * 60;
         var ASAP_CUTOFF  = 18 * 60 + 30;
+        var LEAD_TIME    = 60; // мін. час до початку слоту (1 година)
 
         var firstEnabled = null;
         var asapSlot     = null;
@@ -582,7 +583,8 @@
                     var m = time.match(/^(\d+):(\d+)/);
                     if (m) {
                         var slotStart = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
-                        disabled = cur >= slotStart;
+                        // disable if less than LEAD_TIME minutes before slot start
+                        disabled = cur >= slotStart - LEAD_TIME;
                     }
                 }
             }

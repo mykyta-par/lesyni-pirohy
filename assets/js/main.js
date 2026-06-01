@@ -524,6 +524,7 @@
                     picker.querySelectorAll('.oco-date-card').forEach(function (x) { x.classList.remove('oco-date--active'); });
                     c.classList.add('oco-date--active');
                     selectedDate = c;
+                    initTimeSlots(); // re-evaluate slots for the newly selected date
                     updateWhen();
                 };
             })(card));
@@ -562,10 +563,14 @@
     function initTimeSlots() {
         var now = new Date();
         var cur = now.getHours() * 60 + now.getMinutes();
-        // "Якнайшвидше" available during working hours 09:00–18:30
-        var WORK_START   = 9 * 60;
-        var ASAP_CUTOFF  = 18 * 60 + 30;
-        var LEAD_TIME    = 60; // мін. час до початку слоту (1 година)
+        var WORK_START = 9 * 60;
+        var ASAP_CUTOFF = 18 * 60 + 30;
+        var LEAD_TIME = 60; // мін. час до початку слоту (1 година)
+
+        // check if selected date is today
+        var todaySelected = !selectedDate ||
+            (selectedDate.querySelector('.oco-date-day-name') &&
+             selectedDate.querySelector('.oco-date-day-name').textContent.toLowerCase() === 'сьогодні');
 
         var firstEnabled = null;
         var asapSlot     = null;
@@ -577,15 +582,18 @@
             if (!disabled) {
                 if (time === 'Якнайшвидше') {
                     asapSlot = slot;
-                    disabled = cur < WORK_START || cur > ASAP_CUTOFF;
+                    // "Якнайшвидше" only makes sense for today
+                    disabled = !todaySelected || cur < WORK_START || cur > ASAP_CUTOFF;
                 } else {
-                    // Parse start hour from "HH:MM–HH:MM"
-                    var m = time.match(/^(\d+):(\d+)/);
-                    if (m) {
-                        var slotStart = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
-                        // disable if less than LEAD_TIME minutes before slot start
-                        disabled = cur >= slotStart - LEAD_TIME;
+                    if (todaySelected) {
+                        // today: disable slots within lead time
+                        var m = time.match(/^(\d+):(\d+)/);
+                        if (m) {
+                            var slotStart = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+                            disabled = cur >= slotStart - LEAD_TIME;
+                        }
                     }
+                    // future date: all slots available (disabled stays false)
                 }
             }
 

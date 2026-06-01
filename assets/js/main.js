@@ -64,6 +64,18 @@
     }
 
     /* ------------------------------------------------------------------
+       Catalog: ordering dropdown — WooCommerce relies on jQuery to submit
+       the orderby form; this vanilla JS fallback covers cases where WC's
+       own script hasn't bound the handler yet.
+    ------------------------------------------------------------------ */
+    document.addEventListener('change', function (e) {
+        if (e.target && e.target.matches('.woocommerce-ordering select')) {
+            var form = e.target.closest('form');
+            if (form) form.submit();
+        }
+    });
+
+    /* ------------------------------------------------------------------
        Catalog: category tab filter
     ------------------------------------------------------------------ */
     var tabs  = document.querySelectorAll('.category-tab[data-category]');

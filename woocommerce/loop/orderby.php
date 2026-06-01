@@ -20,7 +20,7 @@ $orderby = isset( $_GET['orderby'] )
     : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', 'menu_order' ) );
 ?>
 <form class="catalog-sort__form" method="get">
-    <select name="orderby" class="catalog-sort__select" aria-label="Сортування">
+    <select name="orderby" class="catalog-sort__select" aria-label="Сортування" onchange="this.form.submit()">
         <?php foreach ( $catalog_orderby_options as $id => $name ) : ?>
             <option value="<?php echo esc_attr( $id ); ?>" <?php selected( $orderby, $id ); ?>>
                 <?php echo esc_html( $name ); ?>

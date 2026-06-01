@@ -64,6 +64,17 @@
     }
 
     /* ------------------------------------------------------------------
+       Catalog: ordering select — submit form on change
+    ------------------------------------------------------------------ */
+    var orderingSelect = document.querySelector('.woocommerce-ordering select.orderby');
+    if (orderingSelect) {
+        orderingSelect.addEventListener('change', function () {
+            var form = orderingSelect.closest('form');
+            if (form) form.submit();
+        });
+    }
+
+    /* ------------------------------------------------------------------
        Catalog: category tab filter
     ------------------------------------------------------------------ */
     var tabs  = document.querySelectorAll('.category-tab[data-category]');

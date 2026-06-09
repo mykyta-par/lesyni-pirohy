@@ -2062,9 +2062,15 @@ add_action( 'woocommerce_api_wc_gateway_liqpay', function () {
     $order = wc_get_order( absint( $data['order_id'] ) );
     if ( ! $order ) return;
 
-    $payment_id = sanitize_text_field( $data['payment_id'] );
+    $payment_id   = sanitize_text_field( $data['payment_id'] );
+    $liqpay_line  = 'LiqPay ID: ' . $payment_id;
+
     $order->update_meta_data( '_liqpay_payment_id', $payment_id );
     $order->add_order_note( 'LiqPay ID транзакції: ' . $payment_id );
+
+    $existing = $order->get_customer_note();
+    $order->set_customer_note( $existing ? $existing . "\n" . $liqpay_line : $liqpay_line );
+
     $order->save();
 }, 1 );
 

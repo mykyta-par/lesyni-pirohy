@@ -2052,6 +2052,22 @@ function lesyni_is_working_now() {
     return in_array( $day_num, $days, false ) && $time >= $start && $time < $end;
 }
 
+/* ── LiqPay: save payment_id to order ───────────────────────────────── */
+add_action( 'woocommerce_api_wc_gateway_liqpay', function () {
+    if ( empty( $_POST['data'] ) ) return;
+
+    $data = json_decode( base64_decode( sanitize_text_field( wp_unslash( $_POST['data'] ) ) ), true );
+    if ( empty( $data['payment_id'] ) || empty( $data['order_id'] ) ) return;
+
+    $order = wc_get_order( absint( $data['order_id'] ) );
+    if ( ! $order ) return;
+
+    $payment_id = sanitize_text_field( $data['payment_id'] );
+    $order->update_meta_data( '_liqpay_payment_id', $payment_id );
+    $order->add_order_note( 'LiqPay ID транзакції: ' . $payment_id );
+    $order->save();
+}, 1 );
+
 /* ── Frontend banner ─────────────────────────────────────────────────── */
 add_action( 'lesyni_after_header', function () {
     $manual_on  = get_option( 'lesyni_wh_manual_on', '0' );

@@ -741,6 +741,20 @@ add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {
 
 // Show delivery time, NP address and gift info in order confirmation emails
 add_action( 'woocommerce_email_after_order_table', function ( $order, $sent_to_admin, $plain_text ) {
+    // Plain phone number for operator (easy copy-paste into Poster)
+    if ( $sent_to_admin ) {
+        $raw_phone  = preg_replace( '/\D/', '', $order->get_billing_phone() );
+        if ( strlen( $raw_phone ) === 10 ) $raw_phone = '38' . $raw_phone;
+        $plain_phone = '+' . $raw_phone;
+        if ( $plain_text ) {
+            echo "\n📞 Телефон для вставки: " . $plain_phone . "\n";
+        } else {
+            echo '<p style="margin:16px 0;padding:12px 16px;background:#f0f7ff;border-left:4px solid #2196f3;font-family:Arial,sans-serif;font-size:14px;">
+                📞 <strong>Телефон для Poster:</strong> <span style="font-size:16px;letter-spacing:1px;">' . esc_html( $plain_phone ) . '</span>
+            </p>';
+        }
+    }
+
     // Delivery date/time block
     $delivery_time = $order->get_meta( '_delivery_time' );
     if ( $delivery_time ) {

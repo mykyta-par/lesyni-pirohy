@@ -2108,3 +2108,11 @@ add_action( 'lesyni_after_header', function () {
     </div>
     <?php
 } );
+
+/* ── Checkout: billing_last_name not required (single name field used) ── */
+add_filter( 'woocommerce_billing_fields', function ( $fields ) {
+    if ( isset( $fields['billing_last_name'] ) ) {
+        $fields['billing_last_name']['required'] = false;
+    }
+    return $fields;
+} );

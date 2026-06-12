@@ -2,6 +2,8 @@
 /**
  * Single product review — overrides woocommerce/templates/single-product/review.php
  * Replaces Gravatar with an initial-letter circle matching the Reviews_Tab.html mockup.
+ *
+ * @version 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;

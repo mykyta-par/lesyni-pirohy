@@ -2,6 +2,8 @@
 /**
  * WooCommerce: Combined Cart + Checkout page
  * Overrides: woocommerce/templates/cart/cart.php
+ *
+ * @version 10.8.0
  */
 
 defined( 'ABSPATH' ) || exit;

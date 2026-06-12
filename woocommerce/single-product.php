@@ -2,6 +2,8 @@
 /**
  * WooCommerce: Single product page
  * Overrides: woocommerce/templates/single-product.php
+ *
+ * @version 1.6.4
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

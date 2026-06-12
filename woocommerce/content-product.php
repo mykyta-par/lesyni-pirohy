@@ -2,6 +2,8 @@
 /**
  * WooCommerce: Product loop item (card)
  * Overrides: woocommerce/templates/content-product.php
+ *
+ * @version 9.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

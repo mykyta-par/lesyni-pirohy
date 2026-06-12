@@ -2,6 +2,7 @@
 /**
  * Email header — overrides woocommerce/templates/emails/email-header.php
  *
+ * @version 10.7.0
  * @var string $email_heading
  */
 defined( 'ABSPATH' ) || exit;

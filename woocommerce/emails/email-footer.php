@@ -1,6 +1,8 @@
 <?php
 /**
  * Email footer — overrides woocommerce/templates/emails/email-footer.php
+ *
+ * @version 10.4.0
  */
 defined( 'ABSPATH' ) || exit;
 

@@ -3,6 +3,7 @@
  * Customer processing order email — custom branded template
  * Overrides: woocommerce/templates/emails/customer-processing-order.php
  *
+ * @version 10.4.0
  * @var WC_Order $order
  * @var string   $email_heading
  * @var string   $additional_content

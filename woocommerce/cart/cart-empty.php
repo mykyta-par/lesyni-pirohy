@@ -2,6 +2,8 @@
 /**
  * WooCommerce: Empty cart page
  * Overrides: woocommerce/templates/cart/cart-empty.php
+ *
+ * @version 7.0.1
  */
 
 defined( 'ABSPATH' ) || exit;

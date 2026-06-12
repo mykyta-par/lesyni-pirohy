@@ -2,6 +2,8 @@
 /**
  * WooCommerce: Checkout form
  * Overrides: woocommerce/templates/checkout/form-checkout.php
+ *
+ * @version 9.4.0
  */
 
 defined( 'ABSPATH' ) || exit;

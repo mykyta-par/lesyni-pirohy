@@ -1,6 +1,8 @@
 <?php
 /**
  * Email styles — overrides woocommerce/templates/emails/email-styles.php
+ *
+ * @version 10.8.0
  */
 defined( 'ABSPATH' ) || exit;
 

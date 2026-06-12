@@ -2,6 +2,8 @@
 /**
  * WooCommerce: Shop/Catalog archive page
  * Overrides: woocommerce/templates/archive-product.php
+ *
+ * @version 8.6.0
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -2,6 +2,8 @@
 /**
  * WooCommerce: Catalog ordering / sort dropdown
  * Overrides: woocommerce/templates/loop/orderby.php
+ *
+ * @version 9.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

@@ -2,6 +2,8 @@
 /**
  * Description tab content — two-column layout
  * Overrides: woocommerce/templates/single-product/tabs/description.php
+ *
+ * @version 2.0.0
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 

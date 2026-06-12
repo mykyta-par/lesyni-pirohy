@@ -2,6 +2,8 @@
 /**
  * WooCommerce: Order Received / Thank You page
  * Overrides: woocommerce/templates/checkout/thankyou.php
+ *
+ * @version 8.1.0
  */
 
 defined( 'ABSPATH' ) || exit;

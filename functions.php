@@ -2117,7 +2117,7 @@ add_filter( 'woocommerce_billing_fields', function ( $fields ) {
     return $fields;
 } );
 
-/* ── Checkout: address fields not required (custom form handles address) ── */
+/* ── Checkout: address not required by default (validated manually below) ── */
 add_filter( 'woocommerce_billing_fields', function ( $fields ) {
     foreach ( [ 'billing_address_1', 'billing_address_2', 'billing_city', 'billing_postcode', 'billing_state' ] as $key ) {
         if ( isset( $fields[ $key ] ) ) {
@@ -2125,4 +2125,13 @@ add_filter( 'woocommerce_billing_fields', function ( $fields ) {
         }
     }
     return $fields;
+} );
+
+/* ── Checkout: require address only for courier delivery ─────────────── */
+add_action( 'woocommerce_checkout_process', function () {
+    $methods  = isset( $_POST['shipping_method'] ) ? (array) $_POST['shipping_method'] : [];
+    $chosen   = reset( $methods );
+    if ( $chosen === 'lesyni_zone_rate' && empty( $_POST['billing_address_1'] ) ) {
+        wc_add_notice( 'Будь ласка, вкажіть адресу доставки.', 'error' );
+    }
 } );

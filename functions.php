@@ -2117,15 +2117,11 @@ add_filter( 'woocommerce_billing_fields', function ( $fields ) {
     return $fields;
 } );
 
-/* ── Checkout: address fields not required for pickup shipping ────────── */
-add_filter( 'woocommerce_checkout_fields', function ( $fields ) {
-    $chosen = WC()->session ? WC()->session->get( 'chosen_shipping_methods', [] ) : [];
-    $is_pickup = ! empty( $chosen ) && strpos( reset( $chosen ), 'local_pickup' ) !== false;
-    if ( $is_pickup ) {
-        foreach ( [ 'billing_address_1', 'billing_address_2', 'billing_city', 'billing_postcode', 'billing_state' ] as $key ) {
-            if ( isset( $fields['billing'][ $key ] ) ) {
-                $fields['billing'][ $key ]['required'] = false;
-            }
+/* ── Checkout: address fields not required (custom form handles address) ── */
+add_filter( 'woocommerce_billing_fields', function ( $fields ) {
+    foreach ( [ 'billing_address_1', 'billing_address_2', 'billing_city', 'billing_postcode', 'billing_state' ] as $key ) {
+        if ( isset( $fields[ $key ] ) ) {
+            $fields[ $key ]['required'] = false;
         }
     }
     return $fields;

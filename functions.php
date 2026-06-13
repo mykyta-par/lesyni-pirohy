@@ -2117,21 +2117,13 @@ add_filter( 'woocommerce_billing_fields', function ( $fields ) {
     return $fields;
 } );
 
-/* ── Checkout: address not required by default (validated manually below) ── */
-add_filter( 'woocommerce_billing_fields', function ( $fields ) {
-    foreach ( [ 'billing_address_1', 'billing_address_2', 'billing_city', 'billing_postcode', 'billing_state' ] as $key ) {
-        if ( isset( $fields[ $key ] ) ) {
-            $fields[ $key ]['required'] = false;
-        }
-    }
-    return $fields;
-} );
+/* ── Checkout: billing_last_name not required (single name field used) ── */
 
-/* ── Checkout: require address only for courier delivery ─────────────── */
-add_action( 'woocommerce_checkout_process', function () {
-    $methods  = isset( $_POST['shipping_method'] ) ? (array) $_POST['shipping_method'] : [];
-    $chosen   = reset( $methods );
-    if ( $chosen === 'lesyni_zone_rate' && empty( $_POST['billing_address_1'] ) ) {
-        wc_add_notice( 'Будь ласка, вкажіть адресу доставки.', 'error' );
+/* ── Checkout: auto-fill store address for pickup (server-side) ──────── */
+add_filter( 'woocommerce_checkout_posted_data', function ( $data ) {
+    $methods = isset( $_POST['shipping_method'] ) ? (array) $_POST['shipping_method'] : [];
+    if ( reset( $methods ) === 'lesyni_pickup_rate' && empty( $data['billing_address_1'] ) ) {
+        $data['billing_address_1'] = 'Воскресенська 41';
     }
+    return $data;
 } );

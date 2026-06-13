@@ -985,6 +985,8 @@
 
             var npFields = document.getElementById('oco-np-fields');
             if (deliveryType === 'pickup') {
+                var addrInput = document.getElementById('wc-billing_address_1');
+                if (addrInput && !addrInput.value) addrInput.value = 'Воскресенська 41';
                 if (addrSection) addrSection.style.display = 'none';
                 if (npFields)    npFields.style.display    = 'none';
                 if (whenSection) whenSection.style.display = '';

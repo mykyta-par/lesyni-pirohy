@@ -2137,3 +2137,25 @@ add_action( 'woocommerce_checkout_process', function () {
         wc_add_notice( 'Введіть повний номер телефону (10 цифр).', 'error' );
     }
 } );
+
+/* ── Checkout: validate delivery time slot is not in the past ────────── */
+add_action( 'woocommerce_checkout_process', function () {
+    if ( empty( $_POST['_delivery_time'] ) ) return;
+
+    $delivery = sanitize_text_field( wp_unslash( $_POST['_delivery_time'] ) );
+
+    // Only validate "сьогодні" orders
+    if ( strpos( mb_strtolower( $delivery ), 'сьогодні' ) === false ) return;
+
+    // Extract slot start time e.g. "сьогодні, 14:00–15:00" → 14:00
+    if ( ! preg_match( '/(\d{1,2}):(\d{2})/', $delivery, $m ) ) return;
+
+    $tz       = new DateTimeZone( 'Europe/Kiev' );
+    $now      = new DateTime( 'now', $tz );
+    $cur      = (int) $now->format( 'H' ) * 60 + (int) $now->format( 'i' );
+    $slot_start = (int) $m[1] * 60 + (int) $m[2];
+
+    if ( $cur >= $slot_start - 60 ) {
+        wc_add_notice( 'Обраний час доставки вже недоступний. Будь ласка, оберіть іншу дату або час.', 'error' );
+    }
+} );

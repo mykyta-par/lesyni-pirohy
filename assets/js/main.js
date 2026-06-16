@@ -1442,6 +1442,21 @@
     var placeBtn = document.getElementById('oco-place-btn');
     if (placeBtn) {
         placeBtn.addEventListener('click', function () {
+            // Re-evaluate time slots before submitting (page may have been open for a while)
+            initTimeSlots();
+            updateWhen();
+
+            // Check that at least one time slot is available
+            var hasEnabled = false;
+            document.querySelectorAll('.oco-time-slot').forEach(function (s) {
+                if (!s.disabled && !s.classList.contains('oco-time-slot--disabled')) hasEnabled = true;
+            });
+            if (!hasEnabled) {
+                var errBox = document.getElementById('oco-checkout-errors');
+                if (errBox) { errBox.textContent = 'На сьогодні доступних слотів більше немає. Будь ласка, оберіть іншу дату.'; errBox.style.display = 'block'; errBox.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                return;
+            }
+
             // Validate required UI fields
             var firstName = document.getElementById('oco-first-name');
             var phone     = document.getElementById('oco-phone');

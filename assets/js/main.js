@@ -1457,6 +1457,17 @@
                 phone.style.borderColor = '#c45a5a';
                 return;
             }
+            if (phone) {
+                var digits = phone.value.replace(/\D/g, '');
+                if (digits.slice(0, 2) === '38') digits = digits.slice(2);
+                if (digits.length < 10) {
+                    phone.focus();
+                    phone.style.borderColor = '#c45a5a';
+                    var errBox = document.getElementById('oco-checkout-errors');
+                    if (errBox) { errBox.textContent = 'Введіть повний номер телефону (10 цифр).'; errBox.style.display = 'block'; }
+                    return;
+                }
+            }
             if (terms && !terms.checked) {
                 var termsLabel = terms.closest('.oco-check');
                 termsLabel.scrollIntoView({ behavior: 'smooth', block: 'center' });

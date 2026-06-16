@@ -2127,3 +2127,13 @@ add_filter( 'woocommerce_checkout_posted_data', function ( $data ) {
     }
     return $data;
 } );
+
+/* ── Checkout: validate phone number has 10 digits (server-side) ─────── */
+add_action( 'woocommerce_checkout_process', function () {
+    if ( empty( $_POST['billing_phone'] ) ) return;
+    $digits = preg_replace( '/\D/', '', sanitize_text_field( wp_unslash( $_POST['billing_phone'] ) ) );
+    if ( strlen( $digits ) >= 2 && substr( $digits, 0, 2 ) === '38' ) $digits = substr( $digits, 2 );
+    if ( strlen( $digits ) < 10 ) {
+        wc_add_notice( 'Введіть повний номер телефону (10 цифр).', 'error' );
+    }
+} );

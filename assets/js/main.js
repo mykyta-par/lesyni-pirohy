@@ -560,7 +560,8 @@
     /* ── Time slots ─────────────────────────────────────────────── */
     var adminDisabledSlots = (window.lesyniData && lesyniData.disabledSlots) ? lesyniData.disabledSlots : [];
 
-    function initTimeSlots() {
+    function initTimeSlots(autoSelect) {
+        if (autoSelect === undefined) autoSelect = true;
         var now = new Date();
         var cur = now.getHours() * 60 + now.getMinutes();
         var WORK_START = 9 * 60;
@@ -574,6 +575,7 @@
 
         var firstEnabled = null;
         var asapSlot     = null;
+        var activeStillEnabled = false;
 
         document.querySelectorAll('.oco-time-slot').forEach(function (slot) {
             var time = slot.dataset.time || '';
@@ -600,9 +602,13 @@
             slot.disabled = disabled;
             slot.classList.toggle('oco-time-slot--disabled', disabled);
             if (!disabled && !firstEnabled) firstEnabled = slot;
+            if (!disabled && slot.classList.contains('oco-time-slot--active')) activeStillEnabled = true;
         });
 
-        // Auto-select: Якнайшвидше if available, else first enabled slot
+        // Keep the user's manual choice if it's still valid; otherwise auto-select a default
+        if (activeStillEnabled) return;
+        if (!autoSelect) return;
+
         var toSelect = (asapSlot && !asapSlot.disabled) ? asapSlot : firstEnabled;
         if (toSelect) {
             document.querySelectorAll('.oco-time-slot').forEach(function (s) { s.classList.remove('oco-time-slot--active'); });
@@ -1443,17 +1449,24 @@
     if (placeBtn) {
         placeBtn.addEventListener('click', function () {
             // Re-evaluate time slots before submitting (page may have been open for a while)
-            initTimeSlots();
+            // Don't silently override the user's manual choice — ask them to re-pick instead
+            initTimeSlots(false);
             updateWhen();
 
-            // Check that at least one time slot is available
+            // The active slot must still be enabled after re-evaluation
+            var activeStillValid = false;
             var hasEnabled = false;
             document.querySelectorAll('.oco-time-slot').forEach(function (s) {
-                if (!s.disabled && !s.classList.contains('oco-time-slot--disabled')) hasEnabled = true;
+                var enabled = !s.disabled && !s.classList.contains('oco-time-slot--disabled');
+                if (enabled) hasEnabled = true;
+                if (enabled && s.classList.contains('oco-time-slot--active')) activeStillValid = true;
             });
-            if (!hasEnabled) {
+            if (!activeStillValid) {
                 var errBox = document.getElementById('oco-checkout-errors');
-                if (errBox) { errBox.textContent = 'На сьогодні доступних слотів більше немає. Будь ласка, оберіть іншу дату.'; errBox.style.display = 'block'; errBox.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                var msg = hasEnabled
+                    ? 'Обраний час доставки вже недоступний. Будь ласка, оберіть інший час.'
+                    : 'На сьогодні доступних слотів більше немає. Будь ласка, оберіть іншу дату.';
+                if (errBox) { errBox.textContent = msg; errBox.style.display = 'block'; errBox.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
                 return;
             }
 

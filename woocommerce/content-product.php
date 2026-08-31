@@ -39,6 +39,8 @@ if ( $is_on_sale ) {
     $badge_class = 'product-badge--new';
 }
 
+$has_pits_warning = get_post_meta( $product->get_id(), '_has_pits_warning', true ) === 'yes';
+
 // Category
 $cats     = wc_get_product_term_ids( $product->get_id(), 'product_cat' );
 $cat_name = '';
@@ -107,8 +109,15 @@ $data_cats = implode( ' ', array_map( function( $id ) {
      data-category="<?php echo esc_attr( $data_cats ); ?>"
      data-type="<?php echo $is_variable ? 'variable' : 'simple'; ?>">
 
-    <?php if ( $badge_text ) : ?>
-        <span class="product-badge <?php echo esc_attr( $badge_class ); ?>"><?php echo esc_html( $badge_text ); ?></span>
+    <?php if ( $badge_text || $has_pits_warning ) : ?>
+        <div class="product-badges">
+            <?php if ( $badge_text ) : ?>
+                <span class="product-badge <?php echo esc_attr( $badge_class ); ?>"><?php echo esc_html( $badge_text ); ?></span>
+            <?php endif; ?>
+            <?php if ( $has_pits_warning ) : ?>
+                <span class="product-badge product-badge--pits">Можуть траплятись кісточки</span>
+            <?php endif; ?>
+        </div>
     <?php endif; ?>
 
     <!-- Image -->

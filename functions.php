@@ -838,6 +838,11 @@ add_action( 'woocommerce_product_options_inventory_product_data', function () {
         'label'       => 'Новинка',
         'description' => 'Показувати бейдж «Новинка» на цьому товарі',
     ] );
+    woocommerce_wp_checkbox( [
+        'id'          => '_has_pits_warning',
+        'label'       => 'Можуть траплятись кісточки',
+        'description' => 'Показувати попередження «Можуть траплятись кісточки» на фото товару',
+    ] );
 } );
 
 add_action( 'woocommerce_process_product_meta', function ( $post_id ) {
@@ -848,6 +853,9 @@ add_action( 'woocommerce_process_product_meta', function ( $post_id ) {
     }
     $is_new = isset( $_POST['_is_new_product'] ) ? 'yes' : 'no';
     update_post_meta( $post_id, '_is_new_product', $is_new );
+
+    $has_pits = isset( $_POST['_has_pits_warning'] ) ? 'yes' : 'no';
+    update_post_meta( $post_id, '_has_pits_warning', $has_pits );
 
     foreach ( [ '_desc_quote_text', '_desc_aside_items', '_desc_aside_note' ] as $key ) {
         if ( isset( $_POST[ $key ] ) ) {

@@ -57,6 +57,8 @@ while ( have_posts() ) :
         $badge       = 'Новинка';
         $badge_class = 'sp-img-badge--new';
     }
+
+    $has_pits_warning = get_post_meta( $product->get_id(), '_has_pits_warning', true ) === 'yes';
     ?>
 
     <?php woocommerce_output_all_notices(); ?>
@@ -102,8 +104,15 @@ while ( have_posts() ) :
                     <?php endif; ?>
 
                     <div class="sp-gallery__main">
-                        <?php if ( $badge ) : ?>
-                            <span class="sp-img-badge <?php echo esc_attr( $badge_class ); ?>"><?php echo esc_html( $badge ); ?></span>
+                        <?php if ( $badge || $has_pits_warning ) : ?>
+                            <div class="sp-img-badges">
+                                <?php if ( $badge ) : ?>
+                                    <span class="sp-img-badge <?php echo esc_attr( $badge_class ); ?>"><?php echo esc_html( $badge ); ?></span>
+                                <?php endif; ?>
+                                <?php if ( $has_pits_warning ) : ?>
+                                    <span class="sp-img-badge sp-img-badge--pits">Можуть траплятись кісточки</span>
+                                <?php endif; ?>
+                            </div>
                         <?php endif; ?>
                         <?php echo wp_get_attachment_image(
                             $all_imgs[0], 'large', false,

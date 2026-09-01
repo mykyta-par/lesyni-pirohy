@@ -104,15 +104,8 @@ while ( have_posts() ) :
                     <?php endif; ?>
 
                     <div class="sp-gallery__main">
-                        <?php if ( $badge || $has_pits_warning ) : ?>
-                            <div class="sp-img-badges">
-                                <?php if ( $badge ) : ?>
-                                    <span class="sp-img-badge <?php echo esc_attr( $badge_class ); ?>"><?php echo esc_html( $badge ); ?></span>
-                                <?php endif; ?>
-                                <?php if ( $has_pits_warning ) : ?>
-                                    <span class="sp-img-badge sp-img-badge--pits">Можуть траплятись кісточки</span>
-                                <?php endif; ?>
-                            </div>
+                        <?php if ( $badge ) : ?>
+                            <span class="sp-img-badge <?php echo esc_attr( $badge_class ); ?>"><?php echo esc_html( $badge ); ?></span>
                         <?php endif; ?>
                         <?php echo wp_get_attachment_image(
                             $all_imgs[0], 'large', false,
@@ -136,6 +129,10 @@ while ( have_posts() ) :
                 <?php endif; ?>
 
                 <h1 class="sp-info__title"><?php the_title(); ?></h1>
+
+                <?php if ( $has_pits_warning ) : ?>
+                    <span class="sp-pits-tag">Можуть траплятись кісточки</span>
+                <?php endif; ?>
 
                 <div class="sp-info__meta">
                     <?php if ( $avg_rating > 0 ) : ?>

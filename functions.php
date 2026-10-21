@@ -2151,19 +2151,30 @@ add_action( 'woocommerce_checkout_process', function () {
     if ( empty( $_POST['_delivery_time'] ) ) return;
 
     $delivery = sanitize_text_field( wp_unslash( $_POST['_delivery_time'] ) );
+    $delivery_lc = mb_strtolower( $delivery );
 
-    // Only validate "сьогодні" orders
-    if ( strpos( mb_strtolower( $delivery ), 'сьогодні' ) === false ) return;
+    $tz  = new DateTimeZone( 'Europe/Kiev' );
+    $now = new DateTime( 'now', $tz );
+    $cur = (int) $now->format( 'H' ) * 60 + (int) $now->format( 'i' );
 
-    // Extract slot start time e.g. "сьогодні, 14:00–15:00" → 14:00
-    if ( ! preg_match( '/(\d{1,2}):(\d{2})/', $delivery, $m ) ) return;
+    // "сьогодні" orders: slot must still be at least 1 hour away
+    if ( strpos( $delivery_lc, 'сьогодні' ) !== false ) {
+        // Extract slot start time e.g. "сьогодні, 14:00–15:00" → 14:00
+        if ( ! preg_match( '/(\d{1,2}):(\d{2})/', $delivery, $m ) ) return;
 
-    $tz       = new DateTimeZone( 'Europe/Kiev' );
-    $now      = new DateTime( 'now', $tz );
-    $cur      = (int) $now->format( 'H' ) * 60 + (int) $now->format( 'i' );
-    $slot_start = (int) $m[1] * 60 + (int) $m[2];
+        $slot_start = (int) $m[1] * 60 + (int) $m[2];
 
-    if ( $cur >= $slot_start - 60 ) {
-        wc_add_notice( 'Обраний час доставки вже недоступний. Будь ласка, оберіть іншу дату або час.', 'error' );
+        if ( $cur >= $slot_start - 60 ) {
+            wc_add_notice( 'Обраний час доставки вже недоступний. Будь ласка, оберіть іншу дату або час.', 'error' );
+        }
+        return;
+    }
+
+    // "завтра" orders placed after 18:30 can't book the 9:00–10:00 slot
+    if ( strpos( $delivery_lc, 'завтра' ) !== false && strpos( $delivery, '09:00' ) !== false ) {
+        $cutoff = 18 * 60 + 30;
+        if ( $cur >= $cutoff ) {
+            wc_add_notice( 'Проміжок 09:00–10:00 на завтра вже недоступний для замовлення після 18:30. Будь ласка, оберіть інший час.', 'error' );
+        }
     }
 } );

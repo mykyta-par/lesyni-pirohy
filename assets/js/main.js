@@ -573,6 +573,14 @@
             (selectedDate.querySelector('.oco-date-day-name') &&
              selectedDate.querySelector('.oco-date-day-name').textContent.toLowerCase() === 'сьогодні');
 
+        // check if selected date is tomorrow
+        var tomorrowSelected = !!(selectedDate &&
+            selectedDate.querySelector('.oco-date-day-name') &&
+            selectedDate.querySelector('.oco-date-day-name').textContent.toLowerCase() === 'завтра');
+
+        // orders placed after 18:30 can no longer book tomorrow's first (9:00–10:00) slot
+        var blockTomorrowEarlySlot = tomorrowSelected && cur >= ASAP_CUTOFF;
+
         var firstEnabled = null;
         var asapSlot     = null;
         var activeStillEnabled = false;
@@ -594,8 +602,11 @@
                             var slotStart = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
                             disabled = cur >= slotStart - LEAD_TIME;
                         }
+                    } else if (blockTomorrowEarlySlot && time === '09:00–10:00') {
+                        // orders for tomorrow placed after 18:30 can't book the 9:00–10:00 slot
+                        disabled = true;
                     }
-                    // future date: all slots available (disabled stays false)
+                    // other future dates: all slots available
                 }
             }
 

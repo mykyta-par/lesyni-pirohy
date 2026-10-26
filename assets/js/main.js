@@ -1289,12 +1289,26 @@
         });
 
         function extractAddress(components) {
-            var street = '', houseNum = '';
+            var street = '', houseNum = '', area = '';
             components.forEach(function (c) {
                 if (c.types.indexOf('route') !== -1)         street   = c.long_name;
                 if (c.types.indexOf('street_number') !== -1) houseNum = c.long_name;
+                // Fallback for predictions without a "route" (e.g. a
+                // neighborhood/district match like "Червоний Камінь" in
+                // Dnipro) — use the neighborhood/sublocality name instead.
+                if (!area && (
+                    c.types.indexOf('neighborhood') !== -1 ||
+                    c.types.indexOf('sublocality') !== -1 ||
+                    c.types.indexOf('sublocality_level_1') !== -1
+                )) {
+                    area = c.long_name;
+                }
             });
-            return { street: street, houseNum: houseNum };
+            return { street: street || area, houseNum: houseNum };
+        }
+
+        function stripStreetTypeWord(text) {
+            return text.replace(/^(вулиця|вул\.?|проспект|просп\.?|бульвар|бул\.?|провулок|пров\.?|площа|узвіз|набережна|шосе|мікрорайон|мкр\.?)\s+/i, '');
         }
 
         function applyAddress(street, houseNum) {
@@ -1306,30 +1320,75 @@
             checkZone(fullAddr);
         }
 
+        // Google's address_components (both from Autocomplete's getPlace()
+        // and from Geocoder) can return a street/area name in English even
+        // with language=uk set on the API loader — confirmed directly: for
+        // some streets Geocoder itself returns e.g. "Voskresenska Street"
+        // regardless of language. The one place that's reliably localized
+        // is the dropdown suggestion text itself, so track whichever
+        // .pac-item is currently selected/hovered and use its text as the
+        // authoritative name when address_components comes back non-Cyrillic.
+        var pacMainText = '';
+
+        function capturePacText(item) {
+            if (!item) return;
+            var queryEl = item.querySelector('.pac-item-query');
+            var text = (queryEl ? queryEl.textContent : item.textContent) || '';
+            text = text.split(',')[0].trim();
+            if (text) pacMainText = stripStreetTypeWord(text);
+        }
+
+        function syncPacMainText() {
+            var container = document.querySelector('.pac-container');
+            if (!container) return;
+            var items = container.querySelectorAll('.pac-item');
+            if (!items.length) return;
+            var selected = container.querySelector('.pac-item[aria-selected="true"]');
+            capturePacText(selected || items[0]);
+        }
+
+        document.addEventListener('mousedown', function (e) {
+            var item = e.target.closest && e.target.closest('.pac-item');
+            if (item) capturePacText(item);
+        }, true);
+
+        new MutationObserver(syncPacMainText).observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['aria-selected'],
+        });
+
         var gGeocoder = null;
 
         gAutocomplete.addListener('place_changed', function () {
             var place = gAutocomplete.getPlace();
             if (!place || !place.address_components) return;
             var addr = extractAddress(place.address_components);
+            var capturedPacText = pacMainText;
+            pacMainText = '';
 
-            // Autocomplete sometimes returns the street name transliterated
-            // into Latin script even with language=uk on the API loader —
-            // Google treats "language" as a preference, not a hard filter.
-            // Geocoder honors it more reliably, so re-fetch via place_id and
-            // prefer its (Cyrillic) result when it's available.
-            if (addr.street && !/[Ѐ-ӿ]/.test(addr.street) && place.place_id) {
+            // Prefer the (reliably localized) dropdown text when the
+            // address_components-derived name has no Cyrillic.
+            var street = addr.street;
+            if ((!street || !/[Ѐ-ӿ]/.test(street)) && capturedPacText && /[Ѐ-ӿ]/.test(capturedPacText)) {
+                street = capturedPacText;
+            }
+
+            if (street && !/[Ѐ-ӿ]/.test(street) && place.place_id) {
+                // Last-resort fallback: re-fetch via Geocoder, which
+                // occasionally has better localized data than getPlace().
                 if (!gGeocoder) gGeocoder = new google.maps.Geocoder();
                 gGeocoder.geocode({ placeId: place.place_id }, function (results, status) {
                     if (status === 'OK' && results && results[0]) {
                         var g = extractAddress(results[0].address_components);
-                        applyAddress(g.street || addr.street, g.houseNum || addr.houseNum);
+                        applyAddress(g.street || street, g.houseNum || addr.houseNum);
                     } else {
-                        applyAddress(addr.street, addr.houseNum);
+                        applyAddress(street, addr.houseNum);
                     }
                 });
             } else {
-                applyAddress(addr.street, addr.houseNum);
+                applyAddress(street, addr.houseNum);
             }
         });
     }

@@ -1289,12 +1289,22 @@
         });
 
         function extractAddress(components) {
-            var street = '', houseNum = '';
+            var street = '', houseNum = '', area = '';
             components.forEach(function (c) {
                 if (c.types.indexOf('route') !== -1)         street   = c.long_name;
                 if (c.types.indexOf('street_number') !== -1) houseNum = c.long_name;
+                // Fallback for predictions without a "route" (e.g. a
+                // neighborhood/district match like "Червоний Камінь" in
+                // Dnipro) — use the neighborhood/sublocality name instead.
+                if (!area && (
+                    c.types.indexOf('neighborhood') !== -1 ||
+                    c.types.indexOf('sublocality') !== -1 ||
+                    c.types.indexOf('sublocality_level_1') !== -1
+                )) {
+                    area = c.long_name;
+                }
             });
-            return { street: street, houseNum: houseNum };
+            return { street: street || area, houseNum: houseNum };
         }
 
         function applyAddress(street, houseNum) {
@@ -1313,11 +1323,14 @@
             if (!place || !place.address_components) return;
             var addr = extractAddress(place.address_components);
 
-            // Autocomplete sometimes returns the street name transliterated
-            // into Latin script even with language=uk on the API loader —
-            // Google treats "language" as a preference, not a hard filter.
-            // Geocoder honors it more reliably, so re-fetch via place_id and
-            // prefer its (Cyrillic) result when it's available.
+            // Autocomplete sometimes returns the street/area name
+            // transliterated into Latin script even with language=uk on
+            // the API loader — Google treats "language" as a ranking
+            // preference, not a hard filter, and the widget's own native
+            // input-fill can use a different (Latin) name than what the
+            // dropdown displayed. Geocoder honors the language more
+            // reliably, so re-fetch via place_id and prefer its (Cyrillic)
+            // result when it's available.
             if (addr.street && !/[Ѐ-ӿ]/.test(addr.street) && place.place_id) {
                 if (!gGeocoder) gGeocoder = new google.maps.Geocoder();
                 gGeocoder.geocode({ placeId: place.place_id }, function (results, status) {

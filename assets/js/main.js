@@ -1285,22 +1285,52 @@
             types:                ['address'],
             componentRestrictions: { country: 'ua' },
             bounds:               dniproBounds,
-            fields:               ['address_components'],
+            fields:               ['address_components', 'place_id'],
         });
-        gAutocomplete.addListener('place_changed', function () {
-            var place = gAutocomplete.getPlace();
-            if (!place || !place.address_components) return;
+
+        function extractAddress(components) {
             var street = '', houseNum = '';
-            place.address_components.forEach(function (c) {
+            components.forEach(function (c) {
                 if (c.types.indexOf('route') !== -1)         street   = c.long_name;
                 if (c.types.indexOf('street_number') !== -1) houseNum = c.long_name;
             });
+            return { street: street, houseNum: houseNum };
+        }
+
+        function applyAddress(street, houseNum) {
             if (street) streetInput.value = street;
             if (houseNum && houseInput && !houseInput.value) houseInput.value = houseNum;
             clearTimeout(zoneCheckTimer);
             var fullAddr = streetInput.value + (houseNum ? ', ' + houseNum : '');
             showZoneIndicator('checking', '🔍 Визначаємо зону доставки…');
             checkZone(fullAddr);
+        }
+
+        var gGeocoder = null;
+
+        gAutocomplete.addListener('place_changed', function () {
+            var place = gAutocomplete.getPlace();
+            if (!place || !place.address_components) return;
+            var addr = extractAddress(place.address_components);
+
+            // Autocomplete sometimes returns the street name transliterated
+            // into Latin script even with language=uk on the API loader —
+            // Google treats "language" as a preference, not a hard filter.
+            // Geocoder honors it more reliably, so re-fetch via place_id and
+            // prefer its (Cyrillic) result when it's available.
+            if (addr.street && !/[Ѐ-ӿ]/.test(addr.street) && place.place_id) {
+                if (!gGeocoder) gGeocoder = new google.maps.Geocoder();
+                gGeocoder.geocode({ placeId: place.place_id }, function (results, status) {
+                    if (status === 'OK' && results && results[0]) {
+                        var g = extractAddress(results[0].address_components);
+                        applyAddress(g.street || addr.street, g.houseNum || addr.houseNum);
+                    } else {
+                        applyAddress(addr.street, addr.houseNum);
+                    }
+                });
+            } else {
+                applyAddress(addr.street, addr.houseNum);
+            }
         });
     }
 
